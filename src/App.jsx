@@ -23,6 +23,7 @@ import ResetPassword from './pages/auth/ResetPassword';
 import AdminDashboard from './pages/admin/Dashboard'
 import ShopManager from './pages/admin/ShopManager';
 import AdminManageProducts from './pages/admin/AdminManageProducts';
+import ManageCategories from './pages/admin/ManageCategories';
 
 
 //Vendor pages
@@ -41,6 +42,7 @@ import NotFound from './pages/NotFound';
 import Error from './components/Error';
 import { requireAuth } from './utils/protect';
 import Cart from './pages/Cart';
+
 
 
 
@@ -78,6 +80,7 @@ function App() {
           <Route path='dashboard' element={<AdminDashboard />} />
           <Route path='vendors' element={<ShopManager />} />
           <Route path='products' element={<AdminManageProducts />} />
+          <Route path='categories' element={<ManageCategories />}></Route>
         </Route>
 
         {/* Vendor Routes */}

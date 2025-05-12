@@ -7,14 +7,15 @@ import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useCart } from "../components/contexts/CartContext";
 import { FaSpinner } from "react-icons/fa";
-
+import Navbar from "../components/common/Navbar";
+import Hero from "../components/Hero";
 
 const Home = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const { pagination, updatePagination } = usePagination();
     const { addToCart, cart } = useCart();
-    const[selectedProduct, setSelectedProduct] = useState()
+    const [selectedProduct, setSelectedProduct] = useState(null);
 
     const fetchProducts = async (page = 1) => {
         setLoading(true);
@@ -82,7 +83,7 @@ const Home = () => {
 
     const handleAddToCart = async (product) => {
         if (!product) return;
-        setSelectedProduct(product)
+        setSelectedProduct(product);
         const result = await addToCart(product, 1, {});
         if (result.success) {
             toast.success(`${product.name} added to cart!`);
@@ -100,10 +101,15 @@ const Home = () => {
     }
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 pt-4">
+            <div className="flex gap-x-4 mb-14">
+                <Navbar />
+                <Hero />
+            </div>
+            
             {/* Page Header */}
             <div className="mb-8 text-center">
-                {/* <h1 className="text-3xl font-bold text-gray-900 mb-2">Featured Products</h1> */}
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Featured Products</h1>
                 <p className="text-gray-600">Discover our latest collection</p>
             </div>
 
@@ -112,7 +118,7 @@ const Home = () => {
                 {products.map((product) => {
                     const discountPercentage = calculateDiscountPercentage(product.price, product.discountPrice);
                     const displayPrice = parseFloat(product.discountPrice > 0 ? product.discountPrice : product.price);
-                    const stockPercentage = Math.min((product.stockQuantity / 20) * 100, 100); // Assuming 20 is max for visualization
+                    const stockPercentage = Math.min((product.stockQuantity / 20) * 100, 100);
                     const stockLevelClass = getStockLevelClass(product.stockQuantity);
                     const stockMessage = getStockMessage(product.stockQuantity);
                     
@@ -185,14 +191,11 @@ const Home = () => {
                                         disabled={product.stockQuantity <= 0}
                                         onClick={() => handleAddToCart(product)}
                                     >
-                                        {cart.loading && product.id === selectedProduct.id ? (
+                                        {cart.loading && selectedProduct?.id === product.id ? (
                                             <FaSpinner className="h-4 w-4 animate-spin" />
                                         ) : (
-                                            <>
-                                                 <FiShoppingCart className="h-4 w-4" />
-                                            </>
+                                            <FiShoppingCart className="h-4 w-4" />
                                         )}
-                                       
                                     </button>
                                 </div>
                             </div>

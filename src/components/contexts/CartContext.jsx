@@ -4,21 +4,27 @@ import axios from '../../lib/axios';
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const user = JSON.parse(localStorage.getItem('user'));
   const [cart, setCart] = useState({
     items: [],
-    summary: { totalItems: 0, totalCost: 0 },
+    shippingOptions: [],
+    summary: { 
+      totalItems: 0, 
+      subtotal: 0,
+      discount: 0,
+      deliveryFee: 0,
+      tax: 0,
+      total: 0 
+    },
     loading: false,
     error: null
   });
-  const [cartCount, setCartCount] = useState(0); // Separate state for header count
 
-  // Fetch cart on mount and when user changes
+  const [cartCount, setCartCount] = useState(0);
+
   useEffect(() => {
     fetchCart();
   }, []);
 
-  // Update cartCount whenever summary.totalItems changes
   useEffect(() => {
     setCartCount(cart.summary.totalItems);
   }, [cart.summary.totalItems]);
@@ -27,14 +33,22 @@ export const CartProvider = ({ children }) => {
     try {
       setCart(prev => ({ ...prev, loading: true }));
       const response = await axios.get('api/v1/cart');
-      const newCart = {
-        items: response.data.data.items || [],
-        summary: response.data.data.summary || { totalItems: 0, totalCost: 0 },
+      const { items, summary, shippingOptions } = response.data.data;
+      
+      setCart({
+        items: items || [],
+        shippingOptions: shippingOptions || [],
+        summary: summary || { 
+          totalItems: 0, 
+          subtotal: 0,
+          discount: 0,
+          deliveryFee: 0,
+          tax: 0,
+          total: 0 
+        },
         loading: false,
         error: null
-      };
-      setCart(newCart);
-      setCartCount(newCart.summary.totalItems); // Update count immediately
+      });
     } catch (error) {
       setCart(prev => ({
         ...prev,
@@ -53,40 +67,9 @@ export const CartProvider = ({ children }) => {
         options
       });
 
-      // Optimistically update both cart and count
-      setCart(prev => {
-        const existingItemIndex = prev.items.findIndex(
-          item => item.productId === product.id && 
-                 JSON.stringify(item.selectedOptions) === JSON.stringify(options)
-        );
-
-        let newItems;
-        let quantityToAdd = quantity;
-        if (existingItemIndex >= 0) {
-          newItems = [...prev.items];
-          newItems[existingItemIndex].quantity += quantity;
-        } else {
-          newItems = [...prev.items, {
-            ...response.data.data.item,
-            product
-          }];
-        }
-
-        const newSummary = {
-          totalItems: prev.summary.totalItems + quantity,
-          totalCost: prev.summary.totalCost + (product.price * quantity)
-        };
-
-        setCartCount(newSummary.totalItems); // Update count
-
-        return {
-          items: newItems,
-          summary: newSummary,
-          loading: false,
-          error: null
-        };
-      });
-
+      // After successful API call, fetch fresh cart data
+      await fetchCart();
+      
       return { success: true, data: response.data };
     } catch (error) {
       setCart(prev => ({
@@ -101,29 +84,17 @@ export const CartProvider = ({ children }) => {
   const removeFromCart = async (productId) => {
     try {
       setCart(prev => ({ ...prev, loading: true }));
-      await axios.delete(`api/v1/cart/item/${productId}`);
-
-      // Optimistically update both cart and count
-      setCart(prev => {
-        const itemToRemove = prev.items.find(item => item.productId === productId);
-        if (!itemToRemove) return prev;
-
-        const newItems = prev.items.filter(item => item.productId !== productId);
-        const newSummary = {
-          totalItems: prev.summary.totalItems - itemToRemove.quantity,
-          totalCost: prev.summary.totalCost - (itemToRemove.product.price * itemToRemove.quantity)
-        };
-
-        setCartCount(newSummary.totalItems); // Update count
-
-        return {
-          items: newItems,
-          summary: newSummary,
-          loading: false,
-          error: null
-        };
-      });
-
+      const response = await axios.delete(`api/v1/cart/item/${productId}`);
+  
+      // Update local state with the returned summary
+      setCart(prev => ({
+        ...prev,
+        items: prev.items.filter(item => item.productId !== productId),
+        summary: response.data.data.summary,
+        loading: false,
+        error: null
+      }));
+  
       return { success: true };
     } catch (error) {
       setCart(prev => ({
@@ -140,38 +111,25 @@ export const CartProvider = ({ children }) => {
       if (newQuantity < 1) {
         return { success: false, error: { message: 'Quantity must be at least 1' } };
       }
-
+  
       setCart(prev => ({ ...prev, loading: true }));
       const response = await axios.patch(`api/v1/cart/item/${productId}`, {
         quantity: newQuantity
       });
-
-      // Optimistically update both cart and count
-      setCart(prev => {
-        const itemIndex = prev.items.findIndex(item => item.productId === productId);
-        if (itemIndex < 0) return prev;
-
-        const oldQuantity = prev.items[itemIndex].quantity;
-        const quantityDiff = newQuantity - oldQuantity;
-        const price = prev.items[itemIndex].product.price;
-
-        const newItems = [...prev.items];
-        newItems[itemIndex].quantity = newQuantity;
-        const newSummary = {
-          totalItems: prev.summary.totalItems + quantityDiff,
-          totalCost: prev.summary.totalCost + (price * quantityDiff)
-        };
-
-        setCartCount(newSummary.totalItems); // Update count
-
-        return {
-          items: newItems,
-          summary: newSummary,
-          loading: false,
-          error: null
-        };
-      });
-
+  
+      // Update local state with the returned data
+      setCart(prev => ({
+        ...prev,
+        items: prev.items.map(item => 
+          item.productId === productId 
+            ? { ...item, quantity: newQuantity } 
+            : item
+        ),
+        summary: response.data.data.summary,
+        loading: false,
+        error: null
+      }));
+  
       return { success: true, data: response.data };
     } catch (error) {
       setCart(prev => ({
@@ -188,15 +146,9 @@ export const CartProvider = ({ children }) => {
       setCart(prev => ({ ...prev, loading: true }));
       await axios.delete('api/v1/cart/clear');
 
-      const newCart = {
-        items: [],
-        summary: { totalItems: 0, totalCost: 0 },
-        loading: false,
-        error: null
-      };
-      setCart(newCart);
-      setCartCount(0); // Reset count
-
+      // After successful clear, fetch fresh cart data
+      await fetchCart();
+      
       return { success: true };
     } catch (error) {
       setCart(prev => ({
@@ -211,7 +163,7 @@ export const CartProvider = ({ children }) => {
   return (
     <CartContext.Provider value={{
       cart,
-      cartCount, // Expose cartCount to consumers
+      cartCount,
       addToCart,
       removeFromCart,
       updateQuantity,

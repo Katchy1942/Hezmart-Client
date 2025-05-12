@@ -5,6 +5,7 @@ import InputField from "../../components/common/InputField";
 import SelectField from "../../components/common/SelectField";
 import { toast } from 'react-toastify';
 import axios from "../../lib/axios";
+import { MdAdd } from "react-icons/md";
 
 const EditProduct = () => {
   const [processing, setProcessing] = useState(false);
@@ -705,7 +706,7 @@ const EditProduct = () => {
           >
             Cancel
           </Link>
-          <Button type="submit" disabled={processing}>
+          <Button type="submit" disabled={processing} icon={<MdAdd />} iconPosition="right">
             {processing ? "Saving..." : "Save Changes"}
           </Button>
         </div>

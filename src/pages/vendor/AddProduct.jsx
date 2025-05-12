@@ -5,6 +5,7 @@ import InputField from "../../components/common/InputField";
 import SelectField from "../../components/common/SelectField";
 import { toast } from 'react-toastify';
 import axios from "../../lib/axios";
+import { MdAdd } from "react-icons/md";
 
 const AddProduct = () => {
   const [processing, setProcessing] = useState(false);
@@ -612,12 +613,12 @@ const AddProduct = () => {
         <div className="flex justify-end space-x-4">
           <button
             type="button"
-            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium"
+            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium cursor-pointer"
             onClick={resetForm}
           >
             Cancel
           </button>
-          <Button type="submit" disabled={processing}>
+          <Button type="submit" disabled={processing} icon={<MdAdd />} iconPosition="right">
             {processing ? "Saving..." : "Save"}
           </Button>
         </div>

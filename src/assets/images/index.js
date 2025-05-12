@@ -14,6 +14,11 @@ import sell_1 from './sell_image_1.svg'
 import sell_2 from './sell_image_2.svg'
 import sell_3 from './sell_image_3.svg'
 import sell_4 from './sell_image_4.svg'
+import carousel_1 from './carousel-one.png';
+import carousel_2 from './carousel-two.png';
+import carousel_3 from './carousel-three.png';
+import carousel_4 from './carousel-four.png';
+
 
 export {
  logo_white,
@@ -29,6 +34,10 @@ export {
  sell_2,
  sell_3,
  sell_4,
- mail
+ mail,
+ carousel_1,
+ carousel_2,
+ carousel_3,
+ carousel_4
 
 };

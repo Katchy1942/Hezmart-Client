@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useNavigate, useSearchParams, Link, useLocation } from "react-router-dom";
 import axios from "../../lib/axios";
 import InputField from "../../components/common/InputField";
 import Button from "../../components/common/Button";
@@ -10,7 +10,12 @@ import { FaLock } from "react-icons/fa";
 const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const pathname = searchParams.get("redirectTo") || null;
+  const location = useLocation();
+  // Get redirect path from (in order of priority):
+  // 1. URL query parameter (redirectTo)
+  // 2. Navigation state (state.from)
+  // 3. Default to null
+  const pathname = searchParams.get("redirectTo") || location.state?.from || null;
   const message = searchParams.get("message") || null;
   const [processing, setProcessing] = useState(false);
   const [formData, setFormData] = useState({
@@ -33,6 +38,8 @@ const Login = () => {
     try {
       const response = await axios.post('api/v1/users/login', formData);
       if (response.data.status === 'success') {
+        //Merge cart
+        await axios.post('api/v1/cart/merge')
         // Store user data and remember me preference
         localStorage.setItem("user", JSON.stringify(response.data.data.user));
         if (rememberMe) {
@@ -61,7 +68,7 @@ const Login = () => {
           default:
             goTo = '/';
         }
-        navigate(goTo);
+        navigate(goTo, { replace: true });
         
       }
     } catch (err) {
@@ -196,6 +203,7 @@ const Login = () => {
             Don't have an account?{' '}
             <Link
               to="/customer-register"
+              state={{ from: location.state?.from }}
               className="font-medium text-blue-600 hover:text-blue-500"
             >
               Create account

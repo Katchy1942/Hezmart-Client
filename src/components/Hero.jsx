@@ -46,7 +46,7 @@ const Hero = () => {
           Get Quality Products At Affordable Price
         </h1>
         
-        <Link  to="/shop"  className="w-full md:w-auto">
+        <Link  to="/shops"  className="w-full md:w-auto">
             <Button className="flex items-center gap-2 px-3">
                 Shop Now
             </Button>

@@ -33,8 +33,12 @@ import VendorManageProducts from './pages/vendor/VendorManageProducts'
 import AddProduct from './pages/vendor/AddProduct';
 import EditProduct from './pages/vendor/EditProduct';
 
+//Customer Pages;
+import OrderPage from './pages/customer/OrderPage';
+
 //Product Pages;
 import ProductDetails from './pages/product/ProductDetails';
+import CategoryProducts from './pages/CategoryProducts';
 
 
 //Others
@@ -42,6 +46,9 @@ import NotFound from './pages/NotFound';
 import Error from './components/Error';
 import { requireAuth } from './utils/protect';
 import Cart from './pages/Cart';
+import Shops from './pages/Shops';
+import VendorProductsPage from './pages/VendorProductsPage';
+
 
 
 
@@ -67,8 +74,15 @@ function App() {
         <Route path='forgot-password' element={<ForgotPassword />}></Route>
         <Route path='resetPassword' element={<ResetPassword />}></Route>
 
+        <Route path='shops' element={<Shops />}></Route>
+
+        {/* Customer Routes */}
+        <Route path='orders' element={<OrderPage />}></Route>
+
         {/* Product Routes */}
         <Route path='/product/:id' element={<ProductDetails />}></Route>
+        <Route path='/category/:categoryId/subcategory/:subcategoryId' element={<CategoryProducts />}></Route>
+        <Route path="/vendor/:vendorId" element={<VendorProductsPage />} />
 
         <Route path='cart' element={<Cart />}></Route>
        

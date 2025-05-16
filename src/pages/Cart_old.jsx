@@ -1,68 +1,140 @@
+
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiShoppingCart, FiTrash2, FiChevronLeft } from 'react-icons/fi';
+import { FiShoppingCart, FiTrash2, FiChevronLeft, FiPlus } from 'react-icons/fi';
 import { useCart } from '../components/contexts/CartContext';
-// import { useAuth } from '../components/contexts/AuthContext';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import axios from '../lib/axios';
+import SelectField from '../components/common/SelectField';
+import InputField from '../components/common/InputField';
 
 const Cart = () => {
   const { cart, updateQuantity, removeFromCart, clearCart, fetchCart } = useCart();
   const currentUser = JSON.parse(localStorage.getItem('user'));
   const navigate = useNavigate();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [deliveryFee, setDeliveryFee] = useState(1500); // Default delivery fee
+  const [selectedShipping, setSelectedShipping] = useState('standard');
   const [selectedAddress, setSelectedAddress] = useState(null);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [newAddress, setNewAddress] = useState({
+    firstName: currentUser?.firstName || '',
+    lastName: currentUser?.lastName || '',
+    primaryPhone: currentUser?.primaryPhone || '',
+    secondaryPhone: currentUser?.secondaryPhone || '',
+    city: currentUser?.city || '',
+    primaryAddress: currentUser?.primaryAddress || '',
+  });
+  const [cities, setCities] = useState([
+    'Abuja', 'Lagos', 'Kano', 'Ibadan', 'Port Harcourt', 
+    'Benin City', 'Maiduguri', 'Zaria', 'Aba', 'Jos',
+    'Owerri', 'Enugu', 'Abeokuta', 'Onitsha', 'Warri'
+  ]);
+
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     fetchCart();
+    // Initialize address from user's primary address if available
+    if (currentUser) {
+      setSelectedAddress({
+        firstName: currentUser.firstName,
+        lastName: currentUser.lastName,
+        primaryPhone: currentUser.primaryPhone,
+        secondaryPhone: currentUser.secondaryPhone,
+        city: currentUser.city,
+        primaryAddress: currentUser.primaryAddress
+      });
+    }
   }, []);
 
-  useEffect(() => {
-    if (currentUser?.addresses?.length > 0) {
-      setSelectedAddress(currentUser.addresses.find(addr => addr.isDefault) || currentUser.addresses[0])
-    }
-  }, [currentUser]);
-
-  const handleQuantityChange = async (productId, newQuantity) => {
+  const handleQuantityChange = async (productId, changeAmount) => {
+    const item = cart.items.find(item => item.productId === productId);
+    if (!item) return;
+  
+    const newQuantity = item.quantity + changeAmount;
     if (newQuantity < 1) return;
+
     const result = await updateQuantity(productId, newQuantity);
     if (result.success) {
       toast.success('Quantity updated');
+    } else if (result.error) {
+      toast.error(result.error.message || 'Failed to update quantity');
     }
   };
-
+  
   const handleRemoveItem = async (productId) => {
     const result = await removeFromCart(productId);
     if (result.success) {
       toast.success('Item removed from cart');
+    } else if (result.error) {
+      toast.error(result.error.message || 'Failed to remove item');
     }
   };
-
+  
   const handleClearCart = async () => {
     const result = await clearCart();
     if (result.success) {
       toast.success('Cart cleared');
+    } else if (result.error) {
+      toast.error(result.error.message || 'Failed to clear cart');
     }
   };
 
-  // Calculate cart totals properly
-  const subtotal = cart.items.reduce((sum, item) => {
-    return sum + (parseFloat(item.product.price) * item.quantity)
-  }, 0);
+  const handleAddressChange = (e) => {
+    const { name, value } = e.target;
+    setNewAddress(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
-  const discountTotal = cart.items.reduce((sum, item) => {
-    if (item.product.discountPrice) {
-      return sum + ((parseFloat(item.product.price) - parseFloat(item.product.discountPrice)) * item.quantity)
+  const handleAddAddress = async () => {
+    try {
+      const response = await axios.patch('/api/users', {
+        firstName: newAddress.firstName,
+        lastName: newAddress.lastName,
+        primaryPhone: newAddress.primaryPhone,
+        secondaryPhone: newAddress.secondaryPhone,
+        city: newAddress.city,
+        primaryAddress: newAddress.primaryAddress
+      });
+      
+      // Update local user data
+      const updatedUser = {
+        ...currentUser,
+        ...response.data.data
+      };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      setSelectedAddress({
+        firstName: newAddress.firstName,
+        lastName: newAddress.lastName,
+        primaryPhone: newAddress.primaryPhone,
+        secondaryPhone: newAddress.secondaryPhone,
+        city: newAddress.city,
+        primaryAddress: newAddress.primaryAddress
+      });
+      
+      setShowAddressForm(false);
+      toast.success('Address updated successfully');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update address');
+      const backendErrors = err.response?.data?.errors || {};
+      const newErrors = {};
+
+      Object.entries(backendErrors).forEach(([field, msg]) => {
+        newErrors[field] = msg;
+      });
+
+      if (err.response?.data?.message && !Object.keys(newErrors).length) {
+        newErrors.root = err.response.data.message;
+      }
+
+      setErrors(newErrors);
     }
-    return sum;
-  }, 0);
-
-  const hasDiscount = discountTotal > 0;
-  const total = subtotal - discountTotal + deliveryFee;
+  };
 
   const handleCheckout = async () => {
-    console.log('hello')
     if (!currentUser) {
       toast.error('Please login to proceed to checkout');
       navigate('/login', { state: { from: '/cart' } });
@@ -70,48 +142,26 @@ const Cart = () => {
     }
 
     if (!selectedAddress) {
-      toast.error('Please select a delivery address');
+      toast.error('Please provide your delivery address');
+      return;
+    }
+
+    const allAvailable = cart.items?.every(item => item.available) ?? false;
+    if (!allAvailable) {
+      toast.error('Some items in your cart are no longer available');
+      fetchCart();
       return;
     }
 
     setCheckoutLoading(true);
 
     try {
-      const checkoutData = {
-        cartItems: cart.items.map(item => ({
-          productId: item.productId,
-          quantity: item.quantity,
-          price: parseFloat(item.product.price),
-          discountPrice: item.product.discountPrice ? parseFloat(item.product.discountPrice) : null,
-          selectedOptions: item.selectedOptions || {}
-        })),
-        totals: {
-          subtotal: subtotal,
-          discount: discountTotal,
-          deliveryFee: deliveryFee,
-          tax: 0,
-          total: total
-        },
-        userDetails: {
-          userId: currentUser.id,
-          email: currentUser.email,
-          firstName: currentUser.firstName,
-          lastName: currentUser.lastName,
-          contactPhone: currentUser.primaryPhone
-        },
-        deliveryAddress: selectedAddress,
-        paymentMethod: 'card'
-      };
-
-      const response = await axios.post('/api/orders/checkout-session', checkoutData, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
+      const response = await axios.post('api/v1/orders/checkout-session', {
+        shippingOptionId: selectedShipping,
+        deliveryAddress: selectedAddress
       });
 
       window.location.href = response.data.data.checkoutUrl;
-
     } catch (error) {
       console.error('Checkout error:', error);
       toast.error(error.response?.data?.message || 'Failed to initiate checkout');
@@ -119,6 +169,7 @@ const Cart = () => {
       setCheckoutLoading(false);
     }
   };
+
 
   if (cart.loading) {
     return (
@@ -145,7 +196,7 @@ const Cart = () => {
     );
   }
 
-  if (cart.items.length === 0) {
+  if (!cart?.items || cart.items.length === 0) {
     return (
       <div className="text-center py-12">
         <FiShoppingCart className="mx-auto h-12 w-12 text-gray-400" />
@@ -163,6 +214,9 @@ const Cart = () => {
     );
   }
 
+  const { items = [], summary = {}, shippingOptions = [] } = cart;
+  const selectedShippingOption = shippingOptions.find(opt => opt.id === selectedShipping) || shippingOptions[0];
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center mb-6">
@@ -176,13 +230,13 @@ const Cart = () => {
         <div className="lg:col-span-8">
           <div className="bg-white shadow overflow-hidden sm:rounded-lg">
             <ul className="divide-y divide-gray-200">
-              {cart.items.map((item) => (
+              {items.map((item) => (
                 <li key={`${item.productId}-${JSON.stringify(item.selectedOptions)}`} className="p-4 sm:p-6">
                   <div className="flex flex-col sm:flex-row">
                     <div className="flex-shrink-0 w-full sm:w-32 h-32 bg-gray-200 rounded-md overflow-hidden">
                       <img
-                        src={item.product.coverImage}
-                        alt={item.product.name}
+                        src={item.product?.coverImage || ''}
+                        alt={item.product?.name || 'Product image'}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -191,7 +245,7 @@ const Cart = () => {
                       <div className="flex justify-between">
                         <div>
                           <h3 className="text-lg font-medium text-gray-900">
-                            <Link to={`/product/${item.productId}`}>{item.product.name}</Link>
+                            <Link to={`/product/${item.productId}`}>{item.product?.name || 'Unnamed Product'}</Link>
                           </h3>
                           {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && (
                             <div className="mt-1 flex flex-wrap gap-2">
@@ -201,6 +255,11 @@ const Cart = () => {
                                 </span>
                               ))}
                             </div>
+                          )}
+                          {!item.available && (
+                            <span className="inline-block mt-2 px-2 py-1 text-xs font-medium text-red-800 bg-red-100 rounded">
+                              Only {item.product?.stockQuantity || 0} available
+                            </span>
                           )}
                         </div>
                         <button
@@ -213,32 +272,32 @@ const Cart = () => {
 
                       <div className="mt-4 flex-1 flex items-end justify-between">
                         <div>
-                          {item.product.discountPrice ? (
+                          {item.product?.discountPrice !== "0.00" ? (
                             <div className="flex items-center">
                               <p className="text-lg font-medium text-primary-light">
-                                ₦{(item.product.discountPrice * item.quantity).toLocaleString()}
+                                ₦{((item.product?.discountPrice || 0) * item.quantity).toLocaleString()}
                               </p>
                               <p className="ml-2 text-sm text-gray-500 line-through">
-                                ₦{(item.product.price * item.quantity).toLocaleString()}
+                                ₦{((item.product?.price || 0) * item.quantity).toLocaleString()}
                               </p>
                             </div>
                           ) : (
                             <p className="text-lg font-medium text-primary-light">
-                              ₦{(item.product.price * item.quantity).toLocaleString()}
+                              ₦{((item.product?.price || 0) * item.quantity).toLocaleString()}
                             </p>
                           )}
                           {item.quantity > 1 && (
                             <p className="text-sm text-gray-500">
-                              ₦{item.product.discountPrice 
-                                ? item.product.discountPrice.toLocaleString() 
-                                : item.product.price.toLocaleString()} each
+                              ₦{item.product?.discountPrice !== "0.00" 
+                                ? (item.product?.discountPrice || 0).toLocaleString() 
+                                : (item.product?.price || 0).toLocaleString()} each
                             </p>
                           )}
                         </div>
 
                         <div className="flex items-center border border-gray-300 bg-[#F0F0F0] rounded-md">
                           <button
-                            onClick={() => handleQuantityChange(item.productId, item.quantity - 1)}
+                            onClick={() => handleQuantityChange(item.productId, -1)}
                             className="px-3 py-1 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
                             disabled={item.quantity <= 1}
                           >
@@ -246,8 +305,9 @@ const Cart = () => {
                           </button>
                           <span className="px-4 py-1 text-gray-900">{item.quantity}</span>
                           <button
-                            onClick={() => handleQuantityChange(item.productId, item.quantity + 1)}
+                            onClick={() => handleQuantityChange(item.productId, 1)}
                             className="px-3 py-1 text-gray-600 hover:bg-gray-100"
+                            disabled={item.quantity >= (item.product?.stockQuantity || 0)}
                           >
                             +
                           </button>
@@ -275,15 +335,122 @@ const Cart = () => {
             <h2 className="text-lg font-medium text-gray-900 mb-4">Order Summary</h2>
 
             <div className="space-y-4">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Subtotal ({cart.items.reduce((acc, item) => acc + item.quantity, 0)} items)</span>
-                <span className="font-medium">₦{subtotal.toLocaleString()}</span>
+              <div className="border-b border-gray-200 pb-4">
+                <h3 className="text-md font-medium text-gray-900 mb-2">Delivery Address</h3>
+                      
+                {selectedAddress ? (
+                  <div className="mb-4">
+                    <div className="p-3 border border-gray-200 rounded-md bg-gray-50">
+                      <p className="font-medium">{selectedAddress.firstName} {selectedAddress.lastName}</p>
+                      <p>{selectedAddress.primaryAddress}</p>
+                      <p>{selectedAddress.city}</p>
+                      <p>Phone: {selectedAddress.primaryPhone}</p>
+                      {selectedAddress.secondaryPhone && (
+                        <p>Alt. Phone: {selectedAddress.secondaryPhone}</p>
+                      )}
+                       <p>Fullname: {selectedAddress.firstName}{' '}{selectedAddress.lastName}</p>
+                    </div>
+                    <button 
+                      onClick={() => setShowAddressForm(true)}
+                      className="mt-2 text-sm text-primary-light hover:text-primary-dark flex items-center"
+                    >
+                      <FiPlus className="mr-1" /> Update Information
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500">
+                    <p>No delivery information saved</p>
+                    <button 
+                      onClick={() => setShowAddressForm(true)}
+                      className="mt-2 text-sm text-primary-light hover:text-primary-dark flex items-center"
+                    >
+                      <FiPlus className="mr-1" /> Add Information
+                    </button>
+                  </div>
+                )}
+
+                {showAddressForm && (
+                  <div className="mt-4 space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <InputField
+                        name="firstName"
+                        label="First Name"
+                        value={newAddress.firstName}
+                        onChange={handleAddressChange}
+                        error={errors.firstName}
+                      />
+                      <InputField
+                        name="lastName"
+                        label="Last Name"
+                        value={newAddress.lastName}
+                        onChange={handleAddressChange}
+                        error={errors.lastName}
+                      />
+                    </div>
+
+                    <InputField
+                      name="deliveryAddress"
+                      label="Delivery Address"
+                      value={newAddress.primaryAddress}
+                      onChange={handleAddressChange}
+                      error={errors.primaryAddress}
+                    />
+
+                    <SelectField
+                      name="city"
+                      label="City"
+                      value={newAddress.city}
+                      onChange={handleAddressChange}
+                      options={cities}
+                      error={errors.city}
+                    />
+
+                    <InputField
+                      name="primaryPhone"
+                      label="Primary Phone"
+                      value={newAddress.primaryPhone}
+                      onChange={handleAddressChange}
+                      type="tel"
+                      error={errors.primaryPhone}
+                    />
+
+                    <InputField
+                      name="secondaryPhone"
+                      label="Secondary Phone (Optional)"
+                      value={newAddress.secondaryPhone}
+                      onChange={handleAddressChange}
+                      type="tel"
+                      error={errors.secondaryPhone}
+                      isRequired={false}
+                    />
+
+                    <div className="flex space-x-2 pt-2">
+                      <button
+                        onClick={handleAddAddress}
+                        className="px-4 py-2 bg-primary-light text-white text-sm font-medium rounded-md hover:bg-primary-dark"
+                      >
+                        Save Information
+                      </button>
+                      <button
+                        onClick={() => setShowAddressForm(false)}
+                        className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md hover:bg-gray-50"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {hasDiscount && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Subtotal ({(summary.totalItems || 0)} items)</span>
+                <span className="font-medium">₦{(summary.subtotal || 0).toLocaleString()}</span>
+              </div>
+
+              {(summary.discount || 0) > 0 && (
                 <div className="flex justify-between text-primary-light">
                   <span>Discount</span>
-                  <span>-₦{discountTotal.toLocaleString()}</span>
+                  <span>-₦{(summary.discount || 0).toLocaleString()}</span>
                 </div>
               )}
 
@@ -291,47 +458,16 @@ const Cart = () => {
                 <div className="flex justify-between items-center">
                   <span className="text-base font-medium text-gray-900">Delivery</span>
                   <select 
-                    value={deliveryFee}
-                    onChange={(e) => setDeliveryFee(Number(e.target.value))}
+                    value={selectedShipping}
+                    onChange={(e) => setSelectedShipping(e.target.value)}
                     className="border rounded p-1 text-sm"
                   >
-                    <option value="1500">Standard Delivery (₦1,500)</option>
-                    <option value="3000">Express Delivery (₦3,000)</option>
-                    <option value="0">Pickup (Free)</option>
-                  </select>
-                </div>
-              </div>
-
-              {currentUser?.addresses?.length > 0 && (
-                <div className="border-t border-gray-200 pt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Address</label>
-                  <select
-                    value={selectedAddress?.id}
-                    onChange={(e) => {
-                      const addr = currentUser.addresses.find(a => a.id === e.target.value);
-                      setSelectedAddress(addr);
-                    }}
-                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-light focus:border-primary-light sm:text-sm rounded-md"
-                  >
-                    {currentUser.addresses.map((address) => (
-                      <option key={address.id} value={address.id}>
-                        {address.street}, {address.city}, {address.state}
+                    {shippingOptions.map(option => (
+                      <option key={option.id} value={option.id}>
+                        {option.name} (₦{(option.cost || 0).toLocaleString()})
                       </option>
                     ))}
                   </select>
-                </div>
-              )}
-
-              <div className="border-t border-gray-200 pt-4">
-                <div className="flex">
-                  <input
-                    type="text"
-                    placeholder="Enter promo code"
-                    className="flex-1 border border-gray-300 rounded-l-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                  <button className="bg-primary-light text-white px-4 py-2 rounded-r-md text-sm font-medium hover:bg-primary-dark cursor-pointer">
-                    Apply
-                  </button>
                 </div>
               </div>
 
@@ -339,7 +475,7 @@ const Cart = () => {
                 <div className="flex justify-between">
                   <span className="text-lg font-bold text-gray-900">Total</span>
                   <span className="text-lg font-bold text-gray-900">
-                    ₦{total.toLocaleString()}
+                    ₦{(summary.total || 0).toLocaleString()}
                   </span>
                 </div>
               </div>
@@ -348,9 +484,11 @@ const Cart = () => {
             <div className="mt-6">
               <button
                 onClick={handleCheckout}
-                disabled={checkoutLoading || !selectedAddress}
+                disabled={checkoutLoading || !items.every(item => item.available) || !selectedAddress}
                 className={`w-full bg-primary-light hover:bg-primary-dark text-white py-3 px-4 rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
                   checkoutLoading ? 'opacity-75 cursor-not-allowed' : ''
+                } ${
+                  !items.every(item => item.available) || !selectedAddress ? 'bg-gray-400 hover:bg-gray-400 cursor-not-allowed' : ''
                 }`}
               >
                 {checkoutLoading ? (
@@ -362,7 +500,8 @@ const Cart = () => {
                     Processing...
                   </span>
                 ) : (
-                  'Proceed to Checkout'
+                  !selectedAddress ? 'Select Address' :
+                  items.every(item => item.available) ? 'Proceed to Checkout' : 'Some items unavailable'
                 )}
               </button>
             </div>

@@ -9,8 +9,12 @@ import { toast } from 'react-toastify';
 const ConfirmEmail = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const queryParams = new URLSearchParams(location.search);
-  const email = queryParams.get("email");
+  // const queryParams = new URLSearchParams(location.search);
+  // const email = queryParams.get("email");
+
+   // Get the redirect path and email from state
+   const from = location.state?.from || "/";
+   const email = location.state?.email;
 
   const [code, setCode] = useState("");
   const [serverError, setServerError] = useState("");
@@ -55,11 +59,13 @@ const ConfirmEmail = () => {
          
         } else if (role === "customer") {
           setTimeout(() => {
-            navigate("/");
+            navigate(from, { replace: true });
         }, 3000);
         } else {
           navigate("/"); // fallback route
         }
+        //Merge cart
+        await axios.post('api/v1/cart/merge')
       }
     } catch (err) {
       const msg = err.response?.data?.message || "Something went wrong.";
@@ -122,6 +128,7 @@ const ConfirmEmail = () => {
           error={errors.code}
         />
 
+       <div className="flex justify-center mt-2">
         <Button
           type="submit"
           disabled={isSubmitting}
@@ -130,6 +137,7 @@ const ConfirmEmail = () => {
         >
           Confirm Email
         </Button>
+       </div>
 
         <hr className="text-[#D7DBEC] my-8" />
 

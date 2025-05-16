@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "../../lib/axios";
 import { FiChevronDown, FiChevronRight } from "react-icons/fi";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
     const [categories, setCategories] = useState([]);
@@ -68,12 +69,12 @@ const Navbar = () => {
                             <ul className="ml-6 mt-1 space-y-1">
                                 {category.subcategories.map((subcategory) => (
                                     <li key={subcategory.id}>
-                                        <a 
-                                            href={`/category/${category.id}/subcategory/${subcategory.id}`}
+                                        <Link
+                                            to={`/category/${category.id}/subcategory/${subcategory.id}`}
                                             className="block p-2 text-sm text-gray-600 hover:bg-gray-50 rounded-md"
                                         >
                                             {subcategory.name}
-                                        </a>
+                                        </Link>
                                     </li>
                                 ))}
                             </ul>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "../../lib/axios";
 import InputField from "../../components/common/InputField";
 import SelectField from "../../components/common/SelectField";
@@ -25,6 +25,8 @@ const CustomerRegister = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from; // Get the original redirect path
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -46,7 +48,10 @@ const CustomerRegister = () => {
       const response = await axios.post("/api/v1/users/signup", formDataToSend);
 
       if (response.data.status === "success") {
-        navigate(`/confirm-email?email=${encodeURIComponent(formData.email)}`);
+        navigate(`/confirm-email`, { 
+            state: { from, email: formData.email },
+            replace: true
+          });
       }
     } catch (err) {
       const backendErrors = err.response?.data?.errors || {};

@@ -111,14 +111,14 @@ export const ReviewsSection = ({
             </div>
 
             {/* Review Form */}
-            {user && (
+            {/* {user && (
                 <ReviewForm 
                     user={user}
                     newReview={newReview}
                     setNewReview={setNewReview}
                     handleSubmitReview={handleSubmitReview}
                 />
-            )}
+            )} */}
 
             {/* Reviews List */}
             <div className="space-y-6">

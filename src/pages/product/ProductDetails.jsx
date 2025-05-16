@@ -6,6 +6,7 @@ import { ReviewsSection, renderRatingStars } from "./ReviewComponent";
 import { ProductTabs } from "./ProductTabs";
 import { useCart } from "../../components/contexts/CartContext.jsx";
 import { toast } from 'react-toastify';
+import Button from "../../components/common/Button.jsx";
 
 const ProductDetails = () => {
     const { addToCart, cart } = useCart();
@@ -32,16 +33,13 @@ const ProductDetails = () => {
             const res = await axios.get(url);
             setProduct(res.data.data.product);
             
-            // Initialize selected options
             const initialOptions = {};
             if (res.data.data.product.options) {
                 res.data.data.product.options.forEach(option => {
                     initialOptions[option.name] = option.values[0].value;
                 });
             }
-            // setSelectedOptions(initialOptions);
             
-            // Fetch reviews (mock data for now - replace with actual API call)
             const mockReviews = [
                 {
                     id: 1,
@@ -101,9 +99,6 @@ const ProductDetails = () => {
 
     const handleSubmitReview = (e) => {
         e.preventDefault();
-        // Implement review submission logic
-        console.log("Submitting review:", newReview);
-        // After submission, you would typically refresh the reviews
         setReviews(prev => [
             {
                 id: Date.now(),
@@ -196,11 +191,10 @@ const ProductDetails = () => {
     const reviewsSection = (
         <ReviewsSection
             product={product}
-            user={user}
+            // user={user}
             reviews={reviews}
-            newReview={newReview}
-            setNewReview={setNewReview}
-            handleSubmitReview={handleSubmitReview}
+            // newReview={setNewReview}
+            // handleSubmitReview={handleSubmitReview}
         />
     );
 
@@ -251,7 +245,6 @@ const ProductDetails = () => {
                             </span>
                            
                             {discountPercentage > 0 && (
-                                
                                 <>
                                     <span className="ml-2 text-lg text-gray-500 line-through">
                                         ₦{product.price.toLocaleString()}
@@ -309,19 +302,17 @@ const ProductDetails = () => {
                         </div>
 
                         <div className="flex gap-3">
-                            <button
+                            <Button
                                 onClick={handleAddToCart}
                                 disabled={cart.loading}
-                                className="flex-1 bg-primary-light hover:bg-primary-dark text-white py-3 px-6 rounded-md flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                                isLoading={cart.loading}
+                                loadingText="Adding to cart..."
+                                icon={<FiShoppingCart />}
+                                iconPosition="left"
+                                className="flex-1 py-3 px-6"
                             >
-                                {cart.loading ? (
-                                    'Adding...'
-                                ) : (
-                                    <>
-                                        <FiShoppingCart /> Add to Cart
-                                    </>
-                                )}
-                            </button>
+                                Add to Cart
+                            </Button>
                             <button className="p-3 border border-gray-300 rounded-md hover:bg-gray-50">
                                 <FiHeart className="text-gray-600" />
                             </button>

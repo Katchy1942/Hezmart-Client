@@ -65,11 +65,11 @@ const OrderPage = () => {
     });
   };
 
-  const handleVerifyPayment = async (id) => {
+  const handleVerifyPayment = async (id, orderNumber) => {
     setSelectedId(id);
     setVerifying(true);
     try {
-      const res = await axios.get(`api/v1/orders/verify-payment/${reference}`);
+      const res = await axios.get(`api/v1/orders/verify-payment/${orderNumber}`);
       if (res.data.status === 'success') {
         toast.success("Payment Verified Successfully."); 
         setOrders(res.data.data.orders);
@@ -266,6 +266,7 @@ const OrderPage = () => {
           <div className="divide-y divide-gray-200">
             {orders.map((order) => (
               <div key={order.id} className="p-4 sm:p-6">
+             
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
                   <div className="mb-4 sm:mb-0">
                     <h3 className="text-lg font-medium text-gray-900">
@@ -415,10 +416,12 @@ const OrderPage = () => {
                       Cancel Order
                     </button>
                   )}
+                  
                   {order.paymentStatus === 'pending' && (
+                  
                     <Button
                       disabled={verifying}
-                      onClick={() => handleVerifyPayment(order.id)}
+                      onClick={() => handleVerifyPayment(order.id, order.orderNumber)}
                       className="inline-flex items-center"
                     >
                       {verifying && selectedId === order.id ? (

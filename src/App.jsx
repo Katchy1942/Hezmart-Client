@@ -24,6 +24,8 @@ import AdminDashboard from './pages/admin/Dashboard'
 import ShopManager from './pages/admin/ShopManager';
 import AdminManageProducts from './pages/admin/AdminManageProducts';
 import ManageCategories from './pages/admin/ManageCategories';
+import AdminOrdersManager from './pages/admin/AdminOrdersManager';
+import AdminOrderDetails from './pages/admin/OrderDetails'
 
 
 //Vendor pages
@@ -95,6 +97,8 @@ function App() {
           <Route path='vendors' element={<ShopManager />} />
           <Route path='products' element={<AdminManageProducts />} />
           <Route path='categories' element={<ManageCategories />}></Route>
+          <Route path='orders' element={<AdminOrdersManager />}></Route>
+          <Route path='orders/:orderId' element={<AdminOrderDetails />}></Route>
         </Route>
 
         {/* Vendor Routes */}

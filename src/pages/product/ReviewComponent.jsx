@@ -67,19 +67,19 @@ export const ReviewItem = ({ review }) => {
         <div className="border-b border-gray-200 pb-6 last:border-0">
             <div className="flex items-start">
                 <img 
-                    src={review.user.avatar} 
-                    alt={review.user.name} 
+                    src={review.reviewUser.photo} 
+                    alt={review.reviewUser.firstName } 
                     className="h-10 w-10 rounded-full mr-4"
                 />
                 <div>
                     <div className="flex items-center mb-1">
-                        <h4 className="font-medium text-gray-900 mr-2">{review.user.name}</h4>
+                        <h4 className="font-medium text-gray-900 mr-2">{review.reviewUser.firstName} {" "} {review.reviewUser.lastName}</h4>
                         <div className="flex">
                             {renderRatingStars(review.rating)}
                         </div>
                     </div>
-                    <p className="text-sm text-gray-500 mb-2">{review.date}</p>
-                    <p className="text-gray-700">{review.comment}</p>
+                    <p className="text-sm text-gray-500 mb-2">{review.createdAt}</p>
+                    <p className="text-gray-700">{review.review}</p>
                 </div>
             </div>
         </div>

@@ -32,38 +32,18 @@ const ProductDetails = () => {
     const fetchProductDetail = async () => {
         try {
             const res = await axios.get(url);
-            setProduct(res.data.data.product);
+            if(res.data.status === 'success'){
+                setProduct(res.data.data.product);
             
-            const initialOptions = {};
-            if (res.data.data.product.options) {
-                res.data.data.product.options.forEach(option => {
-                    initialOptions[option.name] = option.values[0].value;
-                });
-            }
-            
-            const mockReviews = [
-                {
-                    id: 1,
-                    user: {
-                        name: "John Doe",
-                        avatar: "https://randomuser.me/api/portraits/men/1.jpg"
-                    },
-                    rating: 5,
-                    comment: "Excellent product! Very happy with my purchase.",
-                    date: "2025-05-01"
-                },
-                {
-                    id: 2,
-                    user: {
-                        name: "Jane Smith",
-                        avatar: "https://randomuser.me/api/portraits/women/1.jpg"
-                    },
-                    rating: 2,
-                    comment: "Good quality but shipping took longer than expected.",
-                    date: "2025-04-28"
+                const initialOptions = {};
+                if (res.data.data.product.options) {
+                    res.data.data.product.options.forEach(option => {
+                        initialOptions[option.name] = option.values[0].value;
+                    });
                 }
-            ];
-            setReviews(mockReviews);
+                setReviews(res.data.data.product.reviews);
+                
+            }
             
         } catch (error) {
             console.error("Error fetching product:", error);

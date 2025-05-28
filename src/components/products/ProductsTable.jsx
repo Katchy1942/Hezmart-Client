@@ -180,7 +180,7 @@ const ProductsTable = ({
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{product.stock || 0}</div>
+                      <div className="text-sm text-gray-900">{product.stockQuantity || 0}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span

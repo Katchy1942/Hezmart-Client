@@ -2,23 +2,41 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from '../../lib/axios';
-import { FiChevronLeft, FiPrinter, FiMail, FiTruck } from 'react-icons/fi';
+import { FiChevronLeft, FiPrinter, FiMail, FiTruck, FiPackage, FiCheckCircle } from 'react-icons/fi';
 
 const OrderDetails = () => {
   const { orderId } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [statusUpdating, setStatusUpdating] = useState(false);
+  const [itemStatusUpdating, setItemStatusUpdating] = useState(null);
   const [notes, setNotes] = useState('');
 
   // Order status options for dropdown
   const statusOptions = [
     { value: 'pending', label: 'Pending' },
     { value: 'processing', label: 'Processing' },
+    { value: 'partially_shipped', label: 'Partially Shipped' },
+    { value: 'shipped', label: 'Shipped' },
+    { value: 'partially_delivered', label: 'Partially Delivered' },
+    { value: 'delivered', label: 'Delivered' },
+    { value: 'partially_received', label: 'Partially Received' },
+    { value: 'completed', label: 'Completed' },
+    { value: 'partially_cancelled', label: 'Partially Cancelled' },
+    { value: 'cancelled', label: 'Cancelled' },
+    { value: 'closed', label: 'Closed' },
+    { value: 'refunded', label: 'Refunded' }
+  ];
+
+  // Item fulfillment status options
+  const fulfillmentStatusOptions = [
+    { value: 'pending', label: 'Pending' },
+    { value: 'processing', label: 'Processing' },
     { value: 'shipped', label: 'Shipped' },
     { value: 'delivered', label: 'Delivered' },
+    { value: 'received', label: 'Received' },
     { value: 'cancelled', label: 'Cancelled' },
-    { value: 'refunded', label: 'Refunded' }
+    { value: 'returned', label: 'Returned' }
   ];
 
   const fetchOrderDetails = async () => {
@@ -26,8 +44,8 @@ const OrderDetails = () => {
     try {
       const response = await axios.get(`/api/v1/orders/${orderId}`);
       if (response.data.status === 'success') {
-        setOrder(response.data.data);
-        // setNotes(response.data.data.notes || '');
+        setOrder(response.data.data.order);
+        setNotes(response.data.data.order.customerNotes || '');
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to fetch order details');
@@ -52,6 +70,35 @@ const OrderDetails = () => {
       toast.error(error.response?.data?.message || 'Failed to update order status');
     } finally {
       setStatusUpdating(false);
+    }
+  };
+
+  const updateItemStatus = async (itemId, newStatus) => {
+    setItemStatusUpdating(itemId);
+    try {
+      const response = await axios.patch(`/api/v1/orders/items/${itemId}/status`, {
+        status: newStatus
+      });
+
+      if (response.data.status === 'success') {
+        toast.success('Item status updated successfully');
+        setOrder(prev => ({
+          ...prev,
+          items: prev.items.map(item => 
+            item.id === itemId ? { 
+              ...item, 
+              fulfillmentStatus: newStatus,
+              ...(newStatus === 'shipped' && { shippedAt: new Date().toISOString() }),
+              ...(newStatus === 'delivered' && { deliveredAt: new Date().toISOString() }),
+              ...(newStatus === 'received' && { receivedAt: new Date().toISOString() })
+            } : item
+          )
+        }));
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update item status');
+    } finally {
+      setItemStatusUpdating(null);
     }
   };
 
@@ -97,6 +144,7 @@ const OrderDetails = () => {
   }
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -121,12 +169,18 @@ const OrderDetails = () => {
         return `${baseClasses} bg-yellow-100 text-yellow-800`;
       case 'processing':
         return `${baseClasses} bg-blue-100 text-blue-800`;
+      case 'partially_shipped':
       case 'shipped':
+      case 'partially_delivered':
         return `${baseClasses} bg-indigo-100 text-indigo-800`;
       case 'delivered':
+      case 'partially_received':
+      case 'completed':
         return `${baseClasses} bg-green-100 text-green-800`;
       case 'cancelled':
+      case 'partially_cancelled':
         return `${baseClasses} bg-red-100 text-red-800`;
+      case 'closed':
       case 'refunded':
         return `${baseClasses} bg-purple-100 text-purple-800`;
       default:
@@ -134,8 +188,47 @@ const OrderDetails = () => {
     }
   };
 
+  const getItemStatusBadge = (status) => {
+    const baseClasses = 'px-2 py-0.5 rounded-full text-xs font-medium';
+    
+    switch (status) {
+      case 'pending':
+        return `${baseClasses} bg-yellow-100 text-yellow-800`;
+      case 'processing':
+        return `${baseClasses} bg-blue-100 text-blue-800`;
+      case 'shipped':
+        return `${baseClasses} bg-indigo-100 text-indigo-800`;
+      case 'delivered':
+        return `${baseClasses} bg-green-100 text-green-800`;
+      case 'received':
+        return `${baseClasses} bg-green-200 text-green-900`;
+      case 'cancelled':
+        return `${baseClasses} bg-red-100 text-red-800`;
+      case 'returned':
+        return `${baseClasses} bg-purple-100 text-purple-800`;
+      default:
+        return `${baseClasses} bg-gray-100 text-gray-800`;
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'pending': return <FiClock className="text-yellow-500" />;
+      case 'processing': return <FiPackage className="text-blue-500" />;
+      case 'shipped': return <FiTruck className="text-indigo-500" />;
+      case 'delivered': 
+      case 'received':
+      case 'completed':
+        return <FiCheckCircle className="text-green-500" />;
+      case 'cancelled': 
+      case 'returned':
+        return <FiXCircle className="text-red-500" />;
+      default: return <FiClock className="text-gray-500" />;
+    }
+  };
+
   return (
-    <div className="max-w-7xl mx-auto  py-8">
+    <div className="max-w-7xl mx-auto py-8">
       <div className="mb-6 flex justify-between items-center">
         <Link to="/manage/admin/orders" className="flex items-center text-primary-light hover:text-primary-dark">
           <FiChevronLeft className="mr-1" /> Back to orders
@@ -146,9 +239,9 @@ const OrderDetails = () => {
           </button>
           <button 
             onClick={sendShippingNotification}
-            disabled={order.status !== 'shipped'}
+            disabled={!['shipped', 'partially_shipped'].includes(order.status)}
             className={`flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium ${
-              order.status !== 'shipped' 
+              !['shipped', 'partially_shipped'].includes(order.status)
                 ? 'text-gray-400 cursor-not-allowed' 
                 : 'text-gray-700 hover:bg-gray-50'
             }`}
@@ -171,7 +264,9 @@ const OrderDetails = () => {
           </div>
           <div className="flex items-center">
             <span className={getStatusBadge(order.status)}>
-              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+              {order.status.split('_').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1)
+              ).join(' ')}
             </span>
           </div>
         </div>
@@ -286,6 +381,52 @@ const OrderDetails = () => {
                             Subtotal: {formatCurrency((item.discountPrice || item.price) * item.quantity)}
                           </p>
                         </div>
+
+                        {/* Item Status Section */}
+                        <div className="mt-2 pt-2 border-t border-gray-100">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                              <span className="text-xs font-medium text-gray-500 mr-2">Status:</span>
+                              <span className={getItemStatusBadge(item.fulfillmentStatus)}>
+                                {item.fulfillmentStatus.charAt(0).toUpperCase() + item.fulfillmentStatus.slice(1)}
+                              </span>
+                            </div>
+                            {/* <select
+                              value={item.fulfillmentStatus}
+                              onChange={(e) => updateItemStatus(item.id, e.target.value)}
+                              disabled={itemStatusUpdating === item.id}
+                              className="text-xs border-gray-300 focus:outline-none focus:ring-primary-light focus:border-primary-light rounded-md"
+                            >
+                              {fulfillmentStatusOptions.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select> */}
+                          </div>
+                          
+                          {/* Status Timestamps */}
+                          <div className="mt-1 space-y-1 text-xs text-gray-500">
+                            {item.shippedAt && (
+                              <div className="flex items-center">
+                                <FiTruck className="mr-1" size={12} />
+                                Shipped: {formatDate(item.shippedAt)}
+                              </div>
+                            )}
+                            {item.deliveredAt && (
+                              <div className="flex items-center">
+                                <FiPackage className="mr-1" size={12} />
+                                Delivered: {formatDate(item.deliveredAt)}
+                              </div>
+                            )}
+                            {item.receivedAt && (
+                              <div className="flex items-center">
+                                <FiCheckCircle className="mr-1" size={12} />
+                                Received: {formatDate(item.receivedAt)}
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </li>
@@ -354,7 +495,7 @@ const OrderDetails = () => {
             </div>
 
             {/* Order Status Update */}
-            <div className="bg-gray-50 p-4 rounded-lg">
+            {/* <div className="bg-gray-50 p-4 rounded-lg">
               <h4 className="text-lg font-medium text-gray-900 mb-4">Update Status</h4>
               <div className="space-y-4">
                 <div>
@@ -396,7 +537,7 @@ const OrderDetails = () => {
                   {statusUpdating ? 'Saving...' : 'Save Notes'}
                 </button>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

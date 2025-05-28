@@ -9,12 +9,11 @@ import { toast } from 'react-toastify';
 const ConfirmEmail = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  // const queryParams = new URLSearchParams(location.search);
-  // const email = queryParams.get("email");
+  const queryParams = new URLSearchParams(location.search);
 
    // Get the redirect path and email from state
    const from = location.state?.from || "/";
-   const email = location.state?.email;
+   const email = location.state?.email ||  queryParams.get("email");
 
   const [code, setCode] = useState("");
   const [serverError, setServerError] = useState("");

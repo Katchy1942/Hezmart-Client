@@ -34,9 +34,13 @@ import VendorDashboard from './pages/vendor/Dashboard'
 import VendorManageProducts from './pages/vendor/VendorManageProducts'
 import AddProduct from './pages/vendor/AddProduct';
 import EditProduct from './pages/vendor/EditProduct';
+import VendorProductsPage from './pages/VendorProductsPage';
+import VendorOrdersManager from './pages/vendor/VendorOrdersManager';
+import VendorOrderDetails from './pages/vendor/VendorOrderDetails';
 
 //Customer Pages;
 import OrderPage from './pages/customer/OrderPage';
+import OrderDetails from './pages/customer/OrderDetails';
 
 //Product Pages;
 import ProductDetails from './pages/product/ProductDetails';
@@ -49,11 +53,6 @@ import Error from './components/Error';
 import { requireAuth } from './utils/protect';
 import Cart from './pages/Cart';
 import Shops from './pages/Shops';
-import VendorProductsPage from './pages/VendorProductsPage';
-
-
-
-
 
 
 
@@ -80,6 +79,7 @@ function App() {
 
         {/* Customer Routes */}
         <Route path='orders' element={<OrderPage />}></Route>
+        <Route path='orders/:id' element={<OrderDetails />}></Route>
 
         {/* Product Routes */}
         <Route path='/product/:id' element={<ProductDetails />}></Route>
@@ -107,6 +107,8 @@ function App() {
           <Route path='products' element={<VendorManageProducts />} />
           <Route path='add-product' element={<AddProduct />} ></Route>
           <Route path='edit-product/:id' element={<EditProduct />}></Route>
+          <Route path='orders' element={<VendorOrdersManager />}></Route>
+          <Route path='orders/:orderId' element={<VendorOrderDetails />}></Route>
 
         </Route>
        

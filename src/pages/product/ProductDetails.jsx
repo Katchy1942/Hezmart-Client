@@ -7,6 +7,7 @@ import { ProductTabs } from "./ProductTabs";
 import { useCart } from "../../components/contexts/CartContext.jsx";
 import { toast } from 'react-toastify';
 import Button from "../../components/common/Button.jsx";
+import ProductsGrid from "../../components/products/ProductsGrid.jsx";
 
 const ProductDetails = () => {
     const { addToCart, cart } = useCart();
@@ -304,7 +305,7 @@ const ProductDetails = () => {
                         <div className="flex gap-3">
                             <Button
                                 onClick={handleAddToCart}
-                                disabled={cart.loading}
+                                disabled={cart.loading ||product.stockQuantity <= 0}
                                 isLoading={cart.loading}
                                 loadingText="Adding to cart..."
                                 icon={<FiShoppingCart />}
@@ -364,12 +365,14 @@ const ProductDetails = () => {
             />
 
             {/* Similar Products */}
-            <div className="mb-12">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Similar Products</h2>
-                <div className="bg-gray-100 p-12 rounded-lg text-center">
-                    <p className="text-gray-500">Similar products based on {product.category?.name} &gt; {product.subCategory?.name} will appear here</p>
-                </div>
-            </div>
+           
+            <ProductsGrid 
+                fetchUrl={`api/v1/products?status=active&categoryId=${product.categoryId}&subCategoryId=${product.subCategoryId}`}
+                showHeader={true}
+                headerTitle="Similar Products"
+                headerSubtitle={`Similar products based on ${product.category?.name} > ${product.subCategory?.name}`}
+            />
+          
         </div>
     );
 };

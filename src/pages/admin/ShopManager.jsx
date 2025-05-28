@@ -79,17 +79,17 @@ const ShopManager = () => {
     
     try {
       // Map the action values to actual status values
-      const statusMap = {
-        'approve': 'active',
-        'deny': 'denied',
-        'pending': 'pending',
-        'deactivate': 'deactivated'
-      };
+      // const statusMap = {
+      //   'approve': 'active',
+      //   'deny': 'denied',
+      //   'pending': 'pending',
+      //   'deactivate': 'deactivated'
+      // };
       
-      const actualStatus = statusMap[newStatus] || newStatus;
+      // const actualStatus = statusMap[newStatus] || newStatus;
       
       const res = await axios.patch(`api/v1/users/${vendorId}/status`, { 
-        status: actualStatus 
+        status: newStatus 
       });
       
       if (res.data.status === 'success') {
@@ -98,7 +98,7 @@ const ShopManager = () => {
         setShops(prevShops => 
           prevShops.map(shop => 
             shop.id === vendorId 
-              ? { ...shop, status: actualStatus } 
+              ? { ...shop, status: newStatus } 
               : shop
           )
         );

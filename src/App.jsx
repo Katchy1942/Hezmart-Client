@@ -20,7 +20,7 @@ import ResetPassword from './pages/auth/ResetPassword';
 
 
 //Admin Pages
-import AdminDashboard from './pages/admin/Dashboard'
+import AdminDashboard from './pages/admin/AdminDashboard'
 import ShopManager from './pages/admin/ShopManager';
 import AdminManageProducts from './pages/admin/AdminManageProducts';
 import ManageCategories from './pages/admin/ManageCategories';
@@ -30,13 +30,15 @@ import AdminOrderDetails from './pages/admin/OrderDetails'
 
 //Vendor pages
 import PendingVerification from './pages/vendor/PendingVerification';
-import VendorDashboard from './pages/vendor/Dashboard'
+import VendorDashboard from './pages/vendor/VendorDashbaord'
 import VendorManageProducts from './pages/vendor/VendorManageProducts'
 import AddProduct from './pages/vendor/AddProduct';
 import EditProduct from './pages/vendor/EditProduct';
 import VendorProductsPage from './pages/VendorProductsPage';
 import VendorOrdersManager from './pages/vendor/VendorOrdersManager';
 import VendorOrderDetails from './pages/vendor/VendorOrderDetails';
+import CustomersManager from './pages/admin/CustomersManager';
+
 
 //Customer Pages;
 import OrderPage from './pages/customer/OrderPage';
@@ -95,6 +97,7 @@ function App() {
         <Route path='admin' loader={async({ request }) => await requireAuth(request, 'admin')}>
           <Route path='dashboard' element={<AdminDashboard />} />
           <Route path='vendors' element={<ShopManager />} />
+          <Route path='customers' element={<CustomersManager />}></Route>
           <Route path='products' element={<AdminManageProducts />} />
           <Route path='categories' element={<ManageCategories />}></Route>
           <Route path='orders' element={<AdminOrdersManager />}></Route>

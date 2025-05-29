@@ -26,8 +26,8 @@ const Sidebar = ({ user, isToggle, setToggle }) => {
     { name: "Dashboard", path: "vendor/dashboard", icon: <FaTachometerAlt /> },
     { name: "Products", path: "vendor/products", icon: <FaBox /> },
     { name: "Orders", path: "vendor/orders", icon: <FaShoppingCart /> },
-    { name: "Promotions", path: "vendor/promotions", icon: <FaTags /> },
-    { name: "Analytics", path: "vendor/analytics", icon: <FaChartLine /> },
+    // { name: "Promotions", path: "vendor/promotions", icon: <FaTags /> },
+    // { name: "Analytics", path: "vendor/analytics", icon: <FaChartLine /> },
     { name: "Store Settings", path: "vendor/settings", icon: <FaStore /> },
   ];
 
@@ -38,7 +38,8 @@ const Sidebar = ({ user, isToggle, setToggle }) => {
     { name: "Orders", path: "admin/orders", icon: <FaShoppingCart /> },
     { name: "Customers", path: "admin/customers", icon: <FaUsers /> },
     { name: "Vendors", path: "admin/vendors", icon: <FaStore /> },
-    { name: "Analytics", path: "admin/analytics", icon: <FaChartLine /> },
+      { name: "Coupons", path: "admin/coupons", icon: <FaChartLine /> },
+    // { name: "Analytics", path: "admin/analytics", icon: <FaChartLine /> },
     { name: "Settings", path: "admin/settings", icon: <FaCog /> },
   ];
 

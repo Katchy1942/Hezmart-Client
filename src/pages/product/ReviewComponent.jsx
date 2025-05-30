@@ -12,6 +12,16 @@ export const renderRatingStars = (rating) => {
     return stars;
 };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 export const ReviewForm = ({ user, newReview, setNewReview, handleSubmitReview }) => {
     return (
         <div className="bg-gray-50 p-6 rounded-lg mb-8">
@@ -78,7 +88,7 @@ export const ReviewItem = ({ review }) => {
                             {renderRatingStars(review.rating)}
                         </div>
                     </div>
-                    <p className="text-sm text-gray-500 mb-2">{review.createdAt}</p>
+                    <p className="text-sm text-gray-500 mb-2">{formatDate(review.createdAt)}</p>
                     <p className="text-gray-700">{review.review}</p>
                 </div>
             </div>

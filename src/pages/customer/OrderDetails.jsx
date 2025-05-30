@@ -150,35 +150,37 @@ const OrderDetails = () => {
         rating: newReview.rating,
         review: newReview.comment
       });
-
-      toast.success(editingReview ? 'Review updated!' : 'Review submitted!');
+      if(response.data.status === 'success'){
+        
+        toast.success(editingReview ? 'Review updated!' : 'Review submitted!');
       
-      setOrder(prevOrder => ({
-        ...prevOrder,
-        items: prevOrder.items.map(item => {
-          if (item.product.id === newReview.productId) {
-            return {
-              ...item,
-              product: {
-                ...item.product,
-                reviews: editingReview
-                  ? item.product.reviews.map(r => 
-                      r.id === editingReview.id ? response.data.data.review : r
-                    )
-                  : [...(item.product.reviews || []), response.data.data.review]
-              }
-            };
-          }
-          return item;
-        })
-      }));
+        setOrder(prevOrder => ({
+          ...prevOrder,
+          items: prevOrder.items.map(item => {
+            if (item.product.id === newReview.productId) {
+              return {
+                ...item,
+                product: {
+                  ...item.product,
+                  reviews: editingReview
+                    ? item.product.reviews.map(r => 
+                        r.id === editingReview.id ? response.data.data.review : r
+                      )
+                    : [...(item.product.reviews || []), response.data.data.review]
+                }
+              };
+            }
+            return item;
+          })
+        }));
 
-      setEditingReview(null);
-      setNewReview({
-        rating: 1,
-        comment: '',
-        productId: null
-      });
+        setEditingReview(null);
+        setNewReview({
+          rating: 1,
+          comment: '',
+          productId: null
+        });
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to submit review');
     } finally {
@@ -194,6 +196,8 @@ const OrderDetails = () => {
       productId
     });
   };
+
+  
 
 
   const renderStars = (rating, interactive = false, onChange = null) => {

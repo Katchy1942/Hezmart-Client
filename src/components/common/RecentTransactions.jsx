@@ -19,7 +19,7 @@ const RecentTransactions = ({ transactions }) => {
               <tr key={index}>
                 <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{transaction.name}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{transaction.date}</td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">₦{transaction.amount}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{transaction.amount}</td>
                 <td className="px-4 py-3 whitespace-nowrap">
                   <span className={`px-2 py-1 text-xs rounded-full ${
                     transaction.status === 'Paid' 

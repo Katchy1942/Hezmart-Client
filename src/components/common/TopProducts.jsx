@@ -35,8 +35,7 @@ const TopProducts = ({ products }) => {
                         </div>
                     </div>
                 </td>
-                {/* <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{product.name}</td> */}
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">₦{product.price}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{product.price}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{product.unitsSold}</td>
               </tr>
             ))}

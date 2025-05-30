@@ -15,7 +15,7 @@ const Dashboard = ({ isAdmin = false }) => {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('api/v1/dashboard/stats');
+      const res = await axios.get('api/v1/dashboard/stats');  
       setStats(res.data.data);
       setLoading(false);
     } catch (err) {
@@ -90,6 +90,8 @@ const Dashboard = ({ isAdmin = false }) => {
     revenue: `₦${(parseFloat(product.price) * parseInt(product.unitsSold)).toLocaleString()}`,
     coverImage:product.coverImage
   }));
+
+  
 
   return (
     <div className="">

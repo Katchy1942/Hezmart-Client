@@ -12,7 +12,8 @@ const ProductsTable = ({
   onDelete,
   onStatusChange,
   showOwner = false,
-  allowStatusUpdate = false
+  allowStatusUpdate = false,
+  showEditUrl=true
 }) => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [statusUpdating, setStatusUpdating] = useState(null);
@@ -202,13 +203,15 @@ const ProductsTable = ({
                         >
                           <FiEye />
                         </Link>
-                        <Link
+                       {showEditUrl && (
+                         <Link
                           to={`/manage/vendor/edit-product/${product.id}`}
                           className="text-indigo-600 hover:text-indigo-900 p-1"
                           title="Edit"
                         >
                           <FiEdit2 />
                         </Link>
+                       )}
                         {allowStatusUpdate && (
                           <>
                             <button

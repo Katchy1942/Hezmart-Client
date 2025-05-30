@@ -125,6 +125,7 @@ const AdminManageProducts = () => {
                 onDelete={deleteProduct}
                 onStatusChange={toggleStatus}
                 showOwner={true}
+                showEditUrl={false}
                 allowStatusUpdate={true}
             />
         </div>

@@ -15,6 +15,7 @@ import axios from '../../lib/axios';
 import { toast } from 'react-toastify';
 import Button from '../../components/common/Button';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import InputField from '../../components/common/InputField';
 import { FaStar, FaRegStar } from "react-icons/fa";
 
 const OrderDetails = () => {
@@ -28,6 +29,7 @@ const OrderDetails = () => {
     productId: null
   });
   const [markingReceived, setMarkingReceived] = useState(null);
+  const [submittingReview, setSubmittingReview] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -126,8 +128,6 @@ const OrderDetails = () => {
         })
       }));
       }
-      
-      
      
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to mark item as received');
@@ -138,17 +138,17 @@ const OrderDetails = () => {
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
+    setSubmittingReview(true);
     try {
       const endpoint = editingReview ? 
         `api/v1/reviews/${editingReview.id}` : 
-        'api/v1/reviews';
+        `api/v1/products/${newReview.productId}/reviews`;
       
-      const method = editingReview ? 'put' : 'post';
+      const method = editingReview ? 'patch' : 'post';
       
       const response = await axios[method](endpoint, {
         rating: newReview.rating,
-        comment: newReview.comment,
-        productId: newReview.productId
+        review: newReview.comment
       });
 
       toast.success(editingReview ? 'Review updated!' : 'Review submitted!');
@@ -175,12 +175,14 @@ const OrderDetails = () => {
 
       setEditingReview(null);
       setNewReview({
-        rating: 5,
+        rating: 1,
         comment: '',
         productId: null
       });
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to submit review');
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
@@ -188,10 +190,11 @@ const OrderDetails = () => {
     setEditingReview(review);
     setNewReview({
       rating: review.rating,
-      comment: review.comment,
+      comment: review.review,
       productId
     });
   };
+
 
   const renderStars = (rating, interactive = false, onChange = null) => {
     return (
@@ -241,31 +244,26 @@ const OrderDetails = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Rating
                 </label>
-                {[1, 2, 3, 4, 5].map(star => (
+                {[1, 2, 3, 4, 5].map((star) => (
                   <button
                     key={star}
                     type="button"
-                    onClick={() => setNewReview({...newReview, rating: star})}
-                    className="text-2xl mr-1"
+                    onClick={() => setNewReview({ ...newReview, rating: star })}
+                    className="text-2xl text-primary-light focus:outline-none"
                   >
-                    {star <= newReview.rating ? (
-                      <FaStar className="text-primary-light" />
-                      ) : (
-                      <FaRegStar className="text-primary-light" />
-                    )}
+                    {star <= newReview.rating ? <FaStar /> : <FaRegStar />}
                   </button>
                 ))}
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Comment
-                </label>
-                <textarea
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-light focus:border-primary-light"
-                  rows="4"
+                <InputField
+                  as="textarea"
+                  label="Comment"
                   value={newReview.comment}
                   onChange={(e) => setNewReview({...newReview, comment: e.target.value})}
                   required
+                  rows={4}
+                  classNames="w-full"
                 />
               </div>
               <div className="flex justify-end space-x-3">
@@ -276,8 +274,13 @@ const OrderDetails = () => {
                 >
                   Cancel
                 </button>
-                <Button type="submit">
-                  {editingReview ? 'Update Review' : 'Submit Review'}
+                <Button type="submit" disabled={submittingReview}>
+                  {submittingReview ? (
+                    <span className="flex items-center">
+                      <LoadingSpinner size="small" className="mr-2" />
+                      {editingReview ? 'Updating...' : 'Submitting...'}
+                    </span>
+                  ) : editingReview ? 'Update Review' : 'Submit Review'}
                 </Button>
               </div>
             </form>
@@ -416,10 +419,11 @@ const OrderDetails = () => {
                             </span>
                           </div>
                           {item.fulfillmentStatus === 'delivered' && !item.receivedAt && (
-                            <button
+                            <Button
                               onClick={() => handleMarkAsReceived(item.id)}
                               disabled={markingReceived === item.id}
-                              className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none"
+                              size="small"
+                              variant="primary"
                             >
                               {markingReceived === item.id ? (
                                 <LoadingSpinner size="small" />
@@ -429,7 +433,7 @@ const OrderDetails = () => {
                                   Mark as Received
                                 </>
                               )}
-                            </button>
+                            </Button>
                           )}
                           {item.receivedAt && (
                             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
@@ -449,7 +453,6 @@ const OrderDetails = () => {
                           </div>
                         )}
                       </div>
-
                       <div className="mt-3 pt-3 border-t border-gray-100">
                         <h6 className="text-xs font-medium text-gray-500 mb-1">
                           Your Review
@@ -469,13 +472,14 @@ const OrderDetails = () => {
                               </button>
                             </div>
                             <p className="mt-1 text-sm text-gray-700">
-                              {item.product.reviews.find(r => r.userId === order.userId).comment}
+                             
+                              {item.product.reviews.find(r => r.userId === order.userId).review}
                             </p>
                           </div>
                         ) : (
-                          <button
+                         <button
                             onClick={() => setNewReview({
-                              rating: 5,
+                              rating: 1,
                               comment: '',
                               productId: item.product.id
                             })}
@@ -514,7 +518,6 @@ const OrderDetails = () => {
               <Button
                 disabled={verifying}
                 onClick={handleVerifyPayment}
-                className="inline-flex items-center"
               >
                 {verifying ? (
                   <span className='flex items-center'>

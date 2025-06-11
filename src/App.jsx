@@ -28,6 +28,7 @@ import AdminOrdersManager from './pages/admin/AdminOrdersManager';
 import AdminOrderDetails from './pages/admin/OrderDetails'
 import AdminManageCoupons from './pages/admin/AdminManageCoupons'
 import CreateCoupon from './pages/admin/CreateCoupon';
+import EditCoupon from './pages/admin/EditCoupon';
 
 
 //Vendor pages
@@ -109,6 +110,7 @@ function App() {
           <Route path='orders/:orderId' element={<AdminOrderDetails />}></Route>
           <Route path='coupons' element={<AdminManageCoupons />}></Route>
           <Route path='create-coupon' element={<CreateCoupon />}></Route>
+          <Route path='edit-coupon/:id' element={<EditCoupon />}></Route>
         </Route>
 
         {/* Vendor Routes */}

@@ -11,12 +11,12 @@ const AdminManageCoupons = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const { pagination, updatePagination } = usePagination();
+    const [deletingCouponId, setDeletingCouponId] = useState(null);
 
     const statusFilterOptions = [
         { value: "all", label: "All Statuses" },
         { value: "active", label: "Active" },
         { value: "expired", label: "Expired" },
-        // { value: "upcoming", label: "Upcoming" }
     ];
 
     const fetchCoupons = async (page = 1, search = '', status = '') => {
@@ -47,14 +47,15 @@ const AdminManageCoupons = () => {
     const deleteCoupon = async (couponId) => {
         if (window.confirm("Are you sure you want to delete this coupon?")) {
             try {
+                setDeletingCouponId(couponId);
                 const res = await axios.delete(`api/v1/coupons/${couponId}`);
-                if (res.data.status === 'success') {
+                if (res.status === 204) {
                     toast.success("Coupon deleted successfully");
                     fetchCoupons(pagination.currentPage, searchTerm, statusFilter === 'all' ? '' : statusFilter);
                 }
             } catch (error) {
-                toast.error("Failed to delete coupon");
-                console.error("Error deleting coupon:", error);
+                toast.error(error.response?.data?.message  || 'Failed to delete coupon');
+                console.log("Error deleting coupon:", error);
             }
         }
     };
@@ -117,6 +118,7 @@ const AdminManageCoupons = () => {
                 pagination={pagination}
                 onPageChange={handlePageChange}
                 onDelete={deleteCoupon}
+                deletingCouponId={deletingCouponId}
                 onStatusChange={toggleStatus}
             />
         </div>

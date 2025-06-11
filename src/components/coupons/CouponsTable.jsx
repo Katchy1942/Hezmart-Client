@@ -10,25 +10,9 @@ const CouponsTable = ({
     pagination,
     onPageChange,
     onDelete,
+    deletingCouponId,
     onStatusChange,
 }) => {
-    const [activeDropdown, setActiveDropdown] = useState(null);
-    const [statusUpdating, setStatusUpdating] = useState(null);
-    const dropdownRef = useRef(null);
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setActiveDropdown(null);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
-
-    const toggleDropdown = (couponId) => {
-        setActiveDropdown(activeDropdown === couponId ? null : couponId);
-    };
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -36,30 +20,8 @@ const CouponsTable = ({
                 return "bg-green-100 text-green-800";
             case "expired":
                 return "bg-red-100 text-red-800";
-            case "upcoming":
-                return "bg-blue-100 text-blue-800";
             default:
                 return "bg-gray-100 text-gray-800";
-        }
-    };
-
-    const getStatusActions = (currentStatus) => {
-        const allActions = {
-            active: [{ label: "Deactivate", value: "expired" }],
-            expired: [{ label: "Reactivate", value: "active" }],
-            upcoming: [{ label: "Activate Now", value: "active" }]
-        };
-
-        return allActions[currentStatus] || [];
-    };
-
-    const handleStatusUpdate = async (couponId, newStatus) => {
-        setStatusUpdating(couponId);
-        try {
-            await onStatusChange(couponId, newStatus);
-        } finally {
-            setStatusUpdating(null);
-            setActiveDropdown(null);
         }
     };
 
@@ -70,11 +32,28 @@ const CouponsTable = ({
             case 'fixed':
                 return `₦${coupon.value} off`;
             case 'freeShipping':
-                return 'Free Shipping';
+                return `₦${coupon.value} off`;
             default:
                 return coupon.value;
         }
     };
+
+    // Helper function to format coupon value display
+    function formatCouponValueDisplay(coupon) {
+  
+        switch (coupon.type) {
+            case 'percentage':
+            return `Percentage Discount`;
+            case 'fixed':
+            return `Fixed Discount`;
+            case 'freeShipping':
+            return 'Free Shipping';
+            case 'priceDiscount':
+            return `Price Discount`;
+            default:
+            return coupon.type;
+        }
+    }
 
     return (
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -131,7 +110,7 @@ const CouponsTable = ({
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm text-gray-900 capitalize">
-                                                {coupon.type}
+                                                {formatCouponValueDisplay(coupon)}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
@@ -157,7 +136,7 @@ const CouponsTable = ({
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium relative">
                                             <div className="flex justify-end items-center space-x-2">
                                                 <Link
-                                                    to={`/admin/coupons/edit/${coupon.id}`}
+                                                    to={`/manage/admin/edit-coupon/${coupon.id}`}
                                                     className="text-indigo-600 hover:text-indigo-900 p-1"
                                                     title="Edit"
                                                 >
@@ -167,92 +146,14 @@ const CouponsTable = ({
                                                     onClick={() => onDelete(coupon.id)}
                                                     className="text-red-600 hover:text-red-900 p-1"
                                                     title="Delete"
-                                                >
-                                                    <FiTrash2 />
-                                                </button>
-                                                <button
-                                                    onClick={() => toggleDropdown(coupon.id)}
-                                                    className="text-gray-400 hover:text-gray-600 p-1"
-                                                    disabled={statusUpdating === coupon.id}
-                                                    title="Status options"
-                                                >
-                                                    {statusUpdating === coupon.id ? (
-                                                        <svg
-                                                            className="animate-spin h-5 w-5 text-gray-500"
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            fill="none"
-                                                            viewBox="0 0 24 24"
-                                                        >
-                                                            <circle
-                                                                className="opacity-25"
-                                                                cx="12"
-                                                                cy="12"
-                                                                r="10"
-                                                                stroke="currentColor"
-                                                                strokeWidth="4"
-                                                            ></circle>
-                                                            <path
-                                                                className="opacity-75"
-                                                                fill="currentColor"
-                                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                                            ></path>
-                                                        </svg>
+                                                    disabled={deletingCouponId === coupon.id}
+                                                    >
+                                                    {deletingCouponId === coupon.id ? (
+                                                        <div className="h-4 w-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
                                                     ) : (
-                                                        <FaEllipsisV />
+                                                        <FiTrash2 />
                                                     )}
                                                 </button>
-
-                                                {activeDropdown === coupon.id && (
-                                                    <div
-                                                        ref={dropdownRef}
-                                                        className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
-                                                    >
-                                                        <div className="py-1">
-                                                            {getStatusActions(coupon.status).map((action) => (
-                                                                <button
-                                                                    key={action.value}
-                                                                    onClick={() =>
-                                                                        handleStatusUpdate(coupon.id, action.value)
-                                                                    }
-                                                                    disabled={statusUpdating === coupon.id}
-                                                                    className={`block px-4 py-2 text-sm w-full text-left ${
-                                                                        statusUpdating === coupon.id
-                                                                            ? "text-gray-400 cursor-not-allowed"
-                                                                            : "text-gray-700 hover:bg-gray-100"
-                                                                    }`}
-                                                                >
-                                                                    {statusUpdating === coupon.id ? (
-                                                                        <span className="flex items-center">
-                                                                            <svg
-                                                                                className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500"
-                                                                                xmlns="http://www.w3.org/2000/svg"
-                                                                                fill="none"
-                                                                                viewBox="0 0 24 24"
-                                                                            >
-                                                                                <circle
-                                                                                    className="opacity-25"
-                                                                                    cx="12"
-                                                                                    cy="12"
-                                                                                    r="10"
-                                                                                    stroke="currentColor"
-                                                                                    strokeWidth="4"
-                                                                                ></circle>
-                                                                                <path
-                                                                                    className="opacity-75"
-                                                                                    fill="currentColor"
-                                                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                                                                ></path>
-                                                                            </svg>
-                                                                            Processing...
-                                                                        </span>
-                                                                    ) : (
-                                                                        action.label
-                                                                    )}
-                                                                </button>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                )}
                                             </div>
                                         </td>
                                     </tr>

@@ -34,7 +34,7 @@ const Navbar = () => {
     }, []);
 
     return (
-        <div className="w-64 bg-white shadow-md rounded-lg p-4 h-full">
+        <div className="w-full">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">Categories</h2>
             <ul className="space-y-2">
                 {categories.map((category) => (
@@ -72,6 +72,7 @@ const Navbar = () => {
                                         <Link
                                             to={`/category/${category.id}/subcategory/${subcategory.id}`}
                                             className="block p-2 text-sm text-gray-600 hover:bg-gray-50 rounded-md"
+                                            onClick={() => window.innerWidth < 1024 && setMobileNavOpen(false)}
                                         >
                                             {subcategory.name}
                                         </Link>

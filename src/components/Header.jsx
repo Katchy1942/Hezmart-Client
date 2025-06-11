@@ -1,6 +1,6 @@
-import { Link,useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { logo_white, logo } from "../assets/images";
-import { LuShoppingCart } from "react-icons/lu";
+import { LuShoppingCart, LuMenu } from "react-icons/lu";
 import { 
   FiUser, 
   FiLogOut, 
@@ -8,9 +8,10 @@ import {
   FiSettings,
   FiChevronDown,
   FiChevronUp,
-  FiGrid
+  FiGrid,
+  FiX
 } from "react-icons/fi";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SearchBar from "./SearchBar";
 import { useCart } from "./contexts/CartContext";
 import { logout } from "../utils/logout";
@@ -20,11 +21,23 @@ const Header = () => {
     const { cartCount } = useCart();
     const user = JSON.parse(localStorage.getItem('user'));
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const navigate = useNavigate();
     const [processing, setProcessing] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 1024);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
     const closeDropdown = () => setIsDropdownOpen(false);
+    const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
     // Determine user role and dashboard link
     const userRole = user?.role?.toLowerCase();
@@ -37,26 +50,45 @@ const Header = () => {
         try {
             const res = await logout(navigate);
             setProcessing(false);
+            setIsMobileMenuOpen(false);
         } catch (err) {
             setProcessing(false);
             console.log(err);
         }
     };
+
     return (
-        <div>
+        <div className="sticky top-0 z-50 bg-white">
             {/* Top Bar */}
-            <div className="bg-primary-light max-w-7xl mx-auto  px-4 sm:px-6 lg:px-8 py-1">
-                <div className=" flex items-center scroll-py-20">
+            <div className="bg-primary-light w-full px-4 sm:px-6 lg:px-8 lg:py-1 py-[10px]">
+                <div className="flex items-center justify-between">
                     <Link to='sell-on-hezmart' className="text-white lg:text-base text-xs cursor-pointer">
                         Sell on Hezmart
                     </Link>
 
-                    <img src={logo_white} alt="Logo" width={76} className="mx-auto -translate-x-8"/>
+                    <img src={logo_white} alt="Logo" width={76} className="mx-auto lg:mx-0 lg:-translate-x-8"/>
+                    
+                    {/* Mobile cart icon */}
+                    {isMobile && (
+                        <div className="flex items-center gap-4">
+                            <Link to='/cart' className="relative text-white">
+                                <LuShoppingCart className="text-2xl" />
+                                {cartCount > 0 && (
+                                    <span className="absolute -top-2 -right-2 bg-white text-primary-dark rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                                        {cartCount}
+                                    </span>
+                                )}
+                            </Link>
+                            <button onClick={toggleMobileMenu} className="text-white">
+                                {isMobileMenuOpen ? <FiX size={24} /> : <LuMenu size={24} />}
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
            
-            {/* Navigation */}
-            <nav className="hidden max-w-7xl mx-auto bg-white shadow  px-4 sm:px-6 lg:px-8 py-3 lg:flex lg:justify-between">
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex max-w-7xl mx-auto bg-white shadow px-4 sm:px-6 lg:px-8 py-3 justify-between">
                 <Link to='/'>
                     <img src={logo} alt="Logo"/>
                 </Link>
@@ -108,14 +140,6 @@ const Header = () => {
                                             <FiShoppingBag className="mr-2 text-gray-500" />
                                             My Orders
                                         </Link>
-                                        {/* <Link
-                                            to="/settings"
-                                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                            onClick={closeDropdown}
-                                        >
-                                            <FiSettings className="mr-2 text-gray-500" />
-                                            Settings
-                                        </Link> */}
                                         <button
                                            onClick={handleLogout}
                                             className="flex items-center w-full px-4 py-2 text-sm text-gray-700 border-t border-gray-100 hover:bg-gray-100 cursor-pointer"
@@ -129,7 +153,6 @@ const Header = () => {
                                                 </>
                                             )}
                                         </button>
-
                                     </div>
                                 )}
                             </div>
@@ -170,6 +193,93 @@ const Header = () => {
                     </Link>
                 </div>
             </nav>
+
+            {/* Mobile Navigation */}
+            {isMobileMenuOpen && (
+                <div className="lg:hidden fixed inset-0 bg-white z-40 pt-4 px-4 overflow-y-auto">
+                    <div className="flex justify-end mb-4">
+                        <button onClick={toggleMobileMenu} className="text-gray-700">
+                            <FiX size={24} />
+                        </button>
+                    </div>
+                    
+                    <div className="mb-6">
+                        <SearchBar mobile={true} />
+                    </div>
+                    
+                    <div className="flex flex-col space-y-4">
+                        {user ? (
+                            userRole === 'customer' ? (
+                                <>
+                                    <Link 
+                                        to="/profile" 
+                                        onClick={toggleMobileMenu}
+                                        className="flex items-center py-2 px-4 text-gray-700 hover:bg-gray-100 rounded"
+                                    >
+                                        <FiUser className="mr-3" />
+                                        My Profile
+                                    </Link>
+                                    <Link 
+                                        to="/orders" 
+                                        onClick={toggleMobileMenu}
+                                        className="flex items-center py-2 px-4 text-gray-700 hover:bg-gray-100 rounded"
+                                    >
+                                        <FiShoppingBag className="mr-3" />
+                                        My Orders
+                                    </Link>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="flex items-center py-2 px-4 text-gray-700 hover:bg-gray-100 rounded text-left"
+                                    >
+                                        {processing ? (
+                                            <LoadingSpinner size="sm" />
+                                        ) : (
+                                            <>
+                                            <FiLogOut className="mr-3" />
+                                            Logout
+                                            </>
+                                        )}
+                                    </button>
+                                </>
+                            ) : (
+                                <Link 
+                                    to={dashboardLink}
+                                    onClick={toggleMobileMenu}
+                                    className="flex items-center py-2 px-4 text-gray-700 hover:bg-gray-100 rounded"
+                                >
+                                    <FiGrid className="mr-3" />
+                                    Dashboard
+                                </Link>
+                            )
+                        ) : (
+                            <>
+                                <Link
+                                    to="/customer-register"
+                                    onClick={toggleMobileMenu}
+                                    className="text-white bg-gradient-to-r rounded-xl py-3 from-primary-light to-primary-dark px-5 cursor-pointer text-center"
+                                >
+                                    Signup
+                                </Link>
+                                <Link
+                                    to="/login"
+                                    onClick={toggleMobileMenu}
+                                    className="cursor-pointer py-3 px-5 rounded-xl text-primary-light border border-primary-light text-center"
+                                >
+                                    Login
+                                </Link>
+                            </>
+                        )}
+                        
+                        <Link
+                            to="/sell-on-hezmart"
+                            onClick={toggleMobileMenu}
+                            className="py-2 px-4 text-gray-700 hover:bg-gray-100 rounded"
+                        >
+                            Sell on Hezmart
+                        </Link>
+                    </div>
+                </div>
+            )}
 
             {/* Close dropdown when clicking outside */}
             {isDropdownOpen && (

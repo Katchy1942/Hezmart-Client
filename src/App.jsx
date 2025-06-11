@@ -26,6 +26,8 @@ import AdminManageProducts from './pages/admin/AdminManageProducts';
 import ManageCategories from './pages/admin/ManageCategories';
 import AdminOrdersManager from './pages/admin/AdminOrdersManager';
 import AdminOrderDetails from './pages/admin/OrderDetails'
+import AdminManageCoupons from './pages/admin/AdminManageCoupons'
+import CreateCoupon from './pages/admin/CreateCoupon';
 
 
 //Vendor pages
@@ -40,9 +42,11 @@ import VendorOrderDetails from './pages/vendor/VendorOrderDetails';
 import CustomersManager from './pages/admin/CustomersManager';
 
 
+
 //Customer Pages;
 import OrderPage from './pages/customer/OrderPage';
 import OrderDetails from './pages/customer/OrderDetails';
+import Profile from './pages/customer/Profile'
 
 //Product Pages;
 import ProductDetails from './pages/product/ProductDetails';
@@ -82,6 +86,7 @@ function App() {
         {/* Customer Routes */}
         <Route path='orders' element={<OrderPage />}></Route>
         <Route path='orders/:id' element={<OrderDetails />}></Route>
+        <Route path='profile' element={<Profile />}></Route>
 
         {/* Product Routes */}
         <Route path='/product/:id' element={<ProductDetails />}></Route>
@@ -102,6 +107,8 @@ function App() {
           <Route path='categories' element={<ManageCategories />}></Route>
           <Route path='orders' element={<AdminOrdersManager />}></Route>
           <Route path='orders/:orderId' element={<AdminOrderDetails />}></Route>
+          <Route path='coupons' element={<AdminManageCoupons />}></Route>
+          <Route path='create-coupon' element={<CreateCoupon />}></Route>
         </Route>
 
         {/* Vendor Routes */}

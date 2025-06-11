@@ -32,7 +32,7 @@ const AddressForm = ({
 
   const handleSubmit = async () => {
     try {
-      const response = await axios.patch('/api/users', {
+      const response = await axios.patch('/api/v1/users/updateMe', {
         firstName: newAddress.firstName,
         lastName: newAddress.lastName,
         primaryPhone: newAddress.primaryPhone,

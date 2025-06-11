@@ -108,14 +108,14 @@ const Header = () => {
                                             <FiShoppingBag className="mr-2 text-gray-500" />
                                             My Orders
                                         </Link>
-                                        <Link
+                                        {/* <Link
                                             to="/settings"
                                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                             onClick={closeDropdown}
                                         >
                                             <FiSettings className="mr-2 text-gray-500" />
                                             Settings
-                                        </Link>
+                                        </Link> */}
                                         <button
                                            onClick={handleLogout}
                                             className="flex items-center w-full px-4 py-2 text-sm text-gray-700 border-t border-gray-100 hover:bg-gray-100 cursor-pointer"

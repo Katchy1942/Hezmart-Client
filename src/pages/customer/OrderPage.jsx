@@ -72,7 +72,7 @@ const OrderPage = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center mb-6">
-        <Link to="/account" className="flex items-center text-primary-light hover:text-primary-dark">
+        <Link to="/profile" className="flex items-center text-primary-light hover:text-primary-dark">
           <FiChevronLeft className="mr-1" /> Back to Account
         </Link>
         <h1 className="text-2xl font-bold text-gray-900 ml-6">My Orders</h1>

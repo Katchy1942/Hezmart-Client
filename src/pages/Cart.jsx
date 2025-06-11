@@ -97,7 +97,9 @@ const Cart = () => {
         deliveryAddress: selectedAddress
       });
 
-      window.location.href = response.data.data.checkoutUrl;
+      if(response.data.status === 'success'){
+       window.location.href = response.data.data.checkoutUrl;
+      }
     } catch (error) {
       console.error('Checkout error:', error);
       toast.error(error.response?.data?.message || 'Failed to initiate checkout');
@@ -161,6 +163,7 @@ const Cart = () => {
           selectedAddress={selectedAddress}
           currentUser={currentUser}
           cities={cities}
+          fetchCart={fetchCart}
           onCheckout={handleCheckout}
           checkoutLoading={checkoutLoading}
           allItemsAvailable={allItemsAvailable}

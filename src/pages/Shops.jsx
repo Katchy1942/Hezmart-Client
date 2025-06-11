@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback  } from "react";
 import axios from "../lib/axios";
 import usePagination from "../hooks/usePagination";
 import Pagination from "../components/common/Pagination";
@@ -16,7 +16,7 @@ const Shops = () => {
     perPage: 12 // Default number of vendors per page
   });
 
-  const fetchVendors = async (page = 1, search = '') => {
+const fetchVendors = useCallback(async (page = 1, search = '') => {
     setLoading(true);
     try {
       let url = `api/v1/users?status=active&role=vendor&page=${page}&limit=${pagination.perPage}&search=${search}&fields=id,businessName,businessLogo`;
@@ -38,7 +38,7 @@ const Shops = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [pagination.perPage, updatePagination]);
 
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -51,7 +51,7 @@ const Shops = () => {
 
   useEffect(() => {
     fetchVendors();
-  }, []);
+  }, [1]);
 
   if (loading && !vendors.length) {
     return (

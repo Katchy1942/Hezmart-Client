@@ -230,7 +230,7 @@ const CustomersManager = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-900">{customer.address}</td>
-                        <td className="px-6 py-4 text-right relative" ref={dropdownRef}>
+                        {/* <td className="px-6 py-4 text-right relative" ref={dropdownRef}>
                           {actions.length > 0 && (
                             <div className="inline-block text-left">
                               <button
@@ -258,7 +258,7 @@ const CustomersManager = () => {
                               )}
                             </div>
                           )}
-                        </td>
+                        </td> */}
                       </tr>
                     );
                   })

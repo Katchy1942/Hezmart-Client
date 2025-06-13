@@ -19,6 +19,7 @@ const CustomerRegister = () => {
     country: "",
     password: "",
     passwordConfirm: "",
+    role:'customer'
   });
 
   const [errors, setErrors] = useState({});

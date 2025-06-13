@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "../../lib/axios";
 import InputField from "../../components/common/InputField";
 import SelectField from "../../components/common/SelectField";
 import Button from "../../components/common/Button";
+import { toast } from 'react-toastify';
 
 const VendorRegister = () => {
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -25,6 +28,28 @@ const VendorRegister = () => {
     businessLogo:''
 
   });
+
+  
+    
+  
+  const fetchCategories = async () => {
+    setLoadingCategories(true);
+    try {
+      const res = await axios.get('api/v1/categories?fields=name,id,icon');
+      setCategories(res.data.data.categories);
+        
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      toast.error("Failed to load categories");
+    }finally{
+      setLoadingCategories(false);
+    }
+  };
+  
+     
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -271,10 +296,13 @@ const VendorRegister = () => {
                     value={formData.businessCategoryId}
                     onChange={handleChange}
                     options={[
-                        { value: "1", label: "Fashion" },
-                        { value: "2", label: "Electronics" },
-                        { value: "3", label: "Grocery" },
+                      { value: "", label: "Select a category" },
+                      ...categories.map(category => ({
+                        value: category.id,
+                        label: category.name
+                      }))
                     ]}
+                    disabled={loadingCategories}
                     error={errors.businessCategoryId}
                 />
 

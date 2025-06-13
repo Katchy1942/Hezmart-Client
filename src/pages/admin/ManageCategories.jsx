@@ -67,7 +67,6 @@ const ManageCategories = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    // Clear error when user types
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -76,7 +75,6 @@ const ManageCategories = () => {
   const handleSubcategoryInputChange = (e) => {
     const { name, value } = e.target;
     setSubcategoryForm(prev => ({ ...prev, [name]: value }));
-    // Clear error when user types
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -84,7 +82,6 @@ const ManageCategories = () => {
 
   const handleFileChange = (e) => {
     setFormData(prev => ({ ...prev, catIcon: e.target.files[0] }));
-    // Clear error when user selects a file
     if (errors.icon) {
       setErrors(prev => ({ ...prev, catIcon: '' }));
     }
@@ -229,12 +226,12 @@ const ManageCategories = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-4 md:p-6 bg-gray-50 min-h-screen">
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Manage Categories</h1>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <h1 className="text-xl md:text-2xl font-bold text-gray-800">Manage Categories</h1>
           <Button
-            className="flex items-center gap-2 max-w-40 px-3"
+            className="flex items-center gap-2 w-full md:w-auto md:max-w-40 px-3"
             onClick={() => {
               setCurrentCategory(null);
               setFormData({ name: '', icon: null });
@@ -263,21 +260,21 @@ const ManageCategories = () => {
           </div>
         ) : (
           /* Categories table */
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white rounded-lg shadow overflow-hidden overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subcategories</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Icon</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subcategories</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Icon</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredCategories.map((category) => (
                   <>
                     <tr key={category.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           {category.subcategories?.length > 0 && (
                             <button 
@@ -290,43 +287,46 @@ const ManageCategories = () => {
                           <div className="text-sm font-medium text-gray-900">{category.name}</div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-500">
                           {category.subcategories?.length || 0}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-4 whitespace-nowrap">
                         {category.icon ? (
                           <img src={category.icon} alt={category.name} className="h-8 w-8 object-contain" />
                         ) : (
                           <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                      <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium space-x-1 md:space-x-2">
                         <button
                           onClick={() => handleEdit(category)}
                           className="text-blue-600 hover:text-blue-900"
+                          title="Edit"
                         >
-                          <FiEdit className="inline mr-1" /> Edit
+                          <FiEdit className="inline md:mr-1" /> <span className="hidden md:inline">Edit</span>
                         </button>
                         <button
                           onClick={() => handleDelete(category.id)}
                           className="text-red-600 hover:text-red-900"
+                          title="Delete"
                         >
-                          <FiTrash2 className="inline mr-1" /> Delete
+                          <FiTrash2 className="inline md:mr-1" /> <span className="hidden md:inline">Delete</span>
                         </button>
                         <button
                           onClick={() => openAddSubcategoryModal(category)}
                           className="text-green-600 hover:text-green-900"
+                          title="Add Subcategory"
                         >
-                          <FiPlus className="inline mr-1" /> Add Sub
+                          <FiPlus className="inline md:mr-1" /> <span className="hidden md:inline">Add Sub</span>
                         </button>
                       </td>
                     </tr>
                     {expandedCategories[category.id] && category.subcategories?.length > 0 && (
                       <tr className="bg-gray-50">
-                        <td colSpan="4" className="px-6 py-2">
-                          <div className="ml-8">
+                        <td colSpan="4" className="px-4 py-2">
+                          <div className="ml-4 md:ml-8">
                             <h4 className="text-sm font-medium text-gray-500 mb-2">Subcategories:</h4>
                             <ul className="space-y-2">
                               {category.subcategories.map((subcategory) => (
@@ -336,12 +336,14 @@ const ManageCategories = () => {
                                     <button
                                       onClick={() => handleEditSubcategory(category, subcategory)}
                                       className="text-blue-500 hover:text-blue-700 text-sm"
+                                      title="Edit"
                                     >
                                       <FiEdit className="inline" />
                                     </button>
                                     <button
                                       onClick={() => handleDeleteSubcategory(category.id, subcategory.id)}
                                       className="text-red-500 hover:text-red-700 text-sm"
+                                      title="Delete"
                                     >
                                       <FiTrash2 className="inline" />
                                     </button>
@@ -362,10 +364,10 @@ const ManageCategories = () => {
 
         {/* Category Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-              <div className="p-6">
-                <h2 className="text-xl font-bold mb-4">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-2">
+              <div className="p-4 md:p-6">
+                <h2 className="text-lg md:text-xl font-bold mb-4">
                   {currentCategory ? 'Edit Category' : 'Add New Category'}
                 </h2>
                 {generalError && (
@@ -424,10 +426,10 @@ const ManageCategories = () => {
 
         {/* Subcategory Modal */}
         {isSubcategoryModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-              <div className="p-6">
-                <h2 className="text-xl font-bold mb-4">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-2">
+              <div className="p-4 md:p-6">
+                <h2 className="text-lg md:text-xl font-bold mb-4">
                   {currentSubcategory ? 'Edit Subcategory' : `Add New Subcategory to ${currentCategory?.name}`}
                 </h2>
                 {generalError && (

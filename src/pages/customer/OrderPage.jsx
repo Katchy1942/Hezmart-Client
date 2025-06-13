@@ -115,7 +115,7 @@ const OrderPage = () => {
                   <div>
                     <h4 className="text-sm font-medium text-gray-500">Order Total</h4>
                     <p className="mt-1 text-lg font-medium text-gray-900">
-                      ₦{order.total.toLocaleString()}
+                      ₦{parseFloat(order.total).toLocaleString('en-US')}
                     </p>
                   </div>
                   <div>

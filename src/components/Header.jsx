@@ -66,7 +66,9 @@ const Header = () => {
                         Sell on Hezmart
                     </Link>
 
-                    <img src={logo_white} alt="Logo" width={76} className="mx-auto lg:mx-0 lg:-translate-x-8"/>
+                    <Link to='/'>
+                        <img src={logo_white} alt="Logo" width={76} className="mx-auto lg:mx-0 lg:-translate-x-8"/>
+                    </Link>
                     
                     {/* Mobile cart icon */}
                     {isMobile && (

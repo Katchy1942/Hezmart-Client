@@ -346,25 +346,25 @@ const OrderDetails = () => {
                   <div>
                     <p className="text-xs text-gray-500">Subtotal</p>
                     <p className="text-sm font-medium text-gray-900">
-                      ₦{order.subtotal.toLocaleString()}
+                      ₦{parseFloat(order.subtotal).toLocaleString('en-US')}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Delivery Fee</p>
                     <p className="text-sm font-medium text-gray-900">
-                      ₦{order.deliveryFee.toLocaleString()}
+                      ₦{parseFloat(order.deliveryFee).toLocaleString('en-US')}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Discount</p>
                     <p className="text-sm font-medium text-gray-900">
-                      -₦{order.discount.toLocaleString()}
+                       -₦{parseFloat(order.discount).toLocaleString('en-US')}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Total</p>
                     <p className="text-sm font-medium text-gray-900">
-                      ₦{order.total.toLocaleString()}
+                      ₦{parseFloat(order.total).toLocaleString('en-US')}
                     </p>
                   </div>
                 </div>
@@ -402,7 +402,7 @@ const OrderDetails = () => {
                           )}
                         </div>
                         <p className="text-sm font-medium text-gray-900">
-                          ₦{(item.price * item.quantity).toLocaleString()}
+                         ₦{(parseFloat(item.price) * parseInt(item.quantity)).toLocaleString('en-US')}
                         </p>
                       </div>
                       <div className="mt-2 flex justify-between">
@@ -410,7 +410,7 @@ const OrderDetails = () => {
                           Qty: {item.quantity}
                         </p>
                         <p className="text-sm text-gray-500">
-                          ₦{item.price.toLocaleString()} each
+                          ₦{parseFloat(item.price).toLocaleString('en-US')} each
                         </p>
                       </div>
 

@@ -78,23 +78,7 @@ const ProductDetails = () => {
         }
     };
 
-    const handleSubmitReview = (e) => {
-        e.preventDefault();
-        setReviews(prev => [
-            {
-                id: Date.now(),
-                user: {
-                    name: user?.firstName + " " + user?.lastName,
-                    avatar: user?.profilePicture || "https://randomuser.me/api/portraits/men/2.jpg"
-                },
-                rating: newReview.rating,
-                comment: newReview.comment,
-                date: new Date().toISOString().split('T')[0]
-            },
-            ...prev
-        ]);
-        setNewReview({ rating: 5, comment: '' });
-    };
+    
 
     const calculateDiscountPercentage = () => {
         const discountPrice = parseFloat(product.discountPrice);
@@ -106,7 +90,7 @@ const ProductDetails = () => {
     };
 
     const getDisplayPrice = () => {
-        return product.discountPrice || product.price;
+        return parseFloat(product.discountPrice || product.price);
     };
 
     useEffect(() => {
@@ -172,10 +156,7 @@ const ProductDetails = () => {
     const reviewsSection = (
         <ReviewsSection
             product={product}
-            // user={user}
             reviews={reviews}
-            // newReview={setNewReview}
-            // handleSubmitReview={handleSubmitReview}
         />
     );
 
@@ -222,13 +203,13 @@ const ProductDetails = () => {
                     <div className="mb-6">
                         <div className="flex items-center">
                             <span className="text-3xl font-bold text-gray-900">
-                                ₦{displayPrice.toLocaleString()}
+                                  ₦{displayPrice.toLocaleString('en-US')}
                             </span>
                            
                             {discountPercentage > 0 && (
                                 <>
                                     <span className="ml-2 text-lg text-gray-500 line-through">
-                                        ₦{product.price.toLocaleString()}
+                                        ₦{parseFloat(product.price).toLocaleString('en-US')}
                                     </span>
                                     <span className="ml-2 bg-red-100 text-red-800 text-xs font-semibold px-2 py-1 rounded">
                                         {discountPercentage}% OFF

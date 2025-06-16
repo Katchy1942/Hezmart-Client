@@ -19,10 +19,10 @@ const ProductDetails = () => {
     const [selectedOptions, setSelectedOptions] = useState({});
     const [activeTab, setActiveTab] = useState('description');
     const [reviews, setReviews] = useState([]);
-    const [newReview, setNewReview] = useState({
-        rating: 1,
-        comment: ''
-    });
+  
+    const [isLiked, setIsLiked] = useState(false);
+    const [likesCount, setLikesCount] = useState(0);
+    const [isLikeLoading, setIsLikeLoading] = useState(false);
 
     const user = JSON.parse(localStorage.getItem('user'));
     const url = user?.role === 'admin' || user?.role === 'vendor' 
@@ -34,7 +34,8 @@ const ProductDetails = () => {
             const res = await axios.get(url);
             if(res.data.status === 'success'){
                 setProduct(res.data.data.product);
-            
+                setLikesCount(res.data.data.product.likesCount || 0);
+                
                 const initialOptions = {};
                 if (res.data.data.product.options) {
                     res.data.data.product.options.forEach(option => {
@@ -43,13 +44,71 @@ const ProductDetails = () => {
                 }
                 setReviews(res.data.data.product.reviews);
                 
+                // Fetch like status if user is logged in
+                if (user) {
+                    fetchLikeStatus();
+                }
             }
-            
         } catch (error) {
             console.error("Error fetching product:", error);
             toast.error("Failed to load product details");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchLikeStatus = async () => {
+        try {
+            const res = await axios.get(`api/v1/products/${id}/likes/like-status`);
+            if (res.data.status === 'success') {
+                setIsLiked(res.data.data.liked);
+                setLikesCount(res.data.data.likesCount);
+            }
+        } catch (error) {
+            console.log("Error fetching like status:", error);
+        }
+    };
+
+    const handleLikeToggle = async () => {
+        if (!user) {
+            toast.info('Please login to like products');
+            return;
+        }
+
+        setIsLikeLoading(true);
+        try {
+            // Optimistically update UI
+            const newLikedState = !isLiked;
+            setIsLiked(newLikedState);
+            setLikesCount(prev => newLikedState ? prev + 1 : prev - 1);
+
+            // Make API call
+            const res = await axios.post(`api/v1/products/${id}/likes/toggle`);
+            
+            // Verify response
+            if (res.data.status === 'success') {
+                // Show success toast
+                toast.success(
+                    newLikedState 
+                        ? 'Item added to wishlist successfully' 
+                        : 'Item removed from wishlist successfully'
+                );
+                
+                // Only update if there's a mismatch (should be rare)
+                if (res.data.data.liked !== newLikedState) {
+                    setIsLiked(res.data.data.liked);
+                    setLikesCount(res.data.data.likesCount);
+                }
+            }
+        } catch (error) {
+            // Revert on error
+            setIsLiked(prev => !prev);
+            setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+            
+            console.log("Error toggling like:", error);
+            toast.error(error.response?.data?.message || 'Failed to toggle like');
+        } finally {
+            setIsLikeLoading(false);
         }
     };
 
@@ -78,8 +137,6 @@ const ProductDetails = () => {
         }
     };
 
-    
-
     const calculateDiscountPercentage = () => {
         const discountPrice = parseFloat(product.discountPrice);
         const actualPrice = parseFloat(product.price);
@@ -93,9 +150,23 @@ const ProductDetails = () => {
         return parseFloat(product.discountPrice || product.price);
     };
 
+    const handleShare = ()=>{
+        if(navigator.share){
+            navigator
+            .share({
+                title:'Check this out!',
+                text:'I found a great product for you.',
+                url:window.location.href
+            })
+            .then(()=>console.log('Shared successfully'))
+            .catch(err => console.log('Error Sharing', err))
+        }
+    }
+
     useEffect(() => {
         fetchProductDetail();
     }, [id]);
+
 
     if (loading) {
         return (
@@ -151,6 +222,7 @@ const ProductDetails = () => {
     }
 
     const discountPercentage = calculateDiscountPercentage();
+    
     const displayPrice = getDisplayPrice();
 
     const reviewsSection = (
@@ -187,7 +259,7 @@ const ProductDetails = () => {
                 </div>
 
                 {/* Product Info */}
-                <div className="md:w-1/2">
+                <div className="md:w-1/2 bg-white rounded-lg shadow-md p-4">
                     <div className="mb-4">
                         <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
                         <div className="flex items-center mt-2">
@@ -206,7 +278,7 @@ const ProductDetails = () => {
                                   ₦{displayPrice.toLocaleString('en-US')}
                             </span>
                            
-                            {discountPercentage > 0 && (
+                            {discountPercentage > 0  && (
                                 <>
                                     <span className="ml-2 text-lg text-gray-500 line-through">
                                         ₦{parseFloat(product.price).toLocaleString('en-US')}
@@ -266,7 +338,7 @@ const ProductDetails = () => {
                         <div className="flex gap-3">
                             <Button
                                 onClick={handleAddToCart}
-                                disabled={cart.loading ||product.stockQuantity <= 0}
+                                disabled={cart.loading || product.stockQuantity <= 0}
                                 isLoading={cart.loading}
                                 loadingText="Adding to cart..."
                                 icon={<FiShoppingCart />}
@@ -275,10 +347,28 @@ const ProductDetails = () => {
                             >
                                 Add to Cart
                             </Button>
-                            <button className="p-3 border border-gray-300 rounded-md hover:bg-gray-50">
-                                <FiHeart className="text-gray-600" />
+                            <button 
+                                onClick={handleLikeToggle}
+                                disabled={isLikeLoading}
+                                className={`p-3 border cursor-pointer rounded-md hover:bg-gray-50 flex items-center justify-center ${
+                                    isLiked ? 'border-red-300 bg-red-50 text-red-600' : 'border-gray-300 text-gray-600'
+                                }`}
+                            >
+                                {isLikeLoading ? (
+                                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                ) : (
+                                    <>
+                                        <FiHeart className={`${isLiked ? 'fill-current' : ''}`} />
+                                        {likesCount > 0 && (
+                                            <span className="ml-1 text-xs">{likesCount}</span>
+                                        )}
+                                    </>
+                                )}
                             </button>
-                            <button className="p-3 border border-gray-300 rounded-md hover:bg-gray-50">
+                            <button onClick={handleShare} className="p-3 border border-gray-300 rounded-md hover:bg-gray-50">
                                 <FiShare2 className="text-gray-600" />
                             </button>
                         </div>
@@ -326,14 +416,12 @@ const ProductDetails = () => {
             />
 
             {/* Similar Products */}
-           
             <ProductsGrid 
                 fetchUrl={`api/v1/products?status=active&categoryId=${product.categoryId}&subCategoryId=${product.subCategoryId}`}
                 showHeader={true}
                 headerTitle="Similar Products"
                 headerSubtitle={`Similar products based on ${product.category?.name} > ${product.subCategory?.name}`}
             />
-          
         </div>
     );
 };

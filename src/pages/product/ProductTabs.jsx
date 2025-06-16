@@ -35,7 +35,7 @@ export const ProductTabs = ({
                 </nav>
             </div>
 
-            <div className="py-6">
+            <div className="p-6 bg-white rounded-lg shadow-md">
                 {activeTab === 'description' && (
                     <div>
                         <h3 className="text-lg font-medium text-gray-900 mb-4">Product Description</h3>

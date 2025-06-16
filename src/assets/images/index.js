@@ -1,7 +1,7 @@
 
 import logo_white from "./logo-white.svg";
 import cart from './mynaui_cart.svg';
-import logo from "./logo.svg";
+import logo from "./logo.PNG";
 import mail from "./mail.svg"; 
 
 import faviconlogo from './favicon.svg';

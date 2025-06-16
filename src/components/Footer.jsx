@@ -1,5 +1,5 @@
 
-import { faviconlogo as logo, facebook,instagram, twitter, callIcon, message } from '../assets/images';
+import { logo, facebook,instagram, twitter, callIcon, message } from '../assets/images';
 import { Link } from 'react-router-dom';
 
 
@@ -10,7 +10,9 @@ const  Footer = ()=> {
     <div className=''>
       <footer className="lg:px-20 lg:py-6 p-4  bg-[#FCF4ED]">
         <div className="flex justify-between">
-          <img src={logo} alt="logo" />
+         <Link to='/'>
+            <img src={logo} alt="logo" className='w-48' />
+         </Link>
           <div className="flex items-center w-29 justify-between">
             <Link href="/">
               <img src={facebook} width={25} height={25} />

@@ -7,7 +7,7 @@ const BaseLayout = () => {
   return (
     <div className='relative'>
         <Header />
-       <div className=''>
+       <div className='bg-[#f1f1f2]'>
         <Outlet />
        </div>
         <Footer />

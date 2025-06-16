@@ -29,6 +29,7 @@ import AdminOrderDetails from './pages/admin/OrderDetails'
 import AdminManageCoupons from './pages/admin/AdminManageCoupons'
 import CreateCoupon from './pages/admin/CreateCoupon';
 import EditCoupon from './pages/admin/EditCoupon';
+import CustomersManager from './pages/admin/CustomersManager';
 
 
 //Vendor pages
@@ -40,7 +41,7 @@ import EditProduct from './pages/vendor/EditProduct';
 import VendorProductsPage from './pages/VendorProductsPage';
 import VendorOrdersManager from './pages/vendor/VendorOrdersManager';
 import VendorOrderDetails from './pages/vendor/VendorOrderDetails';
-import CustomersManager from './pages/admin/CustomersManager';
+
 
 
 
@@ -48,6 +49,7 @@ import CustomersManager from './pages/admin/CustomersManager';
 import OrderPage from './pages/customer/OrderPage';
 import OrderDetails from './pages/customer/OrderDetails';
 import Profile from './pages/customer/Profile'
+import WishlistPage from './pages/customer/WishListPage';
 
 //Product Pages;
 import ProductDetails from './pages/product/ProductDetails';
@@ -86,6 +88,7 @@ function App() {
 
         {/* Customer Routes */}
         <Route path='orders' element={<OrderPage />}></Route>
+        <Route path='wishlist' element={<WishlistPage />}></Route>
         <Route path='orders/:id' element={<OrderDetails />}></Route>
         <Route path='profile' element={<Profile />}></Route>
 

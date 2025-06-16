@@ -1,9 +1,78 @@
+import { useState, useEffect } from 'react';
 import { FiShoppingCart, FiHeart, FiStar } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { FaSpinner } from "react-icons/fa";
-import { useCart } from "../contexts/CartContext";
+import axios from '../../lib/axios';
+import { toast } from 'react-toastify';
 
 const ProductCard = ({ product, selectedProduct, cart, onAddToCart }) => {
+    const [isLiked, setIsLiked] = useState(false);   
+    const [isLikeLoading, setIsLikeLoading] = useState(false);
+    const [likesCount, setLikesCount] = useState(product.likesCount || 0);
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    useEffect(() => {
+        const fetchLikeStatus = async () => {
+            if (!user) return;
+            
+            try {
+                const res = await axios.get(`api/v1/products/${product.id}/likes/like-status`);
+                if (res.data.status === 'success') {
+                    setIsLiked(res.data.data.liked);
+                    setLikesCount(res.data.data.likesCount);
+                }
+            } catch (error) {
+                console.log("Error fetching like status:", error);
+            }
+        };
+
+        fetchLikeStatus();
+    }, [product.id, user]);
+
+    const handleLikeToggle = async () => {
+        if (!user) {
+            toast.info('Please login to like products');
+            return;
+        }
+
+        setIsLikeLoading(true);
+        try {
+            // Optimistically update UI
+            const newLikedState = !isLiked;
+            setIsLiked(newLikedState);
+            setLikesCount(prev => newLikedState ? prev + 1 : prev - 1);
+
+            // Make API call
+            const res = await axios.post(`api/v1/products/${product.id}/likes/toggle`);
+            
+            // Verify response
+            if (res.data.status === 'success') {
+                // Show success toast
+                toast.success(
+                    newLikedState 
+                        ? 'Item added to wishlist successfully' 
+                        : 'Item removed from wishlist successfully',
+                    { position: "top-right" }
+                );
+                
+                // Only update if there's a mismatch (should be rare)
+                if (res.data.data.liked !== newLikedState) {
+                    setIsLiked(res.data.data.liked);
+                    setLikesCount(res.data.data.likesCount);
+                }
+            }
+        } catch (error) {
+            // Revert on error
+            setIsLiked(prev => !prev);
+            setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+            
+            console.log("Error toggling like:", error);
+            toast.error(error.response?.data?.message || 'Failed to toggle like', { position: "top-right" });
+        } finally {
+            setIsLikeLoading(false);
+        }
+    };
+
     const renderRatingStars = (rating) => {
         const stars = [];
         const fullStars = Math.floor(rating);
@@ -47,7 +116,7 @@ const ProductCard = ({ product, selectedProduct, cart, onAddToCart }) => {
     return (
         <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col">
             {/* Product Image */}
-            <div className="relative pb-[100%] bg-gray-100">
+            <div className="relative h-[150px] lg:h-[273px]">
                 <Link to={`/product/${product.id}`}>
                     <img
                         src={product.coverImage}
@@ -60,8 +129,20 @@ const ProductCard = ({ product, selectedProduct, cart, onAddToCart }) => {
                         {discountPercentage}% <br /> OFF
                     </div>
                 )}
-                <button className="absolute bottom-2 right-2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100">
-                    <FiHeart className="text-gray-600" />
+                <button 
+                    onClick={handleLikeToggle}
+                    disabled={isLikeLoading}
+                    className={`absolute bottom-2 right-2 p-2 rounded-full shadow-md transition-colors duration-200 ${
+                        isLiked 
+                            ? 'bg-primary-light text-white hover:bg-primary-dark' 
+                            : 'bg-white text-gray-600 hover:bg-gray-100'
+                    } ${isLikeLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                >
+                    {isLikeLoading ? (
+                        <FaSpinner className="h-4 w-4 animate-spin" />
+                    ) : (
+                        <FiHeart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+                    )}
                 </button>
             </div>
 
@@ -97,19 +178,19 @@ const ProductCard = ({ product, selectedProduct, cart, onAddToCart }) => {
                 </div>
 
                 {/* Price and Add to Cart */}
-                <div className="mt-auto flex items-center justify-between">
-                    <div>
-                        <span className="text-lg font-bold text-primary-light">
+                <div className="lg:mt-auto flex flex-col lg:flex-row lg:items-center justify-between">
+                    <div className='flex flex-col lg:items-center lg:flex-row'>
+                        <span className="text-sm lg:text-lg font-bold text-primary-light">
                             ₦{displayPrice.toLocaleString()}
                         </span>
                         {discountPercentage > 0 && (
-                            <span className="ml-2 text-sm text-gray-500 line-through">
+                            <span className="lg:ml-2 text-sm text-gray-500 line-through">
                                 ₦{parseFloat(product.price).toLocaleString()}
                             </span>
                         )}
                     </div>
                     <button 
-                        className="bg-primary-light cursor-pointer hover:bg-primary-dark text-white p-2 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="bg-primary-light cursor-pointer self-end hover:bg-primary-dark text-white p-2 h-10 w-10 flex items-center justify-center rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={product.stockQuantity <= 0}
                         onClick={() => onAddToCart(product)}
                     >

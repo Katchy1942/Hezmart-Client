@@ -9,6 +9,7 @@ import {
   FiChevronDown,
   FiChevronUp,
   FiGrid,
+  FiHeart,
   FiX
 } from "react-icons/fi";
 import { useState, useEffect } from "react";
@@ -90,9 +91,9 @@ const Header = () => {
             </div>
            
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex max-w-7xl mx-auto bg-white shadow px-4 sm:px-6 lg:px-8 py-3 justify-between">
+            <nav className="hidden lg:flex max-w-7xl items-center mx-auto bg-white shadow px-4 sm:px-6 lg:px-8 py-3 justify-between">
                 <Link to='/'>
-                    <img src={logo} alt="Logo"/>
+                    <img src={logo} alt="Logo" className="w-48"/>
                 </Link>
                 <SearchBar/>
                 <div className="flex gap-3 items-center">
@@ -141,6 +142,15 @@ const Header = () => {
                                         >
                                             <FiShoppingBag className="mr-2 text-gray-500" />
                                             My Orders
+                                        </Link>
+
+                                        <Link
+                                            to="/wishlist"
+                                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                            onClick={closeDropdown}
+                                        >
+                                            <FiHeart className="mr-2 text-gray-500" />
+                                            Wishlist
                                         </Link>
                                         <button
                                            onClick={handleLogout}

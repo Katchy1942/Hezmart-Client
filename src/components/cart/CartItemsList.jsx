@@ -39,7 +39,9 @@ const CartItemsList = ({
                       )}
                       {!item.available && (
                         <span className="inline-block mt-2 px-2 py-1 text-xs font-medium text-red-800 bg-red-100 rounded">
-                          Only {item.product?.stockQuantity || 0} available
+                          {item.product?.stockQuantity > 0
+                          ? `Only ${item.product.stockQuantity} available`
+                          : 'Out of stock'}
                         </span>
                       )}
                     </div>

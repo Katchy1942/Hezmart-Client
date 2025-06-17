@@ -94,7 +94,7 @@ function App() {
 
         {/* Product Routes */}
         <Route path='/product/:id' element={<ProductDetails />}></Route>
-        <Route path='/category/:categoryId/subcategory/:subcategoryId' element={<CategoryProducts />}></Route>
+       <Route path='/category/:categoryId/:subcategoryId?' element={<CategoryProducts />} />
         <Route path="/vendor/:vendorId" element={<VendorProductsPage />} />
 
         <Route path='cart' element={<Cart />}></Route>

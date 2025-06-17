@@ -73,7 +73,7 @@ const CartSummary = ({
         <div className="space-y-4">
           {/* Delivery Address Section*/}
           <div className="border-b border-gray-200 pb-4">
-            <h3 className="text-md font-medium text-gray-900 mb-2">Delivery Address</h3>
+           {currentUser &&  <h3 className="text-md font-medium text-gray-900 mb-2">Delivery Address</h3>}
                   
             {selectedAddress ? (
               <div className="mb-4">
@@ -86,30 +86,34 @@ const CartSummary = ({
                     <p>Alt. Phone: {selectedAddress.secondaryPhone}</p>
                   )}
                 </div>
-                <Button
-                  variant="text"
-                  onClick={() => setShowAddressForm(true)}
-                  className="mt-2 text-sm flex items-center"
-                  icon={<FiPlus className="mr-1" />}
-                >
-                  Update Information
-                </Button>
+                {currentUser && (
+                  <Button
+                    variant="text"
+                    onClick={() => setShowAddressForm(true)}
+                    className="mt-2 text-sm flex items-center"
+                    icon={<FiPlus className="mr-1" />}
+                  >
+                    Update Information
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="text-sm text-gray-500">
-                <p>No delivery information saved</p>
-                <Button
-                  variant="text"
-                  onClick={() => setShowAddressForm(true)}
-                  className="mt-2 text-sm flex items-center"
-                  icon={<FiPlus className="mr-1" />}
-                >
-                  Add Information
-                </Button>
+               {currentUser && !selectedAddress &&  <p>No delivery information saved</p>}
+                {currentUser && !selectedAddress && (
+                  <Button
+                    variant="text"
+                    onClick={() => setShowAddressForm(true)}
+                    className="mt-2 text-sm flex items-center"
+                    icon={<FiPlus className="mr-1" />}
+                  >
+                    Add Information
+                  </Button>
+                )}
               </div>
             )}
 
-            {showAddressForm && (
+            {showAddressForm && currentUser && (
               <AddressForm
                 currentUser={currentUser}
                 cities={cities}
@@ -172,23 +176,6 @@ const CartSummary = ({
               <span>-₦{(summary.discount ||summary.totalDiscount || 0).toLocaleString()}</span>
             </div>
           )}
-
-          {/* <div className="border-t border-gray-200 pt-4">
-            <div className="flex justify-between items-center">
-              <span className="text-base font-medium text-gray-900">Delivery</span>
-              <select 
-                value={selectedShipping}
-                onChange={(e) => setSelectedShipping(e.target.value)}
-                className="border rounded p-1 text-sm"
-              >
-                {shippingOptions.map(option => (
-                  <option key={option.id} value={option.id}>
-                    {option.name} (₦{(option.cost || 0).toLocaleString()})
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div> */}
 
           <div className="border-t border-gray-200 pt-4">
             <div className="flex justify-between">

@@ -1,5 +1,6 @@
 
 import logo_white from "./logo-white.svg";
+import logo_png from './logo_png.PNG'
 import cart from './mynaui_cart.svg';
 import logo from "./logo.PNG";
 import mail from "./mail.svg"; 
@@ -23,6 +24,7 @@ import carousel_4 from './carousel-four.png';
 export {
  logo_white,
  logo,
+ logo_png,
  faviconlogo,
  cart,
  facebook,

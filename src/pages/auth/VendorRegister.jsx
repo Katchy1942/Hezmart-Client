@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "../../lib/axios";
 import InputField from "../../components/common/InputField";
@@ -15,7 +15,7 @@ const VendorRegister = () => {
     primaryPhone: "",
     secondaryPhone: "",
     email: "",
-    ninNumber:"",
+    ninNumber: "",
     primaryAddress: "",
     secondaryAddress: "",
     city: "",
@@ -23,38 +23,34 @@ const VendorRegister = () => {
     country: "",
     password: "",
     passwordConfirm: "",
-    businessName:"",
-    businessCategoryId:"",
-    businessLogo:''
-
+    businessName: "",
+    businessCategoryId: "",
+    businessLogo: ''
   });
 
-  
-    
-  
+  const [previewImage, setPreviewImage] = useState(null);
+  const fileInputRef = useRef(null);
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const navigate = useNavigate();
+
   const fetchCategories = async () => {
     setLoadingCategories(true);
     try {
       const res = await axios.get('api/v1/categories?fields=name,id,icon');
       setCategories(res.data.data.categories);
-        
     } catch (error) {
       console.error("Error fetching categories:", error);
       toast.error("Failed to load categories");
-    }finally{
+    } finally {
       setLoadingCategories(false);
     }
   };
-  
-     
+
   useEffect(() => {
     fetchCategories();
   }, []);
-
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -66,10 +62,30 @@ const VendorRegister = () => {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
+    if (file) {
+      setFormData((prev) => ({
+        ...prev,
+        businessLogo: file,
+      }));
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setPreviewImage(null);
     setFormData((prev) => ({
       ...prev,
-      businessLogo: file,
+      businessLogo: '',
     }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -79,7 +95,6 @@ const VendorRegister = () => {
 
     const formDataToSend = new FormData(e.target);
 
-    
     try {
       const response = await axios.post("/api/v1/users/signup", formDataToSend);
 
@@ -114,7 +129,7 @@ const VendorRegister = () => {
         <strong>Register</strong>
       </div>
 
-      <div className="px-4 mt-9 border-2 border-gray-200 rounded-lg py-5">
+      <div className="px-4 mt-9 border-2 border-gray-200 bg-white rounded-lg py-5">
         <form onSubmit={handleSubmit}>
           <h1 className="text-xl text-[#111111] font-semibold mb-6">
             Personal Information
@@ -133,7 +148,7 @@ const VendorRegister = () => {
             <InputField
               label="First Name"
               name="firstName"
-             
+              value={formData.firstName}
               onChange={handleChange}
               placeholder="Enter First name"
               error={errors.firstName}
@@ -306,30 +321,48 @@ const VendorRegister = () => {
                     error={errors.businessCategoryId}
                 />
 
-                 <div className="mt-5">
-                    <label htmlFor="" className="block text-md text-[#5A607F] mb-1">Business Logo</label>
+                <div className="mt-5">
+                  <label htmlFor="" className="block text-md text-[#5A607F] mb-1">Business Logo</label>
+                  {previewImage ? (
+                    <div className="relative w-48 h-48">
+                      <img 
+                        src={previewImage} 
+                        alt="Business logo preview" 
+                        className="w-full h-full object-cover rounded-2xl border border-gray-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleRemoveImage}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                        aria-label="Remove image"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ) : (
                     <label
-                        htmlFor="image-input"
-                        className="w-48 h-48 border-gray-400 bg-[#E3E3E3] flex justify-center items-center 
-                        text-gray-500 text-3xl font-semibold cursor-pointer rounded-2xl border-solid border-1
-                        "
+                      htmlFor="image-input"
+                      className="w-48 h-48 border-gray-400 bg-[#E3E3E3] flex justify-center items-center 
+                      text-gray-500 text-3xl font-semibold cursor-pointer rounded-2xl border-solid border-1
+                      hover:bg-gray-200 transition-colors duration-200"
                     >
-                        +
-                        <InputField
-                            id='image-input'
-                            name="businessLogo" 
-                            
-                            onChange={handleFileChange}
-                            type="file"
-                            classNames="hidden"
-                            accept="image/png, image/jpg, image/jpeg, image/webp, image/svg+xml"
-                            error={errors.businessLogo}
-                        />
+                      +
+                      <input
+                        id="image-input"
+                        name="businessLogo"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        type="file"
+                        className="hidden"
+                        accept="image/png, image/jpg, image/jpeg, image/webp, image/svg+xml"
+                      />
                     </label>
+                  )}
+                  {errors.businessLogo && (
+                    <p className="mt-1 text-sm text-red-600">{errors.businessLogo}</p>
+                  )}
                 </div>
             </div>
-
-            
           </div>
 
           <div className="mt-6">

@@ -12,10 +12,10 @@ function SearchBar({width}) {
         
         className="flex items-center justify-center space-x-2 w-full"
       >
-        <div className="relative w-1/2">
+        <div className="relative w-full  lg:w-1/2">
           <input
             type="text"
-            placeholder="Search Categories, items or Products here"
+            placeholder="Search products, brands and categories"
             className="w-full px-4 py-2 pl-10 rounded-lg bg-white text-[#667085] border border-gray-400 
             focus:outline-0 focus:border-primary-light"
           />
@@ -27,7 +27,7 @@ function SearchBar({width}) {
         </div>
         <button
           type="submit"
-          className=" text-white px-4 py-2 rounded-lg bg-primary-light"
+          className=" text-white hidden lg:block px-4 py-2 rounded-lg bg-primary-light"
         >
           Search
         </button>

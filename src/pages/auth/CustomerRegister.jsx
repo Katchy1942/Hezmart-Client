@@ -83,7 +83,7 @@ const CustomerRegister = () => {
                 <strong>Register</strong>
             </div>
 
-            <div className="px-4 mt-9 border-2 border-gray-200 rounded-lg py-5">
+            <div className="px-4 mt-9 border-2 border-gray-200 rounded-lg bg-white py-5">
                 <form onSubmit={handleSubmit}>
                     <h1 className="text-xl text-[#111111] font-semibold mb-6">
                         Personal Information

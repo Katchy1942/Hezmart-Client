@@ -112,7 +112,7 @@ const WishlistPage = () => {
                     />
                   </div>
                   <div className="flex-1">
-                    <div className="flex justify-between items-center">
+                    <div className="flex flex-col lg:flex-row justify-between lg:items-center">
                       <div>
                         <h3 className="text-lg font-medium text-gray-900">
                           {product.name}
@@ -136,7 +136,7 @@ const WishlistPage = () => {
                       <button
                         onClick={() => handleRemoveItem(product.id)}
                         disabled={removingItemId === product.id}
-                        className="text-primary-light hover:text-white flex items-center justify-center transition-all duration-150 border cursor-pointer border-primary-light hover:bg-primary-light h-10 w-10 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="text-primary-light hover:text-white flex mt-2 lg:mt-0 items-center justify-center transition-all duration-150 border cursor-pointer border-primary-light hover:bg-primary-light h-10 w-10 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {removingItemId === product.id ? (
                           <FaSpinner className="h-5 w-5 animate-spin" />

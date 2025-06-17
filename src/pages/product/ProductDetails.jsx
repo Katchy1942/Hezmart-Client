@@ -389,15 +389,7 @@ const ProductDetails = () => {
                                     {product.user?.businessName}
                                 </span>
                             </div>
-                            <div>
-                                <span className="text-gray-500">Status:</span>
-                                <span className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                    ${product.status === 'active' ? 'bg-green-100 text-green-800' : 
-                                      product.status === 'inactive' ? 'bg-red-100 text-red-800' : 
-                                      'bg-yellow-100 text-yellow-800'}`}>
-                                    {product.status}
-                                </span>
-                            </div>
+                            
                             <div>
                                 <span className="text-gray-500">Weight:</span>
                                 <span className="ml-2 text-gray-900">{product.weight} kg</span>

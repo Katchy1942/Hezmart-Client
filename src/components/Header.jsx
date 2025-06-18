@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { logo, logo_png } from "../assets/images";
 import { LuShoppingCart, LuMenu } from "react-icons/lu";
 import { 
@@ -30,7 +30,13 @@ const Header = () => {
     const mobileMenuRef = useRef(null);
     const [isSticky, setIsSticky] = useState(false);
     const topBarRef = useRef(null);
+    const location = useLocation();
 
+    // Close mobile menu when route changes
+    useEffect(() => {
+        setIsMobileMenuOpen(false);
+        document.body.style.overflow = '';
+    }, [location.pathname]);
 
     const [categories, setCategories] = useState([]);
     const fetchCategories = async () => {
@@ -49,9 +55,9 @@ const Header = () => {
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth < 1024);
-            // Close mobile menu when resizing to desktop
             if (window.innerWidth >= 1024) {
                 setIsMobileMenuOpen(false);
+                document.body.style.overflow = '';
             }
         };
 
@@ -61,11 +67,8 @@ const Header = () => {
 
     useEffect(() => {
         const handleScroll = () => {
-            // Get the height of the call-to-action bar (you may need to adjust this)
-            const callToActionHeight = 40; // Approximate height in pixels
+            const callToActionHeight = 40;
             const scrollPosition = window.scrollY || document.documentElement.scrollTop;
-            
-            // Set sticky when scrolled past the call-to-action bar
             setIsSticky(scrollPosition > callToActionHeight);
         };
 
@@ -78,7 +81,6 @@ const Header = () => {
     
     const toggleMobileMenu = () => {
         setIsMobileMenuOpen(prev => !prev);
-        // Lock body scroll when mobile menu is open
         if (!isMobileMenuOpen) {
             document.body.style.overflow = 'hidden';
         } else {
@@ -86,7 +88,6 @@ const Header = () => {
         }
     };
 
-    // Close mobile menu when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
@@ -104,7 +105,6 @@ const Header = () => {
         };
     }, [isMobileMenuOpen]);
 
-    // Determine user role and dashboard link
     const userRole = user?.role?.toLowerCase();
     const dashboardLink = userRole === 'admin' 
         ? '/manage/admin/dashboard' 
@@ -134,7 +134,7 @@ const Header = () => {
             {/* Call-to-action */}
             <div className="bg-primary-light flex justify-center lg:justify-end items-center py-2 px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center gap-2 text-white text-sm sm:text-base">
-                    <span>Call to order:</span>
+                    <span>CALL TO ORDER:</span>
                     <button 
                         onClick={openWhatsApp}
                         className="font-bold cursor-pointer hover:underline flex items-center"
@@ -147,11 +147,11 @@ const Header = () => {
             {/* Top Bar */}
             <div 
                 ref={topBarRef}
-                className={`bg-white lg:bg-[#f1f1f2] w-full  lg:py-2 py-[10px] transition-all duration-300 ${
+                className={`bg-white lg:bg-[#f1f1f2] w-full lg:py-2 py-[10px] transition-all duration-300 ${
                     isSticky ? 'fixed top-0 left-0 right-0 z-50 shadow-md' : 'relative'
                 }`}
             >
-                <div className=" flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2">
+                <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2">
                     <Link to='sell-on-hezmart' className="text-primary-light font-bold text-xs cursor-pointer">
                         Sell on Hezmart
                     </Link>
@@ -181,12 +181,9 @@ const Header = () => {
                     <SearchBar />
                 </div>
            
-
-           
-           
                 {/* Desktop Navigation */}
-                <nav className="hidden px-4 sm:px-6 lg:px-8 lg:flex  items-center  bg-white shadow  py-3 justify-between">
-                     <button onClick={toggleMobileMenu} className="text-black">
+                <nav className="hidden px-4 sm:px-6 lg:px-8 lg:flex items-center bg-white shadow py-3 justify-between">
+                    <button onClick={toggleMobileMenu} className="text-black">
                         {isMobileMenuOpen ? <FiX size={24} /> : <LuMenu size={24} />}
                     </button>
                     <Link to='/'>
@@ -224,7 +221,6 @@ const Header = () => {
                                             <Link
                                                 to="/profile"
                                                 className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                                onClick={closeDropdown}
                                             >
                                                 <FiUser className="mr-2 text-gray-500" />
                                                 My Profile
@@ -232,7 +228,6 @@ const Header = () => {
                                             <Link
                                                 to="/orders"
                                                 className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                                onClick={closeDropdown}
                                             >
                                                 <FiShoppingBag className="mr-2 text-gray-500" />
                                                 My Orders
@@ -240,13 +235,12 @@ const Header = () => {
                                             <Link
                                                 to="/wishlist"
                                                 className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                                onClick={closeDropdown}
                                             >
                                                 <FiHeart className="mr-2 text-gray-500" />
                                                 Wishlist
                                             </Link>
                                             <button
-                                            onClick={handleLogout}
+                                                onClick={handleLogout}
                                                 className="flex items-center w-full px-4 py-2 text-sm text-gray-700 border-t border-gray-100 hover:bg-gray-100 cursor-pointer"
                                             >
                                                 {processing ? (
@@ -321,7 +315,6 @@ const Header = () => {
                                 <p className="text-gray-700 text-xs px-4 mb-3">MY HEZMART ACCOUNT</p>
                                 <Link 
                                     to="/profile" 
-                                    onClick={toggleMobileMenu}
                                     className="flex text-sm items-center py-2 px-4 text-gray-700 hover:bg-gray-100 rounded"
                                 >
                                     <FiUser className="mr-3" />
@@ -329,7 +322,6 @@ const Header = () => {
                                 </Link>
                                 <Link 
                                     to="/orders" 
-                                    onClick={toggleMobileMenu}
                                     className="flex text-sm items-center py-2 px-4 text-gray-700 hover:bg-gray-100 rounded"
                                 >
                                     <FiShoppingBag className="mr-3" />
@@ -338,7 +330,6 @@ const Header = () => {
                                 <Link
                                     to="/wishlist"
                                     className="flex text-sm items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded"
-                                    onClick={toggleMobileMenu}
                                 >
                                     <FiHeart className="mr-3" />
                                     Wishlist
@@ -360,7 +351,6 @@ const Header = () => {
                         ) : (
                             <Link 
                                 to={dashboardLink}
-                                onClick={toggleMobileMenu}
                                 className="flex items-center text-sm py-2 px-4 text-gray-700 hover:bg-gray-100 rounded"
                             >
                                 <FiGrid className="mr-3" />
@@ -371,14 +361,12 @@ const Header = () => {
                         <>
                             <Link
                                 to="/customer-register"
-                                onClick={toggleMobileMenu}
                                 className="text-white bg-gradient-to-r rounded-xl py-3 from-primary-light to-primary-dark px-5 cursor-pointer text-center mb-2"
                             >
                                 Signup
                             </Link>
                             <Link
                                 to="/login"
-                                onClick={toggleMobileMenu}
                                 className="cursor-pointer py-3 px-5 rounded-xl text-primary-light border border-primary-light text-center"
                             >
                                 Login
@@ -394,7 +382,6 @@ const Header = () => {
                        {categories && categories.length > 0 && categories.map(category => (
                         <li key={category.id}>
                             <Link
-                                onClick={toggleMobileMenu}
                                 to={`/category/${category.id}`}
                                 className="flex items-center py-3 px-5 text-sm rounded-md hover:bg-gray-50"
                             >
@@ -420,7 +407,6 @@ const Header = () => {
                         <li className="flex items-center text-sm rounded-md hover:bg-gray-50">
                             <Link
                                 to="/sell-on-hezmart"
-                                onClick={toggleMobileMenu}
                                 className="py-2 px-4 text-gray-700 hover:bg-gray-100 rounded w-full"
                             >
                                 Sell on Hezmart
@@ -428,8 +414,7 @@ const Header = () => {
                         </li>
                         <li className="flex items-center text-sm rounded-md hover:bg-gray-50">
                             <Link
-                                to="/"
-                                onClick={toggleMobileMenu}
+                                to="/contact-us"
                                 className="py-2 px-4 text-gray-700 hover:bg-gray-100 rounded w-full"
                             >
                                 Contact Us
@@ -437,8 +422,7 @@ const Header = () => {
                         </li>
                         <li className="flex items-center text-sm rounded-md hover:bg-gray-50">
                             <Link
-                                to="/"
-                                onClick={toggleMobileMenu}
+                                to="/help-center"
                                 className="py-2 px-4 text-gray-700 hover:bg-gray-100 rounded w-full"
                             >
                                 Help Center

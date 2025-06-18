@@ -113,8 +113,8 @@ const Footer = () => {
                 <small className="text-[#111827]">
                   Need help with your order?
                 </small>
-                <Link to='mailto:herztmartng@gmail.com' className="font-semibold text-[#111827]">
-                  herztmartng@gmail.com
+                <Link to='mailto:herzmartng@gmail.com' className="font-semibold text-[#111827]">
+                  herzmartng@gmail.com
                 </Link>
               </div>
             </div>

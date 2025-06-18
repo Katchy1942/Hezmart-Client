@@ -63,7 +63,7 @@ const ProductsGrid = ({
         if (!initialProducts.length) {
             fetchProducts();
         }
-    }, []);
+    }, [fetchUrl]);
 
     if (loading && !products.length) {
         return (

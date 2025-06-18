@@ -17,17 +17,7 @@ const VendorOrderDetails = () => {
   const { orderId } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [itemStatusUpdating, setItemStatusUpdating] = useState(null);
   const [vendorNotes, setVendorNotes] = useState('');
-
-  // Item fulfillment status options (vendor can only update to these statuses)
-  const fulfillmentStatusOptions = [
-    { value: 'pending', label: 'Pending' },
-    { value: 'processing', label: 'Processing' },
-    { value: 'shipped', label: 'Shipped' },
-    { value: 'delivered', label: 'Delivered' },
-    { value: 'cancelled', label: 'Cancel' }
-  ];
 
   const fetchOrderDetails = async () => {
     setLoading(true);
@@ -44,35 +34,16 @@ const VendorOrderDetails = () => {
     }
   };
 
-  const updateItemStatus = async (itemId, newStatus) => {
-    setItemStatusUpdating(itemId);
+  const saveVendorNotes = async () => {
     try {
-      const response = await axios.patch(`api/v1/orders/items/${itemId}/status`, {
-        status: newStatus,
-        notes: vendorNotes
+      await axios.patch(`api/v1/orders/${orderId}/vendor-notes`, {
+        vendorNotes
       });
-
-      if (response.data.status === 'success') {
-        toast.success('Item status updated successfully');
-        setOrder(prev => ({
-          ...prev,
-          items: prev.items.map(item => 
-            item.id === itemId ? { 
-              ...item, 
-              fulfillmentStatus: newStatus,
-              ...(newStatus === 'shipped' && { shippedAt: new Date().toISOString() }),
-              ...(newStatus === 'delivered' && { deliveredAt: new Date().toISOString() })
-            } : item
-          )
-        }));
-      }
+      toast.success('Vendor notes saved successfully');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update item status');
-    } finally {
-      setItemStatusUpdating(null);
+      toast.error(error.response?.data?.message || 'Failed to save vendor notes');
     }
   };
-
 
   useEffect(() => {
     fetchOrderDetails();
@@ -167,20 +138,23 @@ const VendorOrderDetails = () => {
             <div className="bg-gray-50 p-4 rounded-lg">
               <h4 className="text-lg font-medium text-gray-900 mb-4">Customer Information</h4>
               <div className="text-sm text-gray-700 space-y-1">
-                <p>{order.deliveryAddress?.firstName} {order.deliveryAddress?.lastName}</p>
-                <p>Phone: {order.deliveryAddress?.primaryPhone}</p>
+                <p>
+                  <strong>Name: </strong>
+                  {order.deliveryAddress?.firstName} {order.deliveryAddress?.lastName}
+                  </p>
+                {/* <p>Phone: {order.deliveryAddress?.primaryPhone}</p> */}
               </div>
             </div>
 
             {/* Shipping Address */}
-            <div className="bg-gray-50 p-4 rounded-lg">
+            {/* <div className="bg-gray-50 p-4 rounded-lg">
               <h4 className="text-lg font-medium text-gray-900 mb-4">Shipping Address</h4>
               <div className="text-sm text-gray-700 space-y-1">
                 <p>{order.deliveryAddress?.primaryAddress}</p>
                 <p>{order.deliveryAddress?.city}</p>
                 <p>{order.deliveryAddress?.country.toUpperCase()}</p>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Middle Column - Order Items */}
@@ -236,21 +210,6 @@ const VendorOrderDetails = () => {
                                 {item.fulfillmentStatus.charAt(0).toUpperCase() + item.fulfillmentStatus.slice(1)}
                               </span>
                             </div>
-                            {itemStatusUpdating === item.id ? (
-                              <LoadingSpinner type="dots" size={4} />
-                            ) : (
-                              <select
-                                value={item.fulfillmentStatus}
-                                onChange={(e) => updateItemStatus(item.id, e.target.value)}
-                                className="text-xs border-gray-300 focus:outline-none focus:ring-primary-light focus:border-primary-light rounded-md"
-                              >
-                                {fulfillmentStatusOptions.map((option) => (
-                                  <option key={option.value} value={option.value}>
-                                    {option.label}
-                                  </option>
-                                ))}
-                              </select>
-                            )}
                           </div>
                           
                           {/* Status Timestamps */}
@@ -270,8 +229,8 @@ const VendorOrderDetails = () => {
                           </div>
                         </div>
 
-                        {/* Vendor Notes */}
-                        <div className="mt-3 pt-3 border-t border-gray-100">
+                        {/* Vendor Notes  hide this for now*/}
+                        <div className="hidden mt-3 pt-3 border-t border-gray-100">
                           <label htmlFor={`vendor-notes-${item.id}`} className="block text-xs font-medium text-gray-700 mb-1">
                             Your Notes (Private)
                           </label>
@@ -283,6 +242,12 @@ const VendorOrderDetails = () => {
                             className="shadow-sm focus:ring-primary-light focus:border-primary-light block w-full sm:text-sm border border-gray-300 rounded-md"
                             placeholder="Add private notes about this item..."
                           />
+                          <button
+                            onClick={saveVendorNotes}
+                            className="mt-2 px-3 py-1 bg-primary-light text-white text-xs rounded hover:bg-primary-dark"
+                          >
+                            Save Notes
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -290,8 +255,6 @@ const VendorOrderDetails = () => {
                 ))}
               </ul>
             </div>
-
-           
           </div>
         </div>
       </div>

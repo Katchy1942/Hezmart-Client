@@ -2,7 +2,17 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from '../../lib/axios';
-import { FiChevronLeft, FiPrinter, FiMail, FiTruck, FiPackage, FiCheckCircle } from 'react-icons/fi';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { 
+  FiChevronLeft, 
+  FiPrinter, 
+  FiMail, 
+  FiTruck, 
+  FiPackage, 
+  FiCheckCircle,
+  FiClock,
+  FiXCircle
+} from 'react-icons/fi';
 
 const OrderDetails = () => {
   const { orderId } = useParams();
@@ -127,7 +137,7 @@ const OrderDetails = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-dark mx-auto"></div>
+        <LoadingSpinner type="spinner" size={7} />
       </div>
     );
   }
@@ -211,22 +221,6 @@ const OrderDetails = () => {
     }
   };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'pending': return <FiClock className="text-yellow-500" />;
-      case 'processing': return <FiPackage className="text-blue-500" />;
-      case 'shipped': return <FiTruck className="text-indigo-500" />;
-      case 'delivered': 
-      case 'received':
-      case 'completed':
-        return <FiCheckCircle className="text-green-500" />;
-      case 'cancelled': 
-      case 'returned':
-        return <FiXCircle className="text-red-500" />;
-      default: return <FiClock className="text-gray-500" />;
-    }
-  };
-
   return (
     <div className="max-w-7xl mx-auto py-8">
       <div className="mb-6 flex justify-between items-center">
@@ -237,7 +231,7 @@ const OrderDetails = () => {
           <button className="flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
             <FiPrinter className="mr-2" /> Print
           </button>
-          <button 
+          {/* <button 
             onClick={sendShippingNotification}
             disabled={!['shipped', 'partially_shipped'].includes(order.status)}
             className={`flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium ${
@@ -247,7 +241,7 @@ const OrderDetails = () => {
             }`}
           >
             <FiMail className="mr-2" /> Notify Customer
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -310,7 +304,7 @@ const OrderDetails = () => {
             </div>
 
             {/* Shipping Method */}
-            <div className="bg-gray-50 p-4 rounded-lg">
+            {/* <div className="bg-gray-50 p-4 rounded-lg">
               <h4 className="text-lg font-medium text-gray-900 mb-4">Shipping Method</h4>
               <div className="flex items-center">
                 <FiTruck className="h-5 w-5 text-gray-400" />
@@ -323,7 +317,7 @@ const OrderDetails = () => {
                   </p>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Middle Column - Order Items */}
@@ -391,18 +385,21 @@ const OrderDetails = () => {
                                 {item.fulfillmentStatus.charAt(0).toUpperCase() + item.fulfillmentStatus.slice(1)}
                               </span>
                             </div>
-                            {/* <select
-                              value={item.fulfillmentStatus}
-                              onChange={(e) => updateItemStatus(item.id, e.target.value)}
-                              disabled={itemStatusUpdating === item.id}
-                              className="text-xs border-gray-300 focus:outline-none focus:ring-primary-light focus:border-primary-light rounded-md"
-                            >
-                              {fulfillmentStatusOptions.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                  {option.label}
-                                </option>
-                              ))}
-                            </select> */}
+                           {itemStatusUpdating === item.id ? (
+                              <LoadingSpinner type="dots" size={4} />
+                            ) : (
+                              <select
+                                value={item.fulfillmentStatus}
+                                onChange={(e) => updateItemStatus(item.id, e.target.value)}
+                                className="text-xs border-gray-300 focus:outline-none focus:ring-primary-light focus:border-primary-light rounded-md"
+                              >
+                                {fulfillmentStatusOptions.map((option) => (
+                                  <option key={option.value} value={option.value}>
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
                           </div>
                           
                           {/* Status Timestamps */}
@@ -494,8 +491,8 @@ const OrderDetails = () => {
               </div>
             </div>
 
-            {/* Order Status Update */}
-            {/* <div className="bg-gray-50 p-4 rounded-lg">
+            {/* Order Status Update Hide this for now*/}
+            <div className="hidden bg-gray-50 p-4 rounded-lg">
               <h4 className="text-lg font-medium text-gray-900 mb-4">Update Status</h4>
               <div className="space-y-4">
                 <div>
@@ -537,7 +534,7 @@ const OrderDetails = () => {
                   {statusUpdating ? 'Saving...' : 'Save Notes'}
                 </button>
               </div>
-            </div> */}
+            </div>
           </div>
         </div>
       </div>

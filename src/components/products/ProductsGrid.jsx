@@ -11,7 +11,7 @@ import { FiShoppingCart } from "react-icons/fi";
 const ProductsGrid = ({ 
     initialProducts = [], 
     fetchUrl = 'api/v1/products?status=active',
-    itemsPerPage = 12,
+    itemsPerPage = 20,
     showHeader = true,
     headerTitle = "Featured Products",
     headerSubtitle = "Discover our latest collection"

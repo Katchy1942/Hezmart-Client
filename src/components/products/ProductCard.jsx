@@ -114,90 +114,96 @@ const ProductCard = ({ product, selectedProduct, cart, onAddToCart }) => {
     const stockMessage = getStockMessage(product.stockQuantity);
 
     return (
-        <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col">
+        <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
             {/* Product Image */}
-            <div className="relative h-[150px] lg:h-[273px]">
+            <div className="relative h-[120px] sm:h-[150px] md:h-[180px] lg:h-[200px] xl:h-[220px]">
                 <Link to={`/product/${product.id}`}>
                     <img
-                        src={product.coverImage}
+                        src={product.coverImage || '/placeholder-product.jpg'}
                         alt={product.name}
                         className="absolute h-full w-full object-cover"
                     />
                 </Link>
                 {discountPercentage > 0 && (
-                    <div className="absolute top-0 right-0 bg-[#3567A6] text-white text-xs font-bold p-3 rounded-bl-2xl ">
-                        {discountPercentage}% <br /> OFF
+                    <div className="absolute top-0 right-0 bg-[#3567A6] text-white text-[10px] sm:text-xs font-bold px-2 py-1 sm:px-3 sm:py-2 rounded-bl-lg">
+                        {discountPercentage}% OFF
                     </div>
                 )}
                 <button 
                     onClick={handleLikeToggle}
                     disabled={isLikeLoading}
-                    className={`absolute bottom-2 right-2 p-2 rounded-full shadow-md transition-colors duration-200 ${
+                    className={`absolute bottom-2 right-2 p-1.5 sm:p-2 rounded-full shadow-md transition-colors duration-200 ${
                         isLiked 
                             ? 'bg-primary-light text-white hover:bg-primary-dark' 
                             : 'bg-white text-gray-600 hover:bg-gray-100'
                     } ${isLikeLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
                     {isLikeLoading ? (
-                        <FaSpinner className="h-4 w-4 animate-spin" />
+                        <FaSpinner className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
                     ) : (
-                        <FiHeart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+                        <FiHeart className={`h-3 w-3 sm:h-4 sm:w-4 ${isLiked ? 'fill-current' : ''}`} />
                     )}
                 </button>
             </div>
 
             {/* Product Info */}
-            <div className="p-4 flex-grow flex flex-col">
+            <div className="p-2 sm:p-3 flex-grow flex flex-col">
                 <Link to={`/product/${product.id}`} className="block">
-                    <h3 className="font-medium text-gray-900 mb-1 truncate">{product.name}</h3>
-                    <p className="text-sm text-gray-500 mb-2">{product.category?.name}</p>
+                    <h3 className="text-xs sm:text-sm font-medium text-gray-900 mb-1 line-clamp-2 leading-tight">
+                        {product.name}
+                    </h3>
+                    <p className="text-[10px] sm:text-xs text-gray-500 mb-1 sm:mb-2 truncate">
+                        {product.category?.name || 'Uncategorized'}
+                    </p>
                 </Link>
 
                 {/* Rating */}
-                <div className="flex items-center mb-2">
+                <div className="flex items-center mb-1 sm:mb-2">
                     <div className="flex mr-1">
-                        {renderRatingStars(product.ratingsAverage)}
+                        {renderRatingStars(product.ratingsAverage || 0).map((star, i) => (
+                            <span key={i} className="text-[10px] sm:text-xs">{star}</span>
+                        ))}
                     </div>
-                    <span className="text-xs text-gray-500">
-                        ({product.ratingsQuantity})
+                    <span className="text-[10px] sm:text-xs text-gray-500">
+                        ({product.ratingsQuantity || 0})
                     </span>
                 </div>
 
                 {/* Stock Indicator */}
-                <div className="mb-3">
-                    <div className="flex justify-between text-xs text-gray-600 mb-1">
+                <div className="mb-2 sm:mb-3">
+                    <div className="flex justify-between text-[10px] sm:text-xs text-gray-600 mb-0.5 sm:mb-1">
                         <span>{stockMessage}</span>
-                        <span>{product.stockQuantity} available</span>
+                        <span>{product.stockQuantity || 0} avail.</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2">
                         <div 
-                            className={`h-2 rounded-full ${stockLevelClass}`}
+                            className={`h-1.5 sm:h-2 rounded-full ${stockLevelClass}`}
                             style={{ width: `${stockPercentage}%` }}
                         ></div>
                     </div>
                 </div>
 
                 {/* Price and Add to Cart */}
-                <div className="lg:mt-auto flex flex-col lg:flex-row lg:items-center justify-between">
-                    <div className='flex flex-col lg:items-center lg:flex-row'>
-                        <span className="text-sm lg:text-lg font-bold text-primary-light">
+                <div className="mt-auto flex items-center justify-between">
+                    <div className="flex flex-col">
+                        <span className="text-xs sm:text-sm font-bold text-primary-light">
                             ₦{displayPrice.toLocaleString()}
                         </span>
                         {discountPercentage > 0 && (
-                            <span className="lg:ml-2 text-sm text-gray-500 line-through">
+                            <span className="text-[10px] sm:text-xs text-gray-500 line-through">
                                 ₦{parseFloat(product.price).toLocaleString()}
                             </span>
                         )}
                     </div>
                     <button 
-                        className="bg-primary-light cursor-pointer self-end hover:bg-primary-dark text-white p-2 h-10 w-10 flex items-center justify-center rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="bg-primary-light cursor-pointer hover:bg-primary-dark text-white p-1.5 sm:p-2 h-7 w-7 sm:h-8 sm:w-8 flex items-center justify-center rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={product.stockQuantity <= 0}
                         onClick={() => onAddToCart(product)}
                     >
                         {cart.loading && selectedProduct?.id === product.id ? (
-                            <FaSpinner className="h-4 w-4 animate-spin" />
+                            <FaSpinner className="h-3 w-3 sm:h-3 sm:w-3 animate-spin" />
                         ) : (
-                            <FiShoppingCart className="h-4 w-4" />
+                            <FiShoppingCart className="h-3 w-3 sm:h-3 sm:w-3" />
                         )}
                     </button>
                 </div>

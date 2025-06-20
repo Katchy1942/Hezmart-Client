@@ -125,9 +125,37 @@ const Header = () => {
 
     const openWhatsApp = () => {
         const formattedNumber = '09160002490'.replace(/\D/g, '');
-        const whatsappUrl = `https://wa.me/${formattedNumber}`;
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const whatsappUrl = isIOS 
+            ? `whatsapp://send?phone=${formattedNumber}`
+            : `https://wa.me/${formattedNumber}`;
+
+         setTimeout(() => {
+            window.open(whatsappUrl, '_blank');
+        }, 100);
+        
         window.open(whatsappUrl, '_blank');
     };
+
+    //  <div className="bg-primary-light flex justify-center lg:justify-end items-center py-2 px-4 sm:px-6 lg:px-8">
+    //             <div className="flex items-center gap-2 text-white text-sm sm:text-base">
+    //                 <span>CALL TO ORDER:</span>
+    //                 <a 
+    //                     href={`https://wa.me/${'09160002490'.replace(/\D/g, '')}`}
+    //                     target="_blank"
+    //                     rel="noopener noreferrer"
+    //                     className="font-bold cursor-pointer hover:underline flex items-center"
+    //                 >
+    //                     09160002490
+    //                 </a>
+    //                 {/* <button 
+    //                     onClick={openWhatsApp}
+    //                     className="font-bold cursor-pointer hover:underline flex items-center"
+    //                 >
+    //                     <span>09160002490</span>
+    //                 </button> */}
+    //             </div>
+    //         </div>
 
     return (
         <div className="bg-white">
@@ -135,12 +163,20 @@ const Header = () => {
             <div className="bg-primary-light flex justify-center lg:justify-end items-center py-2 px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center gap-2 text-white text-sm sm:text-base">
                     <span>CALL TO ORDER:</span>
-                    <button 
+                     <a 
+                        href={`https://wa.me/2349160002490`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-bold cursor-pointer hover:underline flex items-center"
+                    >
+                        09160002490
+                    </a>
+                    {/* <button 
                         onClick={openWhatsApp}
                         className="font-bold cursor-pointer hover:underline flex items-center"
                     >
                         <span>09160002490</span>
-                    </button>
+                    </button> */}
                 </div>
             </div>
             

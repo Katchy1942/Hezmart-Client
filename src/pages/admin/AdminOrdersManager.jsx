@@ -5,6 +5,7 @@ import Pagination from '../../components/common/Pagination';
 import usePagination from '../../hooks/usePagination';
 import DataTableFilters from '../../components/common/DataTableFilters';
 import axios from '../../lib/axios';
+import { Link } from "react-router-dom";
 
 const AdminOrdersManager = () => {
     const { pagination, updatePagination } = usePagination();
@@ -333,12 +334,12 @@ const AdminOrdersManager = () => {
                                                                     )}
                                                                 </button>
                                                             ))} */}
-                                                            <a
-                                                                href={`/manage/admin/orders/${order.id}`}
+                                                            <Link
+                                                                to={`/manage/admin/orders/${order.id}`}
                                                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                                             >
                                                                 View Details
-                                                            </a>
+                                                            </Link>
                                                         </div>
                                                     </div>
                                                 )}

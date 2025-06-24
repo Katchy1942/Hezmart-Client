@@ -51,7 +51,7 @@ const SearchBar = ({
         </div>
         <input
           type="text"
-          className="block w-full pl-10 pr-24 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 placeholder:text-sm lg:placeholder:text-base focus:outline-none  focus:ring-primary-light focus:border-primary-light sm:text-sm"
+          className="block w-full pl-10 pr-24 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 placeholder:text-xs lg:placeholder:text-base focus:outline-none  focus:ring-primary-light focus:border-primary-light sm:text-sm"
           placeholder={placeholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -68,7 +68,7 @@ const SearchBar = ({
 
         <button
           type="submit"
-          className="absolute cursor-pointer right-0 h-full px-4 py-2 text-white rounded-r-lg bg-primary-light hover:bg-primary-dark transition-colors"
+          className="absolute cursor-pointer right-0 h-full px-2 lg:px-4 py-2 text-white rounded-r-lg bg-primary-light hover:bg-primary-dark transition-colors"
           disabled={loading}
          
         >

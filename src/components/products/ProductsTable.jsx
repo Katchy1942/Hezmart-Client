@@ -173,10 +173,10 @@ const ProductsTable = ({
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">${product.price}</div>
+                      <div className="text-sm text-gray-900"> ₦{parseFloat(product.price).toLocaleString('en-US')}</div>
                       {product.discountPrice && (
                         <div className="text-sm text-gray-500 line-through">
-                          ${product.discountPrice}
+                          ₦{parseFloat(product.discountPrice).toLocaleString('en-US')}
                         </div>
                       )}
                     </td>

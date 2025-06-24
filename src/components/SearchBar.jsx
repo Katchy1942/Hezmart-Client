@@ -51,7 +51,7 @@ const SearchBar = ({
         </div>
         <input
           type="text"
-          className="block w-full pl-10 pr-24 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none  focus:ring-primary-light focus:border-primary-light sm:text-sm"
+          className="block w-full pl-10 pr-24 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 placeholder:text-sm lg:placeholder:text-base focus:outline-none  focus:ring-primary-light focus:border-primary-light sm:text-sm"
           placeholder={placeholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}

@@ -186,8 +186,9 @@ const Header = () => {
                 }`}
             >
                 <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2">
-                    <Link to='sell-on-hezmart' className="text-primary-light font-bold text-xs cursor-pointer">
-                        Sell on Hezmart
+                   
+                    <Link to='/' className="text-primary-light font-bold text-sm hover:underline">
+                        Ship Items: Foodstuff, Parcels to UK, Canada, USA, etc
                     </Link>
 
                     <Link to='/'>

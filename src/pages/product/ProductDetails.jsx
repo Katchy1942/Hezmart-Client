@@ -205,7 +205,7 @@ const ProductDetails = () => {
                     <div className="space-y-3">
                         <button
                             onClick={() => window.history.back()}
-                            className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg active:scale-95"
+                            className="w-full cursor-pointer px-6 py-3 bg-primary-light hover:bg-primary-dark text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg active:scale-95"
                         >
                             Go Back
                         </button>

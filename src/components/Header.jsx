@@ -32,6 +32,44 @@ const Header = () => {
     const topBarRef = useRef(null);
     const location = useLocation();
 
+    
+    const [selectedResult, setSelectedResult] = useState(null);
+    const [searchResults, setSearchResults] = useState([]);
+    const [searchLoading, setSearchLoading] = useState(false);
+
+    const handleSearch = async (query) => {
+        if (!query.trim()) {
+            setSearchResults([]);
+            return;
+        }
+
+        setSearchLoading(true);
+        try {
+            // Replace with your actual API call
+            const response = await axios.get(`/api/v1/search?q=${query}`);
+            setSearchResults(response.data.data.results);
+        } catch (error) {
+            console.log("Search error:", error);
+            setSearchResults([]);
+        } finally {
+            setSearchLoading(false);
+        }
+      
+    };
+
+    const handleResultSelect = (result) => {
+        // Navigate to the product/category page based on the result type
+        if (result.type === 'product') {
+            navigate(`/product/${result.id}`);
+        } else if (result.type === 'category') {
+            navigate(`/category/${result.id}`);
+        }else if(result.type ==='subcategory'){
+            navigate(`/category/${result.category.id}/${result.id}`); 
+        }
+        // Clear search results after selection
+        setSearchResults([]);
+    };
+
     // Close mobile menu when route changes
     useEffect(() => {
         setIsMobileMenuOpen(false);
@@ -123,41 +161,7 @@ const Header = () => {
         }
     };
 
-    const openWhatsApp = () => {
-        const formattedNumber = '09160002490'.replace(/\D/g, '');
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        const whatsappUrl = isIOS 
-            ? `whatsapp://send?phone=${formattedNumber}`
-            : `https://wa.me/${formattedNumber}`;
-
-         setTimeout(() => {
-            window.open(whatsappUrl, '_blank');
-        }, 100);
-        
-        window.open(whatsappUrl, '_blank');
-    };
-
-    //  <div className="bg-primary-light flex justify-center lg:justify-end items-center py-2 px-4 sm:px-6 lg:px-8">
-    //             <div className="flex items-center gap-2 text-white text-sm sm:text-base">
-    //                 <span>CALL TO ORDER:</span>
-    //                 <a 
-    //                     href={`https://wa.me/${'09160002490'.replace(/\D/g, '')}`}
-    //                     target="_blank"
-    //                     rel="noopener noreferrer"
-    //                     className="font-bold cursor-pointer hover:underline flex items-center"
-    //                 >
-    //                     09160002490
-    //                 </a>
-    //                 {/* <button 
-    //                     onClick={openWhatsApp}
-    //                     className="font-bold cursor-pointer hover:underline flex items-center"
-    //                 >
-    //                     <span>09160002490</span>
-    //                 </button> */}
-    //             </div>
-    //         </div>
-
-    return (
+        return (
         <div className="bg-white">
             {/* Call-to-action */}
             <div className="bg-primary-light flex justify-center lg:justify-end items-center py-2 px-4 sm:px-6 lg:px-8">
@@ -171,12 +175,6 @@ const Header = () => {
                     >
                         09160002490
                     </a>
-                    {/* <button 
-                        onClick={openWhatsApp}
-                        className="font-bold cursor-pointer hover:underline flex items-center"
-                    >
-                        <span>09160002490</span>
-                    </button> */}
                 </div>
             </div>
             
@@ -214,7 +212,13 @@ const Header = () => {
                     )}
                 </div>
                 <div className="lg:hidden pt-3 px-4 sm:px-6 lg:px-8">
-                    <SearchBar />
+                    <SearchBar
+                        placeholder="Search products, brands and categories"
+                        onSearch={handleSearch}
+                        results={searchResults}
+                        onResultSelect={handleResultSelect}
+                        loading={searchLoading}
+                    />
                 </div>
            
                 {/* Desktop Navigation */}
@@ -225,7 +229,13 @@ const Header = () => {
                     <Link to='/'>
                         <img src={logo} alt="Logo" className="w-48"/>
                     </Link>
-                    <SearchBar/>
+                   <SearchBar
+                        placeholder="Search products, brands and categories"
+                        onSearch={handleSearch}
+                        results={searchResults}
+                        onResultSelect={handleResultSelect}
+                        loading={searchLoading}
+                    />
                     <div className="flex gap-3 items-center">
                         {user ? (
                             userRole === 'customer' ? (

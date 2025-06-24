@@ -5,7 +5,7 @@ import Pagination from "../components/common/Pagination";
 import { FaSpinner, FaStore } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
-import SearchBar from "../components/common/SearchBar";
+import SearchBar from "../components/SearchBar";
 
 
 const Shops = () => {

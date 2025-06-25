@@ -13,14 +13,12 @@ const VendorRegister = () => {
     firstName: "",
     lastName: "",
     primaryPhone: "",
-    secondaryPhone: "",
     email: "",
     ninNumber: "",
     primaryAddress: "",
-    secondaryAddress: "",
-    city: "",
-    region: "",
-    country: "",
+    // city: "",
+    // region: "",
+    state: "",
     password: "",
     passwordConfirm: "",
     businessName: "",
@@ -176,19 +174,6 @@ const VendorRegister = () => {
             />
 
             <InputField
-              label="Phone Number 2 (Optional)"
-              name="secondaryPhone"
-              value={formData.secondaryPhone}
-              onChange={handleChange}
-              placeholder="Enter phone number"
-              type="tel"
-              error={errors.secondaryPhone}
-              isRequired={false}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-5 mt-5">
-            <InputField
               label="Email Address"
               name="email"
               value={formData.email}
@@ -197,7 +182,9 @@ const VendorRegister = () => {
               type="email"
               error={errors.email}
             />
+          </div>
 
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-5 mt-5">
             <InputField
               label="NIN"
               name="ninNumber"
@@ -206,8 +193,19 @@ const VendorRegister = () => {
               placeholder="Enter your nin"
               error={errors.ninNumber}
             />
+            <SelectField
+              name="state"
+              label="State"
+              value={formData.state}
+              onChange={handleChange}
+              options={[
+                { value: "Abia", label: "Abia" },
+                { value: "Adamawa", label: "Adamawa" },
+                { value: "Akwa Ibom", label: "Akwa Ibom" },
+              ]}
+              error={errors.state}
+            />
           </div>
-
           <div className="mt-5">
             <InputField
               label="Primary Address"
@@ -220,20 +218,7 @@ const VendorRegister = () => {
             />
           </div>
 
-          <div className="mt-5">
-            <InputField
-              label="Secondary Address (Optional)"
-              name="secondaryAddress"
-              value={formData.secondaryAddress}
-              onChange={handleChange}
-              placeholder="Address"
-              as="textarea"
-              error={errors.secondaryAddress}
-              isRequired={false}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-5 mt-5">
+          {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-5 mt-5">
             <InputField
               label="City"
               name="city"
@@ -251,9 +236,9 @@ const VendorRegister = () => {
               placeholder="Enter region"
               error={errors.region}
             />
-          </div>
+          </div> */}
 
-          <div className="mt-5">
+          {/* <div className="mt-5">
             <SelectField
               name="country"
               label="Country"
@@ -266,7 +251,7 @@ const VendorRegister = () => {
               ]}
               error={errors.country}
             />
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-5 mt-5">
             <InputField

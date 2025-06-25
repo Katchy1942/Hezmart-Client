@@ -10,13 +10,9 @@ const CustomerRegister = () => {
     firstName: "",
     lastName: "",
     primaryPhone: "",
-    secondaryPhone: "",
     email: "",
     primaryAddress: "",
-    secondaryAddress: "",
-    city: "",
-    region: "",
-    country: "",
+    state: "",
     password: "",
     passwordConfirm: "",
     role:'customer'
@@ -126,19 +122,6 @@ const CustomerRegister = () => {
                         />
 
                         <InputField
-                            label="Phone Number 2 (Optional)"
-                            name="secondaryPhone"
-                            value={formData.secondaryPhone}
-                            onChange={handleChange}
-                            placeholder="Enter phone number"
-                            type="tel"
-                            error={errors.secondaryPhone}
-                            isRequired={false}
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-5 mt-5">
-                        <InputField
                             label="Email Address"
                             name="email"
                             value={formData.email}
@@ -162,53 +145,19 @@ const CustomerRegister = () => {
                     </div>
 
                     <div className="mt-5">
-                        <InputField
-                            label="Secondary Address (Optional)"
-                            name="secondaryAddress"
-                            value={formData.secondaryAddress}
-                            onChange={handleChange}
-                            placeholder="Address"
-                            as="textarea"
-                            error={errors.secondaryAddress}
-                            isRequired={false}
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-5 mt-5">
-                        <InputField
-                            label="City"
-                            name="city"
-                            value={formData.city}
-                            onChange={handleChange}
-                            placeholder="Enter city"
-                            error={errors.city}
-                        />
-
-                        <InputField
-                            label="Region"
-                            name="region"
-                            value={formData.region}
-                            onChange={handleChange}
-                            placeholder="Enter region"
-                            error={errors.region}
-                        />
-                    </div>
-
-                    <div className="mt-5">
                         <SelectField
-                            name="country"
-                            label="Country"
-                            value={formData.country}
+                            name="state"
+                            label="State"
+                            value={formData.state}
                             onChange={handleChange}
                             options={[
-                                { value: "ng", label: "Nigeria" },
-                                { value: "us", label: "United States" },
-                                { value: "uk", label: "United Kingdom" },
+                            { value: "Abia", label: "Abia" },
+                            { value: "Adamawa", label: "Adamawa" },
+                            { value: "Akwa Ibom", label: "Akwa Ibom" },
                             ]}
-                            error={errors.country}
+                            error={errors.state}
                         />
                     </div>
-
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-5 mt-5">
                         <InputField
                             label="Password"

@@ -26,6 +26,46 @@ const VendorRegister = () => {
     businessLogo: ''
   });
 
+  const nigerianStates = [
+  "Abia",
+  "Adamawa",
+  "Akwa Ibom",
+  "Anambra",
+  "Bauchi",
+  "Bayelsa",
+  "Benue",
+  "Borno",
+  "Cross River",
+  "Delta",
+  "Ebonyi",
+  "Edo",
+  "Ekiti",
+  "Rivers",
+  "Enugu",
+  "FCT",
+  "Gombe",
+  "Imo",
+  "Jigawa",
+  "Kaduna",
+  "Kano",
+  "Katsina",
+  "Kebbi",
+  "Kogi",
+  "Kwara",
+  "Lagos",
+  "Nasarawa",
+  "Niger",
+  "Ogun",
+  "Ondo",
+  "Osun",
+  "Oyo",
+  "Plateau",
+  "Sokoto",
+  "Taraba",
+  "Yobe",
+  "Zamfara"
+];
+
   const [previewImage, setPreviewImage] = useState(null);
   const fileInputRef = useRef(null);
   const [errors, setErrors] = useState({});
@@ -198,11 +238,7 @@ const VendorRegister = () => {
               label="State"
               value={formData.state}
               onChange={handleChange}
-              options={[
-                { value: "Abia", label: "Abia" },
-                { value: "Adamawa", label: "Adamawa" },
-                { value: "Akwa Ibom", label: "Akwa Ibom" },
-              ]}
+              options={nigerianStates}
               error={errors.state}
             />
           </div>

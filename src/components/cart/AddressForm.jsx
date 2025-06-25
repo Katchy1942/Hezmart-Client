@@ -15,13 +15,49 @@ const AddressForm = ({
     firstName: currentUser?.firstName || '',
     lastName: currentUser?.lastName || '',
     primaryPhone: currentUser?.primaryPhone || '',
-    secondaryPhone: currentUser?.secondaryPhone || '',
-    city: currentUser?.city || '',
+    state: currentUser?.state || '',
     primaryAddress: currentUser?.primaryAddress || '',
-    country:currentUser.country
   });
   const [errors, setErrors] = useState({});
-
+  const nigerianStates = [
+  "Abia",
+  "Adamawa",
+  "Akwa Ibom",
+  "Anambra",
+  "Bauchi",
+  "Bayelsa",
+  "Benue",
+  "Borno",
+  "Cross River",
+  "Delta",
+  "Ebonyi",
+  "Edo",
+  "Ekiti",
+  "Rivers",
+  "Enugu",
+  "FCT",
+  "Gombe",
+  "Imo",
+  "Jigawa",
+  "Kaduna",
+  "Kano",
+  "Katsina",
+  "Kebbi",
+  "Kogi",
+  "Kwara",
+  "Lagos",
+  "Nasarawa",
+  "Niger",
+  "Ogun",
+  "Ondo",
+  "Osun",
+  "Oyo",
+  "Plateau",
+  "Sokoto",
+  "Taraba",
+  "Yobe",
+  "Zamfara"
+];
   const handleAddressChange = (e) => {
     const { name, value } = e.target;
     setNewAddress(prev => ({
@@ -36,9 +72,7 @@ const AddressForm = ({
         firstName: newAddress.firstName,
         lastName: newAddress.lastName,
         primaryPhone: newAddress.primaryPhone,
-        secondaryPhone: newAddress.secondaryPhone,
-        city: newAddress.city,
-        country:newAddress.country,
+        state: newAddress.state,
         primaryAddress: newAddress.primaryAddress
       });
       
@@ -53,8 +87,7 @@ const AddressForm = ({
         firstName: newAddress.firstName,
         lastName: newAddress.lastName,
         primaryPhone: newAddress.primaryPhone,
-        secondaryPhone: newAddress.secondaryPhone,
-        city: newAddress.city,
+        state: newAddress.state,
         primaryAddress: newAddress.primaryAddress
       });
       
@@ -103,14 +136,14 @@ const AddressForm = ({
         error={errors.primaryAddress}
       />
 
-      <SelectField
-        name="city"
-        label="City"
-        value={newAddress.city}
-        onChange={handleAddressChange}
-        options={cities}
-        error={errors.city}
-      />
+       <SelectField
+          name="state"
+          label="State"
+          value={newAddress.state}
+          onChange={handleAddressChange}
+          options={nigerianStates}
+          error={errors.state}
+        />
 
       <InputField
         name="primaryPhone"
@@ -120,17 +153,6 @@ const AddressForm = ({
         type="tel"
         error={errors.primaryPhone}
       />
-
-      <InputField
-        name="secondaryPhone"
-        label="Secondary Phone (Optional)"
-        value={newAddress.secondaryPhone}
-        onChange={handleAddressChange}
-        type="tel"
-        error={errors.secondaryPhone}
-        isRequired={false}
-      />
-
       <div className="flex space-x-2 pt-2">
         <button
           onClick={handleSubmit}
@@ -140,7 +162,7 @@ const AddressForm = ({
         </button>
         <button
           onClick={onCancel}
-          className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md hover:bg-gray-50"
+          className="px-4 py-2 cursor-pointer border border-gray-300 text-sm font-medium rounded-md hover:bg-gray-50"
         >
           Cancel
         </button>

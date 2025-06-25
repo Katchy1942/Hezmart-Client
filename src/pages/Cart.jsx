@@ -15,11 +15,7 @@ const Cart = () => {
   const navigate = useNavigate();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const [cities] = useState([
-    'Abuja', 'Lagos', 'Kano', 'Ibadan', 'Port Harcourt', 
-    'Benin City', 'Maiduguri', 'Zaria', 'Aba', 'Jos',
-    'Owerri', 'Enugu', 'Abeokuta', 'Onitsha', 'Warri'
-  ]);
+ 
 
   useEffect(() => {
     fetchCart();
@@ -29,10 +25,8 @@ const Cart = () => {
         firstName: currentUser.firstName,
         lastName: currentUser.lastName,
         primaryPhone: currentUser.primaryPhone,
-        secondaryPhone: currentUser.secondaryPhone,
-        city: currentUser.city,
+        state: currentUser.state,
         primaryAddress: currentUser.primaryAddress,
-        country:currentUser.country
       });
     }
   }, []);
@@ -162,7 +156,6 @@ const Cart = () => {
           shippingOptions={shippingOptions}
           selectedAddress={selectedAddress}
           currentUser={currentUser}
-          cities={cities}
           fetchCart={fetchCart}
           onCheckout={handleCheckout}
           checkoutLoading={checkoutLoading}

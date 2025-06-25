@@ -12,7 +12,6 @@ const CartSummary = ({
   shippingOptions, 
   selectedAddress,
   currentUser,
-  cities,
   onCheckout,
   checkoutLoading,
   allItemsAvailable,
@@ -80,11 +79,11 @@ const CartSummary = ({
                 <div className="p-3 border border-gray-200 rounded-md bg-gray-50">
                   <p className="font-medium">{selectedAddress.firstName} {selectedAddress.lastName}</p>
                   <p>{selectedAddress.primaryAddress}</p>
-                  <p>{selectedAddress.city}</p>
+                  <p>{selectedAddress.state}</p>
                   <p>Phone: {selectedAddress.primaryPhone}</p>
-                  {selectedAddress.secondaryPhone && (
+                  {/* {selectedAddress.secondaryPhone && (
                     <p>Alt. Phone: {selectedAddress.secondaryPhone}</p>
-                  )}
+                  )} */}
                 </div>
                 {currentUser && (
                   <Button
@@ -116,7 +115,6 @@ const CartSummary = ({
             {showAddressForm && currentUser && (
               <AddressForm
                 currentUser={currentUser}
-                cities={cities}
                 onSave={(address) => {
                   setSelectedAddress(address);
                   setShowAddressForm(false);

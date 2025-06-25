@@ -188,13 +188,16 @@ const Header = () => {
                 <div className="flex lg:items-center flex-col lg:flex-row justify-center lg:justify-between px-4 sm:px-6 lg:px-8 py-2">
                    
                     <Link to='/' className="text-primary-light text-center lg:text-left font-bold text-sm hover:underline">
-                        Ship Items: Foodstuff, Parcels to UK, Canada, USA, etc
+                        Ship items to UK/Canada/US
                     </Link>
 
-                   <div className="flex justify-between mt-4 lg:mt-0">
-                        <Link to='/'>
-                            <img src={logo_png} alt="Logo" width={76} className="mx-auto lg:mx-0 lg:-translate-x-8"/>
-                        </Link>
+                   <div className="flex justify-between mt-4 lg:mt-0 items-center">
+                        <div className="grow">
+                             <Link to='/'>
+                                <img src={logo_png} alt="Logo" width={76} className="mx-auto lg:mx-0 lg:-translate-x-8"/>
+                            </Link>
+                        </div>
+                       
                     
                         {/* Mobile cart icon */}
                         {isMobile && (

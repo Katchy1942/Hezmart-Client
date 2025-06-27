@@ -30,6 +30,7 @@ import AdminManageCoupons from './pages/admin/AdminManageCoupons'
 import CreateCoupon from './pages/admin/CreateCoupon';
 import EditCoupon from './pages/admin/EditCoupon';
 import CustomersManager from './pages/admin/CustomersManager';
+import AdminSettings from './pages/admin/AdminSettings';
 
 
 //Vendor pages
@@ -62,6 +63,7 @@ import Error from './components/Error';
 import { requireAuth } from './utils/protect';
 import Cart from './pages/Cart';
 import Shops from './pages/Shops';
+
 
 
 
@@ -114,6 +116,7 @@ function App() {
           <Route path='coupons' element={<AdminManageCoupons />}></Route>
           <Route path='create-coupon' element={<CreateCoupon />}></Route>
           <Route path='edit-coupon/:id' element={<EditCoupon />}></Route>
+          <Route path='settings' element={<AdminSettings />}></Route>
         </Route>
 
         {/* Vendor Routes */}

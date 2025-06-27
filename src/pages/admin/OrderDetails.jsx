@@ -222,37 +222,27 @@ const OrderDetails = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto py-8">
-      <div className="mb-6 flex justify-between items-center">
+    <div className="max-w-7xl mx-auto">
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <Link to="/manage/admin/orders" className="flex items-center text-primary-light hover:text-primary-dark">
           <FiChevronLeft className="mr-1" /> Back to orders
         </Link>
-        <div className="flex space-x-3">
-          <button className="flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-            <FiPrinter className="mr-2" /> Print
+        <div className="flex space-x-2 sm:space-x-3 w-full sm:w-auto">
+          <button className="flex items-center px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+            <FiPrinter className="mr-1 sm:mr-2" /> 
+            <span className="hidden sm:inline">Print</span>
           </button>
-          {/* <button 
-            onClick={sendShippingNotification}
-            disabled={!['shipped', 'partially_shipped'].includes(order.status)}
-            className={`flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium ${
-              !['shipped', 'partially_shipped'].includes(order.status)
-                ? 'text-gray-400 cursor-not-allowed' 
-                : 'text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            <FiMail className="mr-2" /> Notify Customer
-          </button> */}
         </div>
       </div>
 
-      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+      <div className="bg-white shadow overflow-hidden rounded-lg">
         {/* Order Header */}
-        <div className="px-4 py-5 sm:px-6 border-b border-gray-200 flex justify-between items-center">
+        <div className="px-3 sm:px-4 py-3 sm:py-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div>
-            <h3 className="text-lg leading-6 font-medium text-gray-900">
+            <h3 className="text-base sm:text-lg leading-6 font-medium text-gray-900">
               Order #{order.orderNumber}
             </h3>
-            <p className="mt-1 max-w-2xl text-sm text-gray-500">
+            <p className="mt-0.5 max-w-2xl text-xs sm:text-sm text-gray-500">
               Placed on {formatDate(order.createdAt)}
             </p>
           </div>
@@ -265,45 +255,46 @@ const OrderDetails = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 p-3 sm:p-4 lg:p-6">
           {/* Left Column - Customer and Shipping */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1 space-y-4 sm:space-y-6">
             {/* Customer Information */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="text-lg font-medium text-gray-900 mb-4">Customer Information</h4>
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+              <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Customer Information</h4>
               <div className="flex items-start">
-                <div className="flex-shrink-0 h-12 w-12 rounded-full overflow-hidden bg-gray-200">
+                <div className="flex-shrink-0 h-10 w-10 sm:h-12 sm:w-12 rounded-full overflow-hidden bg-gray-200">
                   <img 
                     src={order.user?.photo || '/images/default-user.png'} 
                     alt={order.user?.firstName}
                     className="h-full w-full object-cover"
                   />
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-900">
+                <div className="ml-3 sm:ml-4">
+                  <p className="text-sm sm:text-base font-medium text-gray-900">
                     {order.user?.firstName} {order.user?.lastName}
                   </p>
-                  <p className="text-sm text-gray-500">{order.deliveryAddress?.primaryPhone}</p>
+                  <p className="text-xs sm:text-sm text-gray-500">{order.deliveryAddress?.primaryPhone}</p>
                 </div>
               </div>
             </div>
 
             {/* Shipping Address */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="text-lg font-medium text-gray-900 mb-4">Shipping Address</h4>
-              <div className="text-sm text-gray-700 space-y-1">
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+              <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Shipping Address</h4>
+              <div className="text-xs sm:text-sm text-gray-700 space-y-1">
                 <p>{order.deliveryAddress?.firstName} {order.deliveryAddress?.lastName}</p>
                 <p>{order.deliveryAddress?.primaryAddress}</p>
                 <p>{order.deliveryAddress?.city}</p>
                 <p>{order.deliveryAddress?.country.toUpperCase()}</p>
-                <p className="mt-2">Phone: {order.deliveryAddress?.primaryPhone}</p>
+                <p className="mt-1 sm:mt-2">Phone: {order.deliveryAddress?.primaryPhone}</p>
                 {order.deliveryAddress?.secondaryPhone && (
                   <p>Alt. Phone: {order.deliveryAddress?.secondaryPhone}</p>
                 )}
               </div>
             </div>
+          </div>
 
-            {/* Shipping Method */}
+           {/* Shipping Method */}
             {/* <div className="bg-gray-50 p-4 rounded-lg">
               <h4 className="text-lg font-medium text-gray-900 mb-4">Shipping Method</h4>
               <div className="flex items-center">
@@ -318,60 +309,60 @@ const OrderDetails = () => {
                 </div>
               </div>
             </div> */}
-          </div>
+          
 
           {/* Middle Column - Order Items */}
           <div className="lg:col-span-1">
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-              <h4 className="text-lg font-medium text-gray-900 p-4 border-b border-gray-200">
+              <h4 className="text-base sm:text-lg font-medium text-gray-900 p-3 sm:p-4 border-b border-gray-200">
                 Order Items ({(order.items || []).length})
               </h4>
               <ul className="divide-y divide-gray-200">
                 {order.items?.map((item) => (
-                  <li key={item.id} className="p-4">
+                  <li key={item.id} className="p-3 sm:p-4">
                     <div className="flex">
-                      <div className="flex-shrink-0 h-20 w-20 bg-gray-200 rounded-md overflow-hidden">
+                      <div className="flex-shrink-0 h-16 w-16 sm:h-20 sm:w-20 bg-gray-200 rounded-md overflow-hidden">
                         <img
                           src={item.product?.coverImage || '/images/default-product.png'}
                           alt={item.product?.name}
                           className="h-full w-full object-cover"
                         />
                       </div>
-                      <div className="ml-4 flex-1">
+                      <div className="ml-3 sm:ml-4 flex-1 min-w-0">
                         <div className="flex justify-between">
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">
+                          <div className="min-w-0">
+                            <p className="text-sm sm:text-base font-medium text-gray-900 truncate">
                               {item.product?.name}
                             </p>
                             <div className="flex items-center mt-1">
-                              <div className="flex-shrink-0 h-6 w-6 rounded-full overflow-hidden">
+                              <div className="flex-shrink-0 h-5 w-5 sm:h-6 sm:w-6 rounded-full overflow-hidden">
                                 <img
                                   src={item.vendor?.businessLogo || '/images/default-business.png'}
                                   alt={item.vendor?.businessName}
                                   className="h-full w-full object-cover"
                                 />
                               </div>
-                              <p className="text-sm text-gray-500 ml-2">
+                              <p className="text-xs sm:text-sm text-gray-500 ml-1 sm:ml-2 truncate">
                                 {item.vendor?.businessName}
                               </p>
                             </div>
                             {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && (
                               <div className="mt-1 flex flex-wrap gap-1">
                                 {Object.entries(item.selectedOptions).map(([key, value]) => (
-                                  <span key={key} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                  <span key={key} className="inline-flex items-center px-1.5 py-0.5 rounded text-2xs sm:text-xs font-medium bg-gray-100 text-gray-800">
                                     {key}: {value}
                                   </span>
                                 ))}
                               </div>
                             )}
                           </div>
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-sm sm:text-base font-medium text-gray-900 whitespace-nowrap pl-2">
                             {formatCurrency(item.discountPrice || item.price)}
                           </p>
                         </div>
                         <div className="mt-2 flex justify-between items-end">
-                          <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-xs sm:text-sm text-gray-500">Qty: {item.quantity}</p>
+                          <p className="text-sm sm:text-base font-medium text-gray-900 whitespace-nowrap">
                             Subtotal: {formatCurrency((item.discountPrice || item.price) * item.quantity)}
                           </p>
                         </div>
@@ -380,18 +371,18 @@ const OrderDetails = () => {
                         <div className="mt-2 pt-2 border-t border-gray-100">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center">
-                              <span className="text-xs font-medium text-gray-500 mr-2">Status:</span>
+                              <span className="text-2xs sm:text-xs font-medium text-gray-500 mr-1 sm:mr-2">Status:</span>
                               <span className={getItemStatusBadge(item.fulfillmentStatus)}>
                                 {item.fulfillmentStatus.charAt(0).toUpperCase() + item.fulfillmentStatus.slice(1)}
                               </span>
                             </div>
                            {itemStatusUpdating === item.id ? (
-                              <LoadingSpinner type="dots" size={4} />
+                              <LoadingSpinner type="dots" size={3} />
                             ) : (
                               <select
                                 value={item.fulfillmentStatus}
                                 onChange={(e) => updateItemStatus(item.id, e.target.value)}
-                                className="text-xs border-gray-300 focus:outline-none focus:ring-primary-light focus:border-primary-light rounded-md"
+                                className="text-2xs sm:text-xs border-gray-300 focus:outline-none focus:ring-primary-light focus:border-primary-light rounded-md"
                               >
                                 {fulfillmentStatusOptions.map((option) => (
                                   <option key={option.value} value={option.value}>
@@ -403,22 +394,22 @@ const OrderDetails = () => {
                           </div>
                           
                           {/* Status Timestamps */}
-                          <div className="mt-1 space-y-1 text-xs text-gray-500">
+                          <div className="mt-1 space-y-1 text-2xs sm:text-xs text-gray-500">
                             {item.shippedAt && (
                               <div className="flex items-center">
-                                <FiTruck className="mr-1" size={12} />
+                                <FiTruck className="mr-1" size={10} />
                                 Shipped: {formatDate(item.shippedAt)}
                               </div>
                             )}
                             {item.deliveredAt && (
                               <div className="flex items-center">
-                                <FiPackage className="mr-1" size={12} />
+                                <FiPackage className="mr-1" size={10} />
                                 Delivered: {formatDate(item.deliveredAt)}
                               </div>
                             )}
                             {item.receivedAt && (
                               <div className="flex items-center">
-                                <FiCheckCircle className="mr-1" size={12} />
+                                <FiCheckCircle className="mr-1" size={10} />
                                 Received: {formatDate(item.receivedAt)}
                               </div>
                             )}
@@ -433,34 +424,34 @@ const OrderDetails = () => {
           </div>
 
           {/* Right Column - Order Summary and Actions */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1 space-y-4 sm:space-y-6">
             {/* Order Summary */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="text-lg font-medium text-gray-900 mb-4">Order Summary</h4>
-              <div className="space-y-3">
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+              <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Order Summary</h4>
+              <div className="space-y-2 sm:space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Subtotal</span>
-                  <span className="text-sm font-medium">{formatCurrency(order.subtotal)}</span>
+                  <span className="text-xs sm:text-sm text-gray-600">Subtotal</span>
+                  <span className="text-xs sm:text-sm font-medium">{formatCurrency(order.subtotal)}</span>
                 </div>
                 {parseFloat(order.discount) > 0 && (
                   <div className="flex justify-between text-green-600">
-                    <span className="text-sm">Discount</span>
-                    <span className="text-sm font-medium">-{formatCurrency(order.discount)}</span>
+                    <span className="text-xs sm:text-sm">Discount</span>
+                    <span className="text-xs sm:text-sm font-medium">-{formatCurrency(order.discount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Shipping</span>
-                  <span className="text-sm font-medium">{formatCurrency(order.deliveryFee)}</span>
+                  <span className="text-xs sm:text-sm text-gray-600">Shipping</span>
+                  <span className="text-xs sm:text-sm font-medium">{formatCurrency(order.deliveryFee)}</span>
                 </div>
                 {parseFloat(order.tax) > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Tax</span>
-                    <span className="text-sm font-medium">{formatCurrency(order.tax)}</span>
+                    <span className="text-xs sm:text-sm text-gray-600">Tax</span>
+                    <span className="text-xs sm:text-sm font-medium">{formatCurrency(order.tax)}</span>
                   </div>
                 )}
-                <div className="border-t border-gray-200 pt-3 flex justify-between">
-                  <span className="text-base font-medium text-gray-900">Total</span>
-                  <span className="text-base font-medium text-gray-900">
+                <div className="border-t border-gray-200 pt-2 sm:pt-3 flex justify-between">
+                  <span className="text-sm sm:text-base font-medium text-gray-900">Total</span>
+                  <span className="text-sm sm:text-base font-medium text-gray-900">
                     {formatCurrency(order.total)}
                   </span>
                 </div>
@@ -468,18 +459,18 @@ const OrderDetails = () => {
             </div>
 
             {/* Payment Information */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="text-lg font-medium text-gray-900 mb-4">Payment Information</h4>
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+              <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Payment Information</h4>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Method</span>
-                  <span className="text-sm font-medium capitalize">
+                  <span className="text-xs sm:text-sm text-gray-600">Method</span>
+                  <span className="text-xs sm:text-sm font-medium capitalize">
                     {order.paymentMethod}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Status</span>
-                  <span className={`text-sm font-medium ${
+                  <span className="text-xs sm:text-sm text-gray-600">Status</span>
+                  <span className={`text-xs sm:text-sm font-medium ${
                     order.paymentStatus === 'paid' ? 'text-green-600' :
                     order.paymentStatus === 'pending' ? 'text-yellow-600' :
                     order.paymentStatus === 'failed' ? 'text-red-600' :
@@ -488,51 +479,6 @@ const OrderDetails = () => {
                     {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
                   </span>
                 </div>
-              </div>
-            </div>
-
-            {/* Order Status Update Hide this for now*/}
-            <div className="hidden bg-gray-50 p-4 rounded-lg">
-              <h4 className="text-lg font-medium text-gray-900 mb-4">Update Status</h4>
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                    Order Status
-                  </label>
-                  <select
-                    id="status"
-                    value={order.status}
-                    onChange={(e) => updateOrderStatus(e.target.value)}
-                    disabled={statusUpdating}
-                    className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-light focus:border-primary-light sm:text-sm rounded-md"
-                  >
-                    {statusOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
-                    Order Notes
-                  </label>
-                  <textarea
-                    id="notes"
-                    rows={3}
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    className="shadow-sm focus:ring-primary-light focus:border-primary-light block w-full sm:text-sm border border-gray-300 rounded-md"
-                    placeholder="Add internal notes about this order..."
-                  />
-                </div>
-                <button
-                  onClick={saveNotes}
-                  disabled={statusUpdating}
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-light hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-light"
-                >
-                  {statusUpdating ? 'Saving...' : 'Save Notes'}
-                </button>
               </div>
             </div>
           </div>

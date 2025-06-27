@@ -66,7 +66,7 @@ const CartSummary = ({
 
   return (
     <div className="mt-8 lg:mt-0 lg:col-span-4">
-      <div className="bg-white shadow overflow-hidden sm:rounded-lg p-6">
+      <div className="bg-white shadow overflow-hidden sm:rounded-lg p-4 lg:p-6">
         <h2 className="text-lg font-medium text-gray-900 mb-4">Order Summary</h2>
 
         <div className="space-y-4">
@@ -128,7 +128,7 @@ const CartSummary = ({
           {/* New Coupon Code Section */}
           <div className="border-b border-gray-200 pb-4">
             <h3 className="text-md font-medium text-gray-900 mb-2">Coupon Code</h3>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-col lg:flex-row">
               <input
                 type="text"
                 value={couponCode}

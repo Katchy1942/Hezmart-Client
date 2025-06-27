@@ -18,45 +18,14 @@ const CustomerRegister = () => {
     role:'customer'
   });
 
-const nigerianStates = [
-  "Abia",
-  "Adamawa",
-  "Akwa Ibom",
-  "Anambra",
-  "Bauchi",
-  "Bayelsa",
-  "Benue",
-  "Borno",
-  "Cross River",
-  "Delta",
-  "Ebonyi",
-  "Edo",
-  "Ekiti",
-  "Rivers",
-  "Enugu",
-  "FCT",
-  "Gombe",
-  "Imo",
-  "Jigawa",
-  "Kaduna",
-  "Kano",
-  "Katsina",
-  "Kebbi",
-  "Kogi",
-  "Kwara",
-  "Lagos",
-  "Nasarawa",
-  "Niger",
-  "Ogun",
-  "Ondo",
-  "Osun",
-  "Oyo",
-  "Plateau",
-  "Sokoto",
-  "Taraba",
-  "Yobe",
-  "Zamfara"
-];
+ const nigerianStates = [
+    "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", 
+    "Benue", "Borno", "Cross River", "Delta", "Ebonyi", "Edo", 
+    "Ekiti", "Rivers", "Enugu", "FCT", "Gombe", "Imo", "Jigawa", 
+    "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", 
+    "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", 
+    "Sokoto", "Taraba", "Yobe", "Zamfara"
+  ];
 
 
   const [errors, setErrors] = useState({});
@@ -139,6 +108,7 @@ const nigerianStates = [
                             onChange={handleChange}
                             placeholder="Enter First name"
                             error={errors.firstName}
+                            classNames="mb-5 lg:mb-0"
                         />
 
                         <InputField
@@ -160,6 +130,7 @@ const nigerianStates = [
                             placeholder="Enter phone number"
                             type="tel"
                             error={errors.primaryPhone}
+                             classNames="mb-5 lg:mb-0"
                         />
 
                         <InputField
@@ -204,6 +175,7 @@ const nigerianStates = [
                             placeholder="Enter password"
                             type="password"
                             error={errors.password}
+                             classNames="mb-5 lg:mb-0"
                         />
 
                         <InputField

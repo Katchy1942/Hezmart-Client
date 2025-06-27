@@ -160,7 +160,7 @@ const AdminOrdersManager = () => {
     }, []);
 
     return (
-        <div className="p-4">
+        <div className="">
             {/* Header and Search */}
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-gray-800 mb-4">Order Management</h1>

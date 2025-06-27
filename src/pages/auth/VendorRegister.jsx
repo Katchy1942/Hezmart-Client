@@ -27,44 +27,13 @@ const VendorRegister = () => {
   });
 
   const nigerianStates = [
-  "Abia",
-  "Adamawa",
-  "Akwa Ibom",
-  "Anambra",
-  "Bauchi",
-  "Bayelsa",
-  "Benue",
-  "Borno",
-  "Cross River",
-  "Delta",
-  "Ebonyi",
-  "Edo",
-  "Ekiti",
-  "Rivers",
-  "Enugu",
-  "FCT",
-  "Gombe",
-  "Imo",
-  "Jigawa",
-  "Kaduna",
-  "Kano",
-  "Katsina",
-  "Kebbi",
-  "Kogi",
-  "Kwara",
-  "Lagos",
-  "Nasarawa",
-  "Niger",
-  "Ogun",
-  "Ondo",
-  "Osun",
-  "Oyo",
-  "Plateau",
-  "Sokoto",
-  "Taraba",
-  "Yobe",
-  "Zamfara"
-];
+    "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", 
+    "Benue", "Borno", "Cross River", "Delta", "Ebonyi", "Edo", 
+    "Ekiti", "Rivers", "Enugu", "FCT", "Gombe", "Imo", "Jigawa", 
+    "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", 
+    "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", 
+    "Sokoto", "Taraba", "Yobe", "Zamfara"
+  ];
 
   const [previewImage, setPreviewImage] = useState(null);
   const fileInputRef = useRef(null);
@@ -190,6 +159,7 @@ const VendorRegister = () => {
               onChange={handleChange}
               placeholder="Enter First name"
               error={errors.firstName}
+              classNames="mb-5 lg:mb-0"
             />
 
             <InputField
@@ -211,6 +181,7 @@ const VendorRegister = () => {
               placeholder="Enter phone number"
               type="tel"
               error={errors.primaryPhone}
+              classNames="mb-5 lg:mb-0"
             />
 
             <InputField
@@ -232,6 +203,7 @@ const VendorRegister = () => {
               onChange={handleChange}
               placeholder="Enter your nin"
               error={errors.ninNumber}
+              classNames="mb-5 lg:mb-0"
             />
             <SelectField
               name="state"
@@ -298,6 +270,7 @@ const VendorRegister = () => {
               placeholder="Enter password"
               type="password"
               error={errors.password}
+              classNames="mb-5 lg:mb-0"
             />
 
             <InputField
@@ -324,6 +297,7 @@ const VendorRegister = () => {
                     onChange={handleChange}
                     placeholder="Enter your business name"
                     error={errors.businessName}
+                    classNames="mb-5 lg:mb-0"
                 />
 
                 <SelectField

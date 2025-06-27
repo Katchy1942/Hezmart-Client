@@ -26,7 +26,7 @@ export default function AuthenticatedLayout() {
                 <Header setToggle={setToggle} toggle={toggle} user={user} />
                
                 {/* Main Content Area */}
-                <main className="py-6 md:py-4 px-4 text-slate-300 relative z-0 pb-20 md:pb-10 overflow-x-auto mt-[64px]">
+                <main className="py-6 md:py-4 px-4 relative z-0 pb-20 md:pb-10 overflow-x-auto mt-[64px]">
                     <Outlet />
                 </main>
             </div>

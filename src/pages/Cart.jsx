@@ -135,12 +135,12 @@ const Cart = () => {
   const allItemsAvailable = items.every(item => item.available);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex items-center mb-6">
-        <Link to="/" className="flex items-center text-primary-light hover:text-primary-dark">
+    <div className="max-w-7xl mx-auto">
+      <div className="flex items-center mb-6 ">
+        <Link to="/" className="flex text-sm items-center text-primary-light hover:text-primary-dark">
           <FiChevronLeft className="mr-1" /> Continue Shopping
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900 ml-6">Your Shopping Cart</h1>
+        <h1 className="text-sm lg:text-2xl font-bold text-gray-900 ml-6">Your Shopping Cart</h1>
       </div>
 
       <div className="lg:grid lg:grid-cols-12 lg:gap-x-12">

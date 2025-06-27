@@ -15,11 +15,13 @@ const Profile = () => {
     password: {}
   });
 
-  const countries = [
-    { value: 'ng', label: 'Nigeria' },
-    { value: 'gh', label: 'Ghana' },
-    { value: 'ke', label: 'Kenya' },
-    { value: 'za', label: 'South Africa' }
+ const nigerianStates = [
+    "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", 
+    "Benue", "Borno", "Cross River", "Delta", "Ebonyi", "Edo", 
+    "Ekiti", "Rivers", "Enugu", "FCT", "Gombe", "Imo", "Jigawa", 
+    "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", 
+    "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", 
+    "Sokoto", "Taraba", "Yobe", "Zamfara"
   ];
 
   const getUser = async () => {
@@ -116,35 +118,27 @@ const Profile = () => {
                     required
                   />
                 </div>
-                
-                <InputField
-                  label="Email"
-                  name="email"
-                  type="email"
-                  value={user.email}
-                  error={errors.account?.email}
-                  required
-                  disabled
-                />
-                
-                <InputField
-                  label="Primary Phone"
-                  name="primaryPhone"
-                  type="tel"
-                  value={user.primaryPhone}
-                  error={errors.account?.primaryPhone}
-                  required
-                />
-                
-                <InputField
-                  label="Secondary Phone"
-                  name="secondaryPhone"
-                  type="tel"
-                  value={user.secondaryPhone || ''}
-                  error={errors.account?.secondaryPhone}
-                  isRequired={false}
-                />
-                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <InputField
+                    label="Email"
+                    name="email"
+                    type="email"
+                    value={user.email}
+                    error={errors.account?.email}
+                    required
+                    disabled
+                  />
+                  
+                  <InputField
+                    label="Primary Phone"
+                    name="primaryPhone"
+                    type="tel"
+                    value={user.primaryPhone}
+                    error={errors.account?.primaryPhone}
+                    required
+                  />
+                </div>
+                 
                 <Button type="submit" isLoading={isUpdating}>
                   Update Account
                 </Button>
@@ -155,6 +149,13 @@ const Profile = () => {
             <div className='border border-gray-300 rounded-md'>
               <h2 className='mb-4 border-b border-b-gray-300 p-3 font-medium'>Address Book</h2>
               <form className='p-3 space-y-4' onSubmit={handleAccountUpdate}>
+                <SelectField
+                  name="state"
+                  label="State"
+                  value={user.state}
+                  options={nigerianStates}
+                  error={errors.account?.state}
+                />
                 <InputField
                   label="Primary Address"
                   name="primaryAddress"
@@ -162,40 +163,6 @@ const Profile = () => {
                   error={errors.account?.primaryAddress}
                   required
                 />
-                
-                <InputField
-                  label="Secondary Address"
-                  name="secondaryAddress"
-                  value={user.secondaryAddress || ''}
-                  error={errors.account?.secondaryAddress}
-                  isRequired={false}
-                />
-                
-                <SelectField
-                  label="Country"
-                  name="country"
-                  options={countries}
-                  value={user.country}
-                  error={errors.account?.country}
-                  required
-                />
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <InputField
-                    label="City"
-                    name="city"
-                    value={user.city}
-                    error={errors.account?.city}
-                    required
-                  />
-                  <InputField
-                    label="Region/State"
-                    name="region"
-                    value={user.region}
-                    error={errors.account?.region}
-                    required
-                  />
-                </div>
                 
                 <Button type="submit" isLoading={isUpdating}>
                   Update Address

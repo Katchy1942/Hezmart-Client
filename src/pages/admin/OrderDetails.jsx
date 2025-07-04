@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from '../../lib/axios';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import Button from '../../components/common/Button'
 import { 
   FiChevronLeft, 
   FiPrinter, 
@@ -11,7 +12,8 @@ import {
   FiPackage, 
   FiCheckCircle,
   FiClock,
-  FiXCircle
+  FiXCircle,
+  FiDollarSign
 } from 'react-icons/fi';
 
 const OrderDetails = () => {
@@ -21,6 +23,7 @@ const OrderDetails = () => {
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [itemStatusUpdating, setItemStatusUpdating] = useState(null);
   const [notes, setNotes] = useState('');
+  const [confirmingPayment, setConfirmingPayment] = useState(false);
 
   // Order status options for dropdown
   const statusOptions = [
@@ -127,6 +130,21 @@ const OrderDetails = () => {
       toast.success('Shipping notification sent to customer');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to send notification');
+    }
+  };
+
+  const confirmPayment = async () => {
+    setConfirmingPayment(true);
+    try {
+      const response = await axios.patch(`/api/v1/orders/${orderId}/confirm-payment`);
+      if (response.data.status === 'success') {
+        toast.success('Payment confirmed successfully');
+        setOrder(prev => ({ ...prev, paymentStatus: 'paid' }));
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to confirm payment');
+    } finally {
+      setConfirmingPayment(false);
     }
   };
 
@@ -284,32 +302,53 @@ const OrderDetails = () => {
               <div className="text-xs sm:text-sm text-gray-700 space-y-1">
                 <p>{order.deliveryAddress?.firstName} {order.deliveryAddress?.lastName}</p>
                 <p>{order.deliveryAddress?.primaryAddress}</p>
-                <p>{order.deliveryAddress?.city}</p>
-                <p>{order.deliveryAddress?.country.toUpperCase()}</p>
+                <p>{order.deliveryAddress?.city || order.deliveryAddress?.state}</p>
                 <p className="mt-1 sm:mt-2">Phone: {order.deliveryAddress?.primaryPhone}</p>
-                {order.deliveryAddress?.secondaryPhone && (
-                  <p>Alt. Phone: {order.deliveryAddress?.secondaryPhone}</p>
-                )}
+                <p className="mt-1 sm:mt-2">Email: {order.deliveryAddress?.email}</p>
               </div>
             </div>
-          </div>
 
-           {/* Shipping Method */}
-            {/* <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="text-lg font-medium text-gray-900 mb-4">Shipping Method</h4>
-              <div className="flex items-center">
-                <FiTruck className="h-5 w-5 text-gray-400" />
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-900">Standard Shipping</p>
-                  <p className="text-sm text-gray-500">
-                    {order.trackingNumber 
-                      ? `Tracking #: ${order.trackingNumber}`
-                      : 'No tracking number provided'}
-                  </p>
+            {/* Delivery Option */}
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+              <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">
+                {order.deliveryOption === 'door' ? 'Door Delivery' : 'Pickup Station'}
+              </h4>
+              {order.deliveryOption === 'door' ? (
+                <div className="text-xs sm:text-sm text-gray-700 space-y-1">
+                  <p>State: {order.stateFeeDetails?.state}</p>
+                  <p>Delivery Fee: {formatCurrency(order.stateFeeDetails?.fee || 0)}</p>
+                </div>
+              ) : (
+                <div className="text-xs sm:text-sm text-gray-700 space-y-1">
+                  <p>Station: {order.pickupStationDetails?.name}</p>
+                  <p>Address: {order.pickupStationDetails?.address}</p>
+                  <p>State: {order.pickupStationDetails?.state}</p>
+                  <p>Contact: {order.pickupStationDetails?.contactPhone}</p>
+                  <p>Pickup Fee: {formatCurrency(order.pickupStationDetails?.fee || 0)}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Wallet Details (for crypto payments) */}
+            {order.paymentMethod === 'crypto' && order.walletDetails && (
+              <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Wallet Information</h4>
+                <div className="text-xs sm:text-sm text-gray-700 space-y-1">
+                  <p>Wallet: {order.walletDetails.name}</p>
+                  <p className="break-all">Address: {order.walletDetails.address}</p>
+                  {order.walletDetails.barcode && (
+                    <div className="mt-2">
+                      <img 
+                        src={order.walletDetails.barcode} 
+                        alt="Wallet barcode"
+                        className="h-24 mx-auto"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
-            </div> */}
-          
+            )}
+          </div>
 
           {/* Middle Column - Order Items */}
           <div className="lg:col-span-1">
@@ -479,7 +518,64 @@ const OrderDetails = () => {
                     {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
                   </span>
                 </div>
+                {order.paymentStatus === 'pending' && (
+                  <div className="pt-2">
+                    <Button
+                      onClick={confirmPayment}
+                      disabled={confirmingPayment}
+                      isLoading={confirmingPayment}
+                      loadingText="Confirming..."
+                      icon={<FiDollarSign />}
+                      iconPosition="left"
+                      className="w-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                    >
+                      Confirm Payment Received
+                    </Button>
+                  </div>
+                )}
               </div>
+            </div>
+
+            {/* Order Status Update */}
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+              <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Update Order Status</h4>
+              <div className="space-y-3">
+                <select
+                  value={order.status}
+                  onChange={(e) => updateOrderStatus(e.target.value)}
+                  disabled={statusUpdating}
+                  className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-light focus:border-primary-light sm:text-sm rounded-md"
+                >
+                  {statusOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                {statusUpdating && (
+                  <div className="flex justify-center">
+                    <LoadingSpinner type="dots" size={4} />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Notes */}
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+              <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Order Notes</h4>
+              <textarea
+                rows="3"
+                className="shadow-sm focus:ring-primary-light focus:border-primary-light block w-full sm:text-sm border border-gray-300 rounded-md"
+                placeholder="Add notes about this order..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
+              <button
+                onClick={saveNotes}
+                className="mt-2 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-light hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-light"
+              >
+                Save Notes
+              </button>
             </div>
           </div>
         </div>

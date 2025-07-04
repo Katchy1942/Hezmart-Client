@@ -8,14 +8,13 @@ import CartItemsList from '../components/cart/CartItemsList';
 import CartSummary from '../components/cart/CartSummary';
 import CartEmptyState from '../components/cart/CartEmptyState';
 
-
 const Cart = () => {
   const { cart, updateQuantity, removeFromCart, clearCart, fetchCart } = useCart();
   const currentUser = JSON.parse(localStorage.getItem('user'));
   const navigate = useNavigate();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
- 
+
 
   useEffect(() => {
     fetchCart();
@@ -150,7 +149,6 @@ const Cart = () => {
           onRemoveItem={handleRemoveItem}
           onClearCart={handleClearCart}
         />
-
         <CartSummary
           summary={summary}
           shippingOptions={shippingOptions}

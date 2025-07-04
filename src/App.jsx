@@ -62,11 +62,8 @@ import NotFound from './pages/NotFound';
 import Error from './components/Error';
 import { requireAuth } from './utils/protect';
 import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
 import Shops from './pages/Shops';
-
-
-
-
 
 function App() {
 
@@ -100,6 +97,7 @@ function App() {
         <Route path="/vendor/:vendorId" element={<VendorProductsPage />} />
 
         <Route path='cart' element={<Cart />}></Route>
+        <Route path='checkout' element={<Checkout />} loader={async({ request }) => await requireAuth(request, 'customer')}></Route>
        
       </Route>
 

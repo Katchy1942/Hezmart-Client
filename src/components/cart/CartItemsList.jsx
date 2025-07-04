@@ -1,5 +1,5 @@
 import { FiTrash2 } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const CartItemsList = ({ 
   items, 
@@ -7,9 +7,12 @@ const CartItemsList = ({
   onRemoveItem,
   onClearCart 
 }) => {
+  const location = useLocation();
+  const pathname = location.pathname
+  
   return (
     <div className="lg:col-span-8">
-      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+      <div className="bg-white shadow overflow-hidden rounded-lg">
         <ul className="divide-y divide-gray-200">
           {items.map((item) => (
             <li key={`${item.productId}-${JSON.stringify(item.selectedOptions)}`} className="p-4 sm:p-6">
@@ -45,12 +48,15 @@ const CartItemsList = ({
                         </span>
                       )}
                     </div>
-                    <button
-                      onClick={() => onRemoveItem(item.productId)}
-                      className="ml-4 text-primary-light hover:text-primary-dark cursor-pointer"
-                    >
-                      <FiTrash2 className="h-5 w-5" />
-                    </button>
+                    {pathname === '/cart' && (
+                      <button
+                        onClick={() => onRemoveItem(item.productId)}
+                        className="ml-4 text-primary-light hover:text-primary-dark cursor-pointer"
+                      >
+                        <FiTrash2 className="h-5 w-5" />
+                      </button>
+                    )}
+                   
                   </div>
 
                   <div className="mt-4 flex-1 flex items-end justify-between">
@@ -76,25 +82,29 @@ const CartItemsList = ({
                             : (item.product?.price || 0).toLocaleString()} each
                         </p>
                       )}
+                       <div className=''>Quantity: {item.quantity}</div>
                     </div>
 
-                    <div className="flex items-center border border-gray-300 bg-[#F0F0F0] rounded-md">
-                      <button
-                        onClick={() => onQuantityChange(item.productId, -1)}
-                        className="px-3 py-1 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
-                        disabled={item.quantity <= 1}
-                      >
-                        -
-                      </button>
-                      <span className="px-4 py-1 text-gray-900">{item.quantity}</span>
-                      <button
-                        onClick={() => onQuantityChange(item.productId, 1)}
-                        className="px-3 py-1 text-gray-600 hover:bg-gray-100"
-                        disabled={item.quantity >= (item.product?.stockQuantity || 0)}
-                      >
-                        +
-                      </button>
-                    </div>
+                   
+                    {pathname === '/cart' && (
+                      <div className="flex items-center border border-gray-300 bg-[#F0F0F0] rounded-md">
+                        <button
+                          onClick={() => onQuantityChange(item.productId, -1)}
+                          className="px-3 py-1 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
+                          disabled={item.quantity <= 1}
+                        >
+                          -
+                        </button>
+                        <span className="px-4 py-1 text-gray-900">{item.quantity}</span>
+                        <button
+                          onClick={() => onQuantityChange(item.productId, 1)}
+                          className="px-3 py-1 text-gray-600 hover:bg-gray-100"
+                          disabled={item.quantity >= (item.product?.stockQuantity || 0)}
+                        >
+                          +
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -103,14 +113,17 @@ const CartItemsList = ({
         </ul>
       </div>
 
-      <div className="mt-4 flex justify-end">
-        <button
-          onClick={onClearCart}
-          className="text-sm text-red-600 hover:text-red-800 flex items-center cursor-pointer"
-        >
-          <FiTrash2 className="mr-1" /> Clear Cart
-        </button>
-      </div>
+      {pathname === '/cart' && (
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={onClearCart}
+            className="text-sm text-red-600 hover:text-red-800 flex items-center cursor-pointer"
+          >
+            <FiTrash2 className="mr-1" /> Clear Cart
+          </button>
+        </div>
+      )}
+      
     </div>
   );
 };

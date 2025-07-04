@@ -250,7 +250,7 @@ const AdminOrdersManager = () => {
                                                             {order.user?.firstName} {order.user?.lastName}
                                                         </div>
                                                         <div className="text-sm text-gray-500">
-                                                            {order.deliveryAddress.city}
+                                                            {order.deliveryAddress?.city || order.deliveryAddress?.state}
                                                         </div>
                                                     </div>
                                                 </div>

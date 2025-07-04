@@ -18,7 +18,7 @@ const SelectField = ({
 
   // Variant-specific styles
   const variants = {
-    default: "border border-[#D9E1EC] rounded-lg placeholder-[#A1A7C4] text-black focus:border-primary-2",
+    default: "border border-[#D9E1EC] rounded-lg placeholder-[#A1A7C4] text-black focus:border-primary-light",
     outline: "border-b-2 border-gray-300 bg-transparent focus:border-blue-500",
     filled: "bg-gray-100 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500",
     floating: "border border-gray-300 rounded-lg peer focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
@@ -61,7 +61,9 @@ const SelectField = ({
           {option.name || option.title || JSON.stringify(option)}
         </option>
       );
-    });
+
+    })
+   
   };
 
   if (variant === "floating") {

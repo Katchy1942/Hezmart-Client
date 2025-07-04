@@ -537,7 +537,7 @@ const OrderDetails = () => {
             </div>
 
             {/* Order Status Update */}
-            <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+            <div className="hidden bg-gray-50 p-3 sm:p-4 rounded-lg">
               <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Update Order Status</h4>
               <div className="space-y-3">
                 <select
@@ -561,7 +561,7 @@ const OrderDetails = () => {
             </div>
 
             {/* Notes */}
-            <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+            <div className=" hidden bg-gray-50 p-3 sm:p-4 rounded-lg">
               <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Order Notes</h4>
               <textarea
                 rows="3"

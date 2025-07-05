@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FiPlus, FiCopy } from 'react-icons/fi';
 import AddressForm from './AddressForm';
@@ -33,45 +33,77 @@ const CartSummary = ({
   const pathname = location.pathname;
   const [selectedShipping, setSelectedShipping] = useState('standard');
 
-  // Check if address is valid
-  const isValidAddress = selectedAddress && 
-    selectedAddress.firstName && 
-    selectedAddress.lastName && 
-    selectedAddress.primaryPhone && 
-    selectedAddress.state && 
-    selectedAddress.email && 
-    selectedAddress.primaryAddress;
+  // Memoized address validation
+  const isValidAddress = useMemo(() => {
+    // console.log('Validating address:', selectedAddress);
+    
+    if (!selectedAddress || typeof selectedAddress !== 'object') {
+      console.log('Invalid address object');
+      return false;
+    }
 
-   // Check if delivery requirements are met
+    const requiredFields = [
+      'firstName',
+      'lastName',
+      'primaryPhone',
+      'state',
+      'email',
+      'primaryAddress'
+    ];
+
+    for (const field of requiredFields) {
+      if (!selectedAddress[field]?.trim()) {
+        console.log(`Missing required field: ${field}`);
+        return false;
+      }
+    }
+
+    return true;
+  }, [selectedAddress]);
+
+  // Enhanced delivery validation
   const isDeliveryValid = () => {
     if (!deliveryOption) return false;
     
     if (deliveryOption === 'door') {
-      return selectedStateFee;
+      return Boolean(selectedStateFee?.id);
     } else if (deliveryOption === 'pickup') {
-      return selectedPickupStation;
+      return Boolean(selectedPickupStation);
     }
     return false;
   };
 
-  // Check if payment requirements are met
+  // Enhanced payment validation
   const isPaymentValid = () => {
     if (!paymentMethod) return false;
     
     if (paymentMethod === 'crypto') {
-      return selectedWallet?.walletAddress;
+      return Boolean(selectedWallet?.walletAddress);
     }
-    return true; // Other payment methods just need to be selected
+    return true;
   };
 
-  // Determine if checkout button should be disabled
+  // Comprehensive checkout disabled logic
   const isCheckoutDisabled = () => {
-    return checkoutLoading || 
-      (paymentMethod === 'crypto' && loadingCryptoRate) ||
-      !isValidAddress ||
-      !isDeliveryValid() ||
-      !isPaymentValid() ||
-      !allItemsAvailable;
+    // Early returns for loading states
+    if (checkoutLoading || (paymentMethod === 'crypto' && loadingCryptoRate)) {
+      return true;
+    }
+
+    // Validate all requirements
+    const requirements = {
+      addressValid: isValidAddress, // Using memoized value directly
+      deliveryValid: isDeliveryValid(),
+      paymentValid: isPaymentValid(),
+      itemsAvailable: allItemsAvailable
+    };
+
+    console.log('Validation Requirements:', requirements);
+    
+    return !requirements.addressValid || 
+           !requirements.deliveryValid || 
+           !requirements.paymentValid || 
+           !requirements.itemsAvailable;
   };
 
   const handleCopyAddress = () => {
@@ -183,47 +215,45 @@ const CartSummary = ({
         <div className="space-y-4">
           {/* Delivery Address Section */}
           <div className="hidden border-b border-gray-200 pb-4">
-            {currentUser && <h3 className="text-md font-medium text-gray-900 mb-2">Delivery Address</h3>}
+            <h3 className="text-md font-medium text-gray-900 mb-2">Delivery Information</h3>
                       
-            {selectedAddress ? (
+            {selectedAddress && isValidAddress ? (
               <div className="mb-4">
                 <div className="p-3 border border-gray-200 rounded-md bg-gray-50">
                   <p className="font-medium">{selectedAddress.firstName} {selectedAddress.lastName}</p>
                   <p>{selectedAddress.primaryAddress}</p>
                   <p>{selectedAddress.state}</p>
                   <p>Phone: {selectedAddress.primaryPhone}</p>
+                  <p>Email: {selectedAddress.email}</p>
                 </div>
-                {currentUser && (
-                  <Button
-                    variant="text"
-                    onClick={() => setShowAddressForm(true)}
-                    className="mt-2 text-sm flex items-center"
-                    icon={<FiPlus className="mr-1" />}
-                  >
-                    Update Information
-                  </Button>
-                )}
+                <Button
+                  variant="text"
+                  onClick={() => setShowAddressForm(true)}
+                  className="mt-2 text-sm flex items-center"
+                  icon={<FiPlus className="mr-1" />}
+                >
+                  Update Information
+                </Button>
               </div>
             ) : (
               <div className="text-sm text-gray-500">
-                {currentUser && !selectedAddress && <p>No delivery information saved</p>}
-                {currentUser && !selectedAddress && (
-                  <Button
-                    variant="text"
-                    onClick={() => setShowAddressForm(true)}
-                    className="mt-2 text-sm flex items-center"
-                    icon={<FiPlus className="mr-1" />}
-                  >
-                    Add Information
-                  </Button>
-                )}
+                <p>Please provide complete delivery information</p>
+                <Button
+                  variant="text"
+                  onClick={() => setShowAddressForm(true)}
+                  className="mt-2 text-sm flex items-center"
+                  icon={<FiPlus className="mr-1" />}
+                >
+                  Add Delivery Information
+                </Button>
               </div>
             )}
 
-            {showAddressForm && currentUser && (
+            {showAddressForm && (
               <AddressForm
                 currentUser={currentUser}
                 onSave={(address) => {
+                  console.log('Saving address:', address);
                   setSelectedAddress(address);
                   setShowAddressForm(false);
                 }}
@@ -235,42 +265,43 @@ const CartSummary = ({
 
           {/* Coupon Code Section */}
           {pathname === '/checkout' && (
-          <div className="border-b border-gray-200 pb-4">
-            <h3 className="text-md font-medium text-gray-900 mb-2">Coupon Code</h3>
-            <div className="flex gap-2 flex-col lg:flex-row">
-              <input
-                type="text"
-                value={couponCode}
-                onChange={(e) => setCouponCode(e.target.value)}
-                placeholder="Enter coupon code"
-                className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary-light"
-                disabled={applyingCoupon || summary.appliedCoupon}
-              />
-              {summary.appliedCoupon ? (
-                <Button
-                  onClick={handleRemoveCoupon}
-                  disabled={applyingCoupon}
-                  variant="outline"
-                  className="whitespace-nowrap"
-                >
-                  {applyingCoupon ? 'Removing...' : 'Remove'}
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleApplyCoupon}
-                  disabled={applyingCoupon}
-                  className="whitespace-nowrap"
-                >
-                  {applyingCoupon ? 'Applying...' : 'Apply'}
-                </Button>
+            <div className="border-b border-gray-200 pb-4">
+              <h3 className="text-md font-medium text-gray-900 mb-2">Coupon Code</h3>
+              <div className="flex gap-2 flex-col lg:flex-row">
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  placeholder="Enter coupon code"
+                  className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary-light"
+                  disabled={applyingCoupon || summary.appliedCoupon}
+                />
+                {summary.appliedCoupon ? (
+                  <Button
+                    onClick={handleRemoveCoupon}
+                    disabled={applyingCoupon}
+                    variant="outline"
+                    className="whitespace-nowrap"
+                  >
+                    {applyingCoupon ? 'Removing...' : 'Remove'}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleApplyCoupon}
+                    disabled={applyingCoupon}
+                    className="whitespace-nowrap"
+                  >
+                    {applyingCoupon ? 'Applying...' : 'Apply'}
+                  </Button>
+                )}
+              </div>
+              {summary.appliedCoupon && (
+                <div className="mt-2 text-sm text-green-600">
+                  Coupon "{summary.appliedCoupon}" applied successfully!
+                </div>
               )}
             </div>
-            {summary.appliedCoupon && (
-              <div className="mt-2 text-sm text-green-600">
-                Coupon "{summary.appliedCoupon}" applied successfully!
-              </div>
-            )}
-          </div>)}
+          )}
 
           {/* Order Summary */}
           <div className="flex justify-between">
@@ -320,9 +351,6 @@ const CartSummary = ({
                             <span className="text-xs text-green-500 ml-1">Copied!</span>
                           )}
                         </div>
-                        {/* <div className="text-xs text-red-500 mt-1">
-                          Payment must be completed within 30 minutes
-                        </div> */}
                       </div>
                     ) : (
                       <div className="text-sm text-gray-500 mt-1">
@@ -362,8 +390,7 @@ const CartSummary = ({
             
             {isCheckoutDisabled() && !checkoutLoading && (
               <div className="text-xs text-red-500 mt-2 space-y-1">
-             
-                {!isValidAddress && <div>• Please provide a complete delivery address</div>}
+                {!isValidAddress && <div>• Please provide complete delivery information</div>}
                 {!isDeliveryValid() && deliveryOption === 'door' && <div>• Please select a state for delivery</div>}
                 {!isDeliveryValid() && deliveryOption === 'pickup' && <div>• Please select a pickup station</div>}
                 {!isPaymentValid() && paymentMethod === 'crypto' && <div>• Please select a crypto wallet</div>}

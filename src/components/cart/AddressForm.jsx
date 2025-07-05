@@ -17,6 +17,7 @@ const AddressForm = ({
     primaryPhone: currentUser?.primaryPhone || '',
     state: currentUser?.state || '',
     primaryAddress: currentUser?.primaryAddress || '',
+    email:currentUser?.email
   });
   const [errors, setErrors] = useState({});
   const nigerianStates = [
@@ -73,7 +74,8 @@ const AddressForm = ({
         lastName: newAddress.lastName,
         primaryPhone: newAddress.primaryPhone,
         state: newAddress.state,
-        primaryAddress: newAddress.primaryAddress
+        primaryAddress: newAddress.primaryAddress,
+        email:newAddress.email
       });
       
       // Update local user data
@@ -81,14 +83,15 @@ const AddressForm = ({
         ...currentUser,
         ...response.data.data
       };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+      // localStorage.setItem('user', JSON.stringify(updatedUser));
       
       onSave({
         firstName: newAddress.firstName,
         lastName: newAddress.lastName,
         primaryPhone: newAddress.primaryPhone,
         state: newAddress.state,
-        primaryAddress: newAddress.primaryAddress
+        primaryAddress: newAddress.primaryAddress,
+        email:newAddress.email
       });
       
       toast.success('Address updated successfully');
@@ -149,6 +152,15 @@ const AddressForm = ({
         name="primaryPhone"
         label="Primary Phone"
         value={newAddress.primaryPhone}
+        onChange={handleAddressChange}
+        type="tel"
+        error={errors.primaryPhone}
+      />
+
+       <InputField
+        name="email"
+        label="Email"
+        value={newAddress.email}
         onChange={handleAddressChange}
         type="tel"
         error={errors.primaryPhone}

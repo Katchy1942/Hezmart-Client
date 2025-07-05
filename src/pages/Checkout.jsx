@@ -13,18 +13,30 @@ import PaymentMethodSection from '../components/cart/PaymentMethodSection';
 
 const Checkout = () => {
   const { cart, updateQuantity, removeFromCart, clearCart, fetchCart } = useCart();
-  const currentUser = JSON.parse(localStorage.getItem('user'));
+  const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [deliveryOption, setDeliveryOption] = useState(null);
   const [selectedPickupStation, setSelectedPickupStation] = useState('');
-  const[selectedStateFee, setSelectedStateFee] = useState('')
+  const [selectedStateFee, setSelectedStateFee] = useState('');
   const [shippingSettings, setShippingSettings] = useState({});
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [cryptoWallets, setCryptoWallets] = useState([]);
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [selectedWallet, setSelectedWallet] = useState(null);
+
+  // Fetch user data
+  const getUser = async () => {
+    try {
+      const res = await axios.get('api/v1/users/me');
+      if (res.data.status === 'success') {
+        setCurrentUser(res.data.user);
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to fetch user data');
+    }
+  };
 
   // Fetch shipping settings
   const getShippingSettings = async () => {
@@ -38,11 +50,19 @@ const Checkout = () => {
     }
   };
 
+  // Initial data loading
   useEffect(() => {
-    fetchCart();
-    getShippingSettings();
-    
-    // Initialize address from user's primary address if available
+    const fetchData = async () => {
+      await fetchCart();
+      await getShippingSettings();
+      await getUser();
+    };
+
+    fetchData();
+  }, []);
+
+  // Set selected address when currentUser changes
+  useEffect(() => {
     if (currentUser && 
         currentUser.firstName && 
         currentUser.lastName && 
@@ -55,11 +75,11 @@ const Checkout = () => {
         lastName: currentUser.lastName,
         primaryPhone: currentUser.primaryPhone,
         state: currentUser.state,
-        email:currentUser.email,
+        email: currentUser.email,
         primaryAddress: currentUser.primaryAddress,
       });
     }
-  }, []);
+  }, [currentUser]);
 
   const handleStateSelected = ({ state, fee }) => {
     setDeliveryFee(fee);
@@ -71,7 +91,6 @@ const Checkout = () => {
   };
 
   const handleCheckout = async (selectedShipping) => {
-    
     if (!currentUser) {
       toast.error('Please login to proceed to checkout');
       navigate('/login', { state: { from: '/cart' } });
@@ -126,22 +145,21 @@ const Checkout = () => {
         deliveryAddress: selectedAddress,
         deliveryOption,
         paymentMethod,
-       ...(deliveryOption === 'door' && { selectedStateId:selectedStateFee.id,}),
+        ...(deliveryOption === 'door' && { selectedStateId: selectedStateFee.id }),
         ...(deliveryOption === 'pickup' && { pickupStationId: selectedPickupStation }),
         ...(paymentMethod === 'crypto' && { 
           cryptoPayment: true,
           cryptoWalletId: selectedWallet.id
         })
       };
-      const endpoint = paymentMethod ==='crypto' ? 'crypto-checkout' :'checkout-session' 
+      const endpoint = paymentMethod === 'crypto' ? 'crypto-checkout' : 'checkout-session';
       const response = await axios.post(`api/v1/orders/${endpoint}`, payload);
 
-      if(paymentMethod === 'prepay' && response.data.status === 'success'){
+      if (paymentMethod === 'prepay' && response.data.status === 'success') {
         window.location.href = response.data.data.checkoutUrl;
-      } else if(paymentMethod === 'crypto' && response.data.status === 'success'){
-        navigate('/orders')
+      } else if (paymentMethod === 'crypto' && response.data.status === 'success') {
+        navigate('/orders');
         toast.success('Please make payment to the provided crypto wallet address');
-        // Show payment instructions with wallet details
       }
     } catch (error) {
       console.error('Checkout error:', error);
@@ -151,8 +169,6 @@ const Checkout = () => {
     }
   };
 
-
-  
   if (cart.loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -244,7 +260,7 @@ const Checkout = () => {
             deliveryFee={deliveryFee}
             paymentMethod={paymentMethod}
             selectedWallet={selectedWallet}
-            selectedPickupStation ={selectedPickupStation }
+            selectedPickupStation={selectedPickupStation}
             selectedStateFee={selectedStateFee}
           />
         </div>

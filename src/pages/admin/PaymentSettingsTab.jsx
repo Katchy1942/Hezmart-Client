@@ -102,8 +102,8 @@ const PaymentSettingsTab = ({ paymentSettings }) => {
     return (
         <div className="space-y-6">
             <div className='border border-gray-200 rounded-lg shadow-sm bg-white'>
-                <div className='flex justify-between items-center border-b border-b-gray-200 p-4'>
-                    <h2 className='text-lg font-semibold text-gray-800'>Payment Methods</h2>
+                <div className='flex flex-col lg:flex-row justify-between lg:items-center border-b border-b-gray-200 p-4'>
+                    <h2 className='text-lg font-semibold text-gray-800 mb-3 lg:mb-0'>Payment Methods</h2>
                     {
                         showForm ? ( 
                             <button

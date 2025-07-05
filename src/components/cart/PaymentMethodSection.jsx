@@ -9,11 +9,12 @@ const PaymentMethodSection = ({
   setSelectedWallet
 }) => {
   const [cryptoWallets, setWallets] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [expandedWalletId, setExpandedWalletId] = useState(null);
 
   const getWallets = async () => {
     try {
+      setLoading(true);
       const res = await axios.get('api/v1/paymentOptions');
       if (res.data.status === 'success') {
         setWallets(res.data.data.paymentOptions);
@@ -41,8 +42,6 @@ const PaymentMethodSection = ({
     navigator.clipboard.writeText(text);
     toast.success("Wallet address copied to clipboard");
   };
-
-  
 
   return (
     <div className={`bg-white rounded-lg shadow-sm p-6 ${paymentMethod ? 'border-l-4 border-green-500' : ''}`}>
@@ -92,81 +91,90 @@ const PaymentMethodSection = ({
         </div>
 
         {/* Crypto wallets */}
-        {paymentMethod === 'crypto' && cryptoWallets?.length > 0 && (
+        {paymentMethod === 'crypto' && (
           <div className="p-4 border border-gray-200 rounded-md bg-gray-50 mt-4">
             <h4 className="font-medium text-sm mb-3">Available Crypto Wallets</h4>
-            <div className="space-y-3">
-              {cryptoWallets.map((wallet) => (
-                <div 
-                  key={wallet.id} 
-                  className="p-3 bg-white rounded border border-gray-200 cursor-pointer hover:shadow transition"
-                  onClick={() => handleToggleWallet(wallet)}
-                >
-                  <div>
-                    <h5 className="text-sm font-semibold text-gray-800">{wallet.networkName}</h5>
-                    {expandedWalletId !== wallet.id && (
-                      <p className="text-xs text-gray-500">Click to get wallet address</p>
+            
+            {loading ? (
+              <div className="flex justify-center items-center h-40">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-dark mx-auto"></div>
+              </div>
+            ) : cryptoWallets?.length > 0 ? (
+              <div className="space-y-3">
+                {cryptoWallets.map((wallet) => (
+                  <div 
+                    key={wallet.id} 
+                    className="p-3 bg-white rounded border border-gray-200 cursor-pointer hover:shadow transition"
+                    onClick={() => handleToggleWallet(wallet)}
+                  >
+                    <div>
+                      <h5 className="text-sm font-semibold text-gray-800">{wallet.networkName}</h5>
+                      {expandedWalletId !== wallet.id && (
+                        <p className="text-xs text-gray-500">Click to get wallet address</p>
+                      )}
+                    </div>
+
+                    {expandedWalletId === wallet.id && (
+                      <div className="mt-3 space-y-3">
+                        <div>
+                          <p className="text-xs text-gray-500 mb-1">Wallet Address:</p>
+                          <div className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                            <code className="text-sm break-all">{wallet.walletAddress}</code>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                copyToClipboard(wallet.walletAddress);
+                              }}
+                              className="ml-2 cursor-pointer text-xs text-blue-600 hover:text-blue-800"
+                            >
+                              Copy
+                            </button>
+                          </div>
+                        </div>
+
+                        {wallet.barcode && (
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">Scan Barcode:</p>
+                            <img
+                              src={wallet.barcode}
+                              alt={`${wallet.networkName} barcode`}
+                              className="max-h-40 rounded border border-gray-200"
+                            />
+                          </div>
+                        )}
+
+                        {/* Warning message */}
+                        <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-md border border-red-200 dark:border-red-800">
+                          <h4 className="text-red-700 dark:text-red-300 text-sm font-semibold mb-1">
+                            To avoid loss of funds:
+                          </h4>
+                          <ul className="text-red-600 dark:text-red-300 text-xs space-y-1">
+                            <li className="flex items-start">
+                              <span className="mr-1">•</span>
+                              <span> Only send <strong>{wallet.networkName}</strong> to this address</span>
+                            </li>
+                            <li className="flex items-start">
+                              <span className="mr-1">•</span>
+                              Make sure to copy the wallet address above and paste it into your crypto wallet
+                            </li>
+                            <li className="flex items-start">
+                              <span className="mr-1">•</span>
+                              <span> In your crypto wallet, select the{'   '}<strong>{wallet.networkName} </strong>{'   '}network when transferring</span>
+                            </li>
+                            <li className="flex items-start">
+                              <span className="mr-1">•</span>
+                              Incorrect transfers may result in the loss of funds
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
                     )}
                   </div>
-
-                  {expandedWalletId === wallet.id && (
-                    <div className="mt-3 space-y-3">
-                      <div>
-                        <p className="text-xs text-gray-500 mb-1">Wallet Address:</p>
-                        <div className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                          <code className="text-sm break-all">{wallet.walletAddress}</code>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              copyToClipboard(wallet.walletAddress);
-                            }}
-                            className="ml-2 cursor-pointer text-xs text-blue-600 hover:text-blue-800"
-                          >
-                            Copy
-                          </button>
-                        </div>
-                      </div>
-
-                      {wallet.barcode && (
-                        <div>
-                          <p className="text-xs text-gray-500 mb-1">Scan Barcode:</p>
-                          <img
-                            src={wallet.barcode}
-                            alt={`${wallet.networkName} barcode`}
-                            className="max-h-40 rounded border border-gray-200"
-                          />
-                        </div>
-                      )}
-
-                      {/* Warning message */}
-                      <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-md border border-red-200 dark:border-red-800">
-                        <h4 className="text-red-700 dark:text-red-300 text-sm font-semibold mb-1">
-                          To avoid loss of funds:
-                        </h4>
-                        <ul className="text-red-600 dark:text-red-300 text-xs space-y-1">
-                          <li className="flex items-start">
-                            <span className="mr-1">•</span>
-                            <span> Only send <strong>{wallet.networkName}</strong> to this address</span>
-                          </li>
-                          <li className="flex items-start">
-                            <span className="mr-1">•</span>
-                            Make sure to copy the wallet address above and paste it into your crypto wallet
-                          </li>
-                          <li className="flex items-start">
-                            <span className="mr-1">•</span>
-                            <span> In your crypto wallet, select the{'   '}<strong>{wallet.networkName} </strong>{'   '}network when transferring</span>
-                          </li>
-                          <li className="flex items-start">
-                            <span className="mr-1">•</span>
-                            Incorrect transfers may result in the loss of funds
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              !loading && <p className="text-sm text-gray-500">No crypto wallets available</p>
+            )}
           </div>
         )}
       </div>

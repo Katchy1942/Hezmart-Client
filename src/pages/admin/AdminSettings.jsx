@@ -35,12 +35,6 @@ const AdminSettings = () => {
         "Sokoto", "Taraba", "Yobe", "Zamfara"
     ];
 
-    const paymentMethodOptions = [
-        { value: 'card', label: 'Credit/Debit Card' },
-        { value: 'bank', label: 'Bank Transfer' },
-        { value: 'wallet', label: 'Digital Wallet' }
-    ];
-
     // Fetch user data
     const getUser = async () => {
         try {
@@ -53,70 +47,9 @@ const AdminSettings = () => {
         }
     };
 
-  
-
-    // Fetch payment settings
-    const getPaymentSettings = async () => {
-        try {
-            const res = await axios.get('api/v1/payment-settings');
-            if (res.data.status === 'success') {
-                setPaymentSettings(res.data.data);
-            }
-        } catch (err) {
-            toast.error(err.response?.data?.message || 'Failed to fetch payment settings');
-        }
-    };
-
-
-    // Payment settings handler
-    const handlePaymentSettingsSubmit = async (e) => {
-        e.preventDefault();
-        setIsUpdating(true);
-        
-        try {
-            const res = await axios.post('api/v1/payment-settings', paymentSettings);
-            if (res.data.status === 'success') {
-                toast.success('Payment settings updated successfully');
-                setPaymentSettings(res.data.data);
-                setErrors(prev => ({ ...prev, payment: {} }));
-            }
-        } catch (err) {
-            if (err.response?.data?.errors) {
-                setErrors(prev => ({ ...prev, payment: err.response.data.errors }));
-            }
-            toast.error(err.response?.data?.message || 'Failed to update payment settings');
-        } finally {
-            setIsUpdating(false);
-        }
-    };
-
-
-    // Payment settings handlers
-    const handlePaymentMethodChange = (index, field, value) => {
-        const updatedMethods = [...paymentSettings.paymentMethods];
-        updatedMethods[index] = { ...updatedMethods[index], [field]: value };
-        setPaymentSettings({ ...paymentSettings, paymentMethods: updatedMethods });
-    };
-
-    const addNewPaymentMethod = () => {
-        setPaymentSettings({
-            ...paymentSettings,
-            paymentMethods: [
-                ...paymentSettings.paymentMethods,
-                { type: 'card', details: '', isActive: true }
-            ]
-        });
-    };
-
-    const removePaymentMethod = (index) => {
-        const updatedMethods = paymentSettings.paymentMethods.filter((_, i) => i !== index);
-        setPaymentSettings({ ...paymentSettings, paymentMethods: updatedMethods });
-    };
-
     // Initial data loading
     useEffect(() => {
         getUser();
-        getPaymentSettings();
     }, []);
 
     if (!user) {
@@ -129,41 +62,39 @@ const AdminSettings = () => {
 
     return (
         <section className='bg-gray-100 min-h-screen'>
-            <div className="max-w-7xl mx-auto">
+            <div className="">
                 <h1 className="text-2xl font-bold text-gray-800 mb-6">Admin Settings</h1>
                 
-                {/* Tabs Navigation */}
-                <div className="border-b border-gray-200 mb-6">
-                    <nav className="-mb-px flex space-x-8">
+                {/* Responsive Tabs Navigation */}
+                <div className="border-b border-gray-200 mb-6 overflow-x-auto">
+                    <nav className="flex space-x-8 min-w-max">
                         <button
                             onClick={() => setActiveTab('profile')}
-                            className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'profile' ? 'border-primary-dark text-primary-dark' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                            className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'profile' ? 'border-primary-dark text-primary-dark' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                         >
                             Profile
                         </button>
                         <button
                             onClick={() => setActiveTab('payment')}
-                            className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'payment' ? 'border-primary-dark text-primary-dark' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                            className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'payment' ? 'border-primary-dark text-primary-dark' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                         >
                             Payment
                         </button>
                         <button
                             onClick={() => setActiveTab('shipping')}
-                            className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'shipping' ? 'border-primary-dark text-primary-dark' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                            className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'shipping' ? 'border-primary-dark text-primary-dark' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                         >
                             Shipping
                         </button>
-
                         <button
                             onClick={() => setActiveTab('pickup')}
-                            className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'pickup' ? 'border-primary-dark text-primary-dark' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                            className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'pickup' ? 'border-primary-dark text-primary-dark' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                         >
                             Pickup Stations
                         </button>
-
-                         <button
+                        <button
                             onClick={() => setActiveTab('stateFee')}
-                            className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'stateFee' ? 'border-primary-dark text-primary-dark' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                            className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'stateFee' ? 'border-primary-dark text-primary-dark' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                         >
                             State Fee
                         </button>
@@ -198,7 +129,7 @@ const AdminSettings = () => {
                         />
                     )}
 
-                     {activeTab === 'stateFee' && (
+                    {activeTab === 'stateFee' && (
                         <StateFeesTab 
                             nigerianStates={nigerianStates}
                         />

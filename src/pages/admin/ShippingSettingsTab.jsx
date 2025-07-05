@@ -22,9 +22,7 @@ const ShippingSettingsTab = ({
     // Fetch shipping settings
     const getShippingSettings = async () => {
         try {
-            const res = await axios.get('api/v1/shipping-settings/active');
-            console.log(res);
-            
+            const res = await axios.get('api/v1/shipping-settings/active'); 
             if (res.data.status === 'success') {
                 setShippingSettings(res.data.data.settings);
             }

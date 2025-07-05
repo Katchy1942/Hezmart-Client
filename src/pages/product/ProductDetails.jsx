@@ -8,6 +8,7 @@ import { useCart } from "../../components/contexts/CartContext.jsx";
 import { toast } from 'react-toastify';
 import Button from "../../components/common/Button.jsx";
 import ProductsGrid from "../../components/products/ProductsGrid.jsx";
+import MetaTags from "../../components/common/MetaTags.jsx";
 
 const ProductDetails = () => {
     const { addToCart, cart } = useCart();
@@ -150,16 +151,32 @@ const ProductDetails = () => {
         return parseFloat(product.discountPrice || product.price);
     };
 
-    const handleShare = ()=>{
-        if(navigator.share){
-            navigator
-            .share({
+    // const handleShare = ()=>{
+    //     if(navigator.share){
+    //         navigator
+    //         .share({
+    //             title:'Check this out!',
+    //             text:'I found a great product for you.',
+    //             url:window.location.href
+    //         })
+    //         .then(()=>console.log('Shared successfully'))
+    //         .catch(err => console.log('Error Sharing', err))
+    //     }
+    // }
+
+    const handleShare = () => {
+        if (navigator.share) {
+            navigator.share({
                 title:'Check this out!',
                 text:'I found a great product for you.',
-                url:window.location.href
+                url: window.location.href,
             })
-            .then(()=>console.log('Shared successfully'))
-            .catch(err => console.log('Error Sharing', err))
+            .then(() => console.log('Shared successfully'))
+            .catch(err => console.log('Error Sharing', err));
+        } else {
+            // Fallback for browsers that don't support the Web Share API
+            const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(product.name)}&url=${encodeURIComponent(window.location.href)}`;
+            window.open(shareUrl, '_blank');
         }
     }
 
@@ -234,6 +251,13 @@ const ProductDetails = () => {
 
     return (
         <div className="max-w-7xl mx-auto">
+            {/* Add MetaTags for social sharing */}
+            <MetaTags
+                title={product.name}
+                description={product.description || `Check out ${product.name} on our store`}
+                image={product.coverImage}
+                url={window.location.href}
+            />
             {/* Product Overview */}
             <div className="flex flex-col md:flex-row gap-8 mb-12">
                 {/* Product Images */}

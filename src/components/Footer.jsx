@@ -162,7 +162,7 @@ const Footer = () => {
       {isVisible && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-6 right-6 bg-primary-light text-white p-3 rounded-full shadow-lg hover:bg-primary-dark transition-colors duration-300 focus:outline-none"
+          className="fixed bottom-6 left-6 bg-primary-light text-white p-3 rounded-full shadow-lg hover:bg-primary-dark transition-colors duration-300 focus:outline-none"
           aria-label="Scroll to top"
         >
           <svg

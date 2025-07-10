@@ -75,7 +75,7 @@ const Footer = () => {
             <h3 className="text-lg font-bold text-[#111827] mb-4">Useful Links</h3>
             <ul className="space-y-2">
               <li><Link to="/" className="text-[#6B7280] hover:text-primary-dark">Dispute Resolution Policy</Link></li>
-              <li><Link to="/" className="text-[#6B7280] hover:text-primary-dark">Return Policy</Link></li>
+              <li><Link to="/returns-refunds-policy"  className="text-[#6B7280] hover:text-primary-dark">Return Policy</Link></li>
               <li><Link to="/" className="text-[#6B7280] hover:text-primary-dark">Pickup Stations</Link></li>
               <li><Link to="/" className="text-[#6B7280] hover:text-primary-dark">How to return a product</Link></li>
             </ul>

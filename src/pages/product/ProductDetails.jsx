@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 import Button from "../../components/common/Button.jsx";
 import ProductsGrid from "../../components/products/ProductsGrid.jsx";
 import MetaTags from "../../components/common/MetaTags.jsx";
+import { FiInfo } from "react-icons/fi";
 
 const ProductDetails = () => {
     const { addToCart, cart } = useCart();
@@ -414,8 +415,35 @@ const ProductDetails = () => {
                                 <span className="ml-2 text-gray-900">{product.weight} kg</span>
                             </div>
                         </div>
+                         {/* <div className="mt-4 text-sm">
+                            <span className="text-gray-500">Return Policy:</span>
+                            <span className="ml-2 text-gray-900">
+                                Free return within 7 days for ALL eligible items{' '}
+                                <Link to="/return-policy" className="text-blue-600 hover:underline">
+                                    Details
+                                </Link>
+                            </span>
+                        </div> */}
                     </div>
                 </div>
+            </div>
+
+  
+
+            <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-8">
+                <h3 className="font-medium text-blue-900 mb-2 flex items-center">
+                    <FiInfo className="mr-2" />
+                    Return Policy
+                </h3>
+                <p className="text-sm text-blue-800">
+                    Free return within 7 days for ALL eligible items{' '}
+                    <Link 
+                        to="/returns-refunds-policy" 
+                        className="font-medium hover:underline text-blue-600"
+                    >
+                        Details
+                    </Link>
+                </p>
             </div>
 
             {/* Product Tabs */}

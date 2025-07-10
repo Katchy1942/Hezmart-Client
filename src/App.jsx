@@ -64,6 +64,7 @@ import { requireAuth } from './utils/protect';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Shops from './pages/Shops';
+import ReturnsRefundsPolicy from './pages/ReturnsRefundsPolicy';
 
 function App() {
 
@@ -84,6 +85,7 @@ function App() {
         <Route path='resetPassword' element={<ResetPassword />}></Route>
 
         <Route path='shops' element={<Shops />}></Route>
+        <Route path='returns-refunds-policy' element={<ReturnsRefundsPolicy />} />
 
         {/* Customer Routes */}
         <Route path='orders' element={<OrderPage />}></Route>
@@ -93,9 +95,8 @@ function App() {
 
         {/* Product Routes */}
         <Route path='/product/:id' element={<ProductDetails />}></Route>
-       <Route path='/category/:categoryId/:subcategoryId?' element={<CategoryProducts />} />
+        <Route path='/category/:categoryId/:subcategoryId?' element={<CategoryProducts />} />
         <Route path="/vendor/:vendorId" element={<VendorProductsPage />} />
-
         <Route path='cart' element={<Cart />}></Route>
         <Route path='checkout' element={<Checkout />} loader={async({ request }) => await requireAuth(request, 'customer')}></Route>
        

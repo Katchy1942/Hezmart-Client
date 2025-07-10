@@ -2,6 +2,7 @@ import Header from './Header';
 import Sidebar from './Sidebar';
 import { Outlet } from 'react-router-dom';
 import { useState } from 'react';
+import ScrollToTop from './../components/ScrollToTop'
 
 export default function AuthenticatedLayout() {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -9,6 +10,7 @@ export default function AuthenticatedLayout() {
 
     return (
         <div className="min-h-screen bg-slate-100 relative">
+            <ScrollToTop />
             {/* Mobile Overlay - only visible when sidebar is open on mobile */}
             {toggle && (
                 <div 

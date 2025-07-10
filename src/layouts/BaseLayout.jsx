@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Navbar from '../components/common/Navbar';
+import ScrollToTop from './../components/ScrollToTop'
 
 const BaseLayout = () => {
   const buildTawkChatWidget = async()=>{
@@ -19,6 +20,7 @@ const BaseLayout = () => {
   },[])
   return (
     <div className='relative'>
+      <ScrollToTop />
       <Header />
        <div className='bg-[#f1f1f2] relative px-4 sm:px-6 lg:px-8 pb-8'>
         <Outlet />

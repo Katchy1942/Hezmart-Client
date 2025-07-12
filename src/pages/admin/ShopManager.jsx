@@ -25,7 +25,7 @@ const ShopManager = () => {
   const fetchVendors = async (page = 1, search = '', status = '') => {
     setLoading(true);
     try {
-      let url = `api/v1/users?role=vendor&page=${page}&limit=${pagination.perPage}&search=${search}&fields=firstName,lastName,email,status,id,primaryAddress,primaryPhone,businessName,businessLogo`;
+      let url = `api/v1/users?role=vendor&page=${page}&limit=${pagination.perPage}&search=${search}&fields=firstName,lastName,email,status,id,primaryAddress,primaryPhone,businessName,businessLogo,createdAt`;
       if (status && status !== 'all') {
         url += `&status=${status}`;
       }
@@ -42,7 +42,8 @@ const ShopManager = () => {
           mobile: user.primaryPhone,
           category: user.category?.name || 'Uncategorized',
           address: user.primaryAddress,
-          status: user.status
+          status: user.status,
+          joinDate:user.createdAt
         })));
         
         updatePagination({
@@ -70,23 +71,13 @@ const ShopManager = () => {
     fetchVendors(page, searchQuery, activeTab === 'all' ? '' : activeTab);
   };
 
-
-
   // Update vendor status
   const updateStatus = async (vendorId, newStatus) => {
     setStatusUpdating(vendorId);
     setStatusError(null);
     
     try {
-      // Map the action values to actual status values
-      // const statusMap = {
-      //   'approve': 'active',
-      //   'deny': 'denied',
-      //   'pending': 'pending',
-      //   'deactivate': 'deactivated'
-      // };
-      
-      // const actualStatus = statusMap[newStatus] || newStatus;
+     
       
       const res = await axios.patch(`api/v1/users/${vendorId}/status`, { 
         status: newStatus 
@@ -193,6 +184,17 @@ const ShopManager = () => {
     setActiveDropdown(activeDropdown === shopId ? null : shopId);
   };
 
+   const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+    });
+  };
+
   return (
     <div className="">
       {/* Header and Search */}
@@ -244,6 +246,10 @@ const ShopManager = () => {
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Owner
                   </th>
+
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date On
+                  </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Email
                   </th>
@@ -288,6 +294,10 @@ const ShopManager = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {shop.owner}
+                      </td>
+
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {formatDate(shop.joinDate)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {shop.email}

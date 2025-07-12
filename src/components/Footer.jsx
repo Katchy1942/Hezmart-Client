@@ -1,9 +1,15 @@
 import { logo, facebook, instagram, twitter, callIcon, message } from '../assets/images';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import InputField from './common/InputField';
+import axios from '../lib/axios';
+import { toast } from 'react-toastify';
+import Button from "./../components/common/Button";
 
 const Footer = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const[errors, setErrors] = useState({})
+  const[processing, setProcessing] = useState(false)
 
   // Show button when page is scrolled down
   const toggleVisibility = () => {
@@ -26,6 +32,35 @@ const Footer = () => {
     window.addEventListener('scroll', toggleVisibility);
     return () => window.removeEventListener('scroll', toggleVisibility);
   }, []);
+
+  const handleSubmit = async(e)=>{
+    e.preventDefault();
+    setProcessing(true)
+    try{
+      const formData = new FormData(e.target)
+      const dataToSend =Object.fromEntries(formData)
+      const res = await axios.post('api/v1/subscribers', dataToSend);
+      if(res.data.status === 'success'){
+        toast.success('Details submitted successfully');
+        e.target.reset()
+      }
+    }catch(err){
+      console.log(err);
+      if (err.response) {
+        if (err.response.data.message) {
+          toast.error(err.response.data.message);
+        }
+        if (err.response.data.errors) {
+          setErrors(err.response.data.errors);
+        }
+      } else {
+        toast.error(err.response?.data?.message || 'Failed to submit details');
+      }
+      
+    }finally{
+      setProcessing(false)
+    }
+  }
 
   return (
     <div className='relative'>
@@ -130,17 +165,36 @@ const Footer = () => {
               </p>
             </div>
             <form
-              className="w-full flex max-w-80 mt-5 mb-2"
+              className="w-full  max-w-80 mt-5 mb-2"
+              onSubmit={handleSubmit}
             >
-              <input
-                register={"...email"}
-                type="email"
-                placeholder="Your Email"
-                className="py-2 px-5 bg-white w-2/3"
+              <InputField
+                name="name"
+                label="Name"
+                placeholder='Please enter your name'
+                classNames='bg-white mb-3'
+                error={errors.name}
               />
-              <button className="text-white w-1/3 rounded-r-sm bg-gradient-to-r from-primary-light to-primary-dark py-2">
-                <Link href="/">Subscribe</Link>
-              </button>
+
+              <InputField
+                name="email"
+                label="Email"
+                placeholder='Please enter your email'
+                classNames='bg-white mb-3'
+                error={errors.email}
+              />
+              <div className="flex justify-end">
+                <Button 
+                  type="submit"
+                  variant="primary"
+                  isLoading={processing}
+                  disabled={processing}
+                  loadingText="Processing..."
+                >
+                  Subscribe
+                </Button>
+              </div>
+             
             </form>
             <small className="text-[#6B7280] text-xs">
               By subscribing you agree to our&nbsp;

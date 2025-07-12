@@ -23,7 +23,7 @@ const CustomersManager = () => {
   const fetchVendors = async (page = 1, search = '', status = '') => {
     setLoading(true);
     try {
-      let url = `api/v1/users?role=customer&page=${page}&limit=${pagination.perPage}&search=${search}&fields=firstName,lastName,email,photo,status,id,primaryAddress,primaryPhone,businessName,businessLogo`;
+      let url = `api/v1/users?role=customer&page=${page}&limit=${pagination.perPage}&search=${search}&fields=firstName,lastName,email,photo,status,id,primaryAddress,primaryPhone,createdAt`;
       if (status && status !== 'all') url += `&status=${status}`;
 
       const res = await axios.get(url);
@@ -35,7 +35,8 @@ const CustomersManager = () => {
           email: user.email,
           mobile: user.primaryPhone,
           address: user.primaryAddress,
-          status: user.status
+          status: user.status,
+          dateJoin:user.createdAt
         })));
 
         updatePagination({
@@ -161,6 +162,17 @@ const CustomersManager = () => {
     setActiveDropdown(activeDropdown === shopId ? null : shopId);
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+    });
+  };
+
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Customers Manager</h1>
@@ -193,7 +205,7 @@ const CustomersManager = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  {['Name', 'Email', 'Mobile', 'Status', 'Address', 'Actions'].map((header, idx) => (
+                  {['Name', 'Join On', 'Email', 'Mobile', 'Status', 'Address'].map((header, idx) => (
                     <th key={idx} className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${header === 'Actions' ? 'text-right' : ''}`}>
                       {header}
                     </th>
@@ -222,6 +234,7 @@ const CustomersManager = () => {
                             </div>
                           </div>
                         </td>
+                        <td className="px-6 py-4 text-sm text-gray-900">{formatDate(customer.dateJoin)}</td>
                         <td className="px-6 py-4 text-sm text-gray-900">{customer.email}</td>
                         <td className="px-6 py-4 text-sm text-gray-900">{customer.mobile}</td>
                         <td className="px-6 py-4">

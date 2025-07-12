@@ -37,6 +37,7 @@ const CustomerAddressSection = ({ currentUser, selectedAddress, setSelectedAddre
             <p>{selectedAddress.primaryAddress}</p>
             <p>{selectedAddress.state}</p>
             <p>Phone: {selectedAddress.primaryPhone}</p>
+            <p>Email: {selectedAddress.email}</p>
           </div>
           {currentUser && (
             <Button

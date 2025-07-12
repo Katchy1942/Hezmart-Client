@@ -31,6 +31,7 @@ import CreateCoupon from './pages/admin/CreateCoupon';
 import EditCoupon from './pages/admin/EditCoupon';
 import CustomersManager from './pages/admin/CustomersManager';
 import AdminSettings from './pages/admin/AdminSettings';
+import Subscribers from './pages/admin/Subscribers';
 
 
 //Vendor pages
@@ -65,6 +66,7 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Shops from './pages/Shops';
 import ReturnsRefundsPolicy from './pages/ReturnsRefundsPolicy';
+
 
 function App() {
 
@@ -116,6 +118,7 @@ function App() {
           <Route path='create-coupon' element={<CreateCoupon />}></Route>
           <Route path='edit-coupon/:id' element={<EditCoupon />}></Route>
           <Route path='settings' element={<AdminSettings />}></Route>
+          <Route path='subscribers' element={<Subscribers />}/>
         </Route>
 
         {/* Vendor Routes */}

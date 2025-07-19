@@ -438,239 +438,245 @@ const OrderDetails = () => {
                                   />
                                 </div>
                                 <p className="text-xs text-gray-500 ml-2 truncate">
-                                  {item.vendor?.businessName}
-                                </p>
+                                    {item.vendor?.businessName}
+                                  </p>
+                                </div>
+                                {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && (
+                                  <div className="mt-1 flex flex-wrap gap-1">
+                                    {Object.entries(item.selectedOptions).map(([key, value]) => (
+                                      <span key={key} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                        {key}: {value}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
-                              {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && (
-                                <div className="mt-1 flex flex-wrap gap-1">
-                                  {Object.entries(item.selectedOptions).map(([key, value]) => (
-                                    <span key={key} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                                      {key}: {value}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
+                              <p className="text-sm font-medium text-gray-900 whitespace-nowrap pl-2">
+                                {formatCurrency(item.discountPrice || item.price)}
+                              </p>
                             </div>
-                            <p className="text-sm font-medium text-gray-900 whitespace-nowrap pl-2">
-                              {formatCurrency(item.discountPrice || item.price)}
-                            </p>
-                          </div>
-                          <div className="mt-2 flex justify-between items-end">
-                            <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
-                            <p className="text-sm font-medium text-gray-900 whitespace-nowrap">
-                              Subtotal: {formatCurrency((item.discountPrice || item.price) * item.quantity)}
-                            </p>
-                          </div>
+                            <div className="mt-2 flex justify-between items-end">
+                              <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                              <p className="text-sm font-medium text-gray-900 whitespace-nowrap">
+                                Subtotal: {formatCurrency((item.discountPrice || item.price) * item.quantity)}
+                              </p>
+                            </div>
 
-                          {/* Item Status Section */}
-                          <div className="mt-2 pt-2 border-t border-gray-100">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center">
-                                <span className="text-xs font-medium text-gray-500 mr-2">Status:</span>
-                                <span className="text-xs font-medium capitalize">
-                                  {item.fulfillmentStatus}
-                                </span>
-                              </div>
-                              {item.fulfillmentStatus === 'delivered' && !item.receivedAt && (
-                                <Button
-                                  onClick={() => handleMarkAsReceived(item.id)}
-                                  disabled={markingReceived === item.id}
-                                  size="small"
-                                  variant="primary"
-                                >
-                                  {markingReceived === item.id ? (
-                                    <LoadingSpinner size="small" />
-                                  ) : (
-                                    <>
-                                      <FiPackage className="mr-1" />
-                                      Mark as Received
-                                    </>
-                                  )}
-                                </Button>
-                              )}
-                              {item.receivedAt && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                  <FiCheckCircle className="mr-1" />
-                                  Received on {formatDate(item.receivedAt)}
-                                </span>
-                              )}
-                            </div>
-                            
-                            {/* Status Timestamps */}
-                            <div className="mt-1 space-y-1 text-xs text-gray-500">
-                              {item.shippedAt && (
+                            {/* Item Status Section */}
+                            <div className="mt-2 pt-2 border-t border-gray-100">
+                              <div className="flex items-center justify-between">
                                 <div className="flex items-center">
-                                  <FiTruck className="mr-1" size={12} />
-                                  Shipped: {formatDate(item.shippedAt)}
+                                  <span className="text-xs font-medium text-gray-500 mr-2">Status:</span>
+                                  <span className="text-xs font-medium capitalize">
+                                    {item.fulfillmentStatus}
+                                  </span>
                                 </div>
-                              )}
-                              {item.deliveredAt && (
-                                <div className="flex items-center">
-                                  <FiPackage className="mr-1" size={12} />
-                                  Delivered: {formatDate(item.deliveredAt)}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Review Section */}
-                          <div className="mt-3 pt-3 border-t border-gray-100">
-                            <h6 className="text-xs font-medium text-gray-500 mb-1">
-                              Your Review
-                            </h6>
-                            {item.product.reviews?.find(r => r.userId === order.userId) ? (
-                              <div className="bg-gray-50 p-3 rounded-md">
-                                <div className="flex justify-between items-start">
-                                  {renderStars(item.product.reviews.find(r => r.userId === order.userId).rating)}
-                                  <button
-                                    onClick={() => handleEditReview(
-                                      item.product.reviews.find(r => r.userId === order.userId),
-                                      item.product.id
-                                    )}
-                                    className="text-primary-light hover:text-primary-dark"
+                                {item.fulfillmentStatus === 'delivered' && !item.receivedAt && (
+                                  <Button
+                                    onClick={() => handleMarkAsReceived(item.id)}
+                                    disabled={markingReceived === item.id}
+                                    size="small"
+                                    variant="primary"
                                   >
-                                    <FiEdit2 size={16} />
-                                  </button>
-                                </div>
-                                <p className="mt-1 text-sm text-gray-700">
-                                  {item.product.reviews.find(r => r.userId === order.userId).review}
-                                </p>
+                                    {markingReceived === item.id ? (
+                                      <LoadingSpinner size="small" />
+                                    ) : (
+                                      <>
+                                        <FiPackage className="mr-1" />
+                                        Mark as Received
+                                      </>
+                                    )}
+                                  </Button>
+                                )}
+                                {item.receivedAt && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                    <FiCheckCircle className="mr-1" />
+                                    Received on {formatDate(item.receivedAt)}
+                                  </span>
+                                )}
                               </div>
-                            ) : (
-                              <button
-                                onClick={() => setNewReview({
-                                  rating: 1,
-                                  comment: '',
-                                  productId: item.product.id
-                                })}
-                                className="text-sm text-primary-light hover:text-primary-dark font-medium"
-                              >
-                                + Add Review
-                              </button>
-                            )}
+                              
+                              {/* Status Timestamps */}
+                              <div className="mt-1 space-y-1 text-xs text-gray-500">
+                                {item.shippedAt && (
+                                  <div className="flex items-center">
+                                    <FiTruck className="mr-1" size={12} />
+                                    Shipped: {formatDate(item.shippedAt)}
+                                  </div>
+                                )}
+                                {item.deliveredAt && (
+                                  <div className="flex items-center">
+                                    <FiPackage className="mr-1" size={12} />
+                                    Delivered: {formatDate(item.deliveredAt)}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Review Section */}
+                            <div className="mt-3 pt-3 border-t border-gray-100">
+                              <h6 className="text-xs font-medium text-gray-500 mb-1">
+                                Your Review
+                              </h6>
+                              {item.product.reviews?.find(r => r.userId === order.userId) ? (
+                                <div className="bg-gray-50 p-3 rounded-md">
+                                  <div className="flex justify-between items-start">
+                                    {renderStars(item.product.reviews.find(r => r.userId === order.userId).rating)}
+                                    <button
+                                      onClick={() => handleEditReview(
+                                        item.product.reviews.find(r => r.userId === order.userId),
+                                        item.product.id
+                                      )}
+                                      className="text-primary-light hover:text-primary-dark"
+                                    >
+                                      <FiEdit2 size={16} />
+                                    </button>
+                                  </div>
+                                  <p className="mt-1 text-sm text-gray-700">
+                                    {item.product.reviews.find(r => r.userId === order.userId).review}
+                                  </p>
+                                </div>
+                              ) : (
+                                item.fulfillmentStatus === 'received' ? (
+                                  <button
+                                    onClick={() => setNewReview({
+                                      rating: 1,
+                                      comment: '',
+                                      productId: item.product.id
+                                    })}
+                                    className="text-sm text-primary-light hover:text-primary-dark font-medium"
+                                  >
+                                    + Add Review
+                                  </button>
+                                ) : (
+                                  <p className="text-xs text-gray-500">
+                                    You can add a review after receiving this item.
+                                  </p>
+                                )
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          {/* Payment Information and Actions */}
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-gray-50 p-4 rounded-md">
-              <h4 className="text-sm font-medium text-gray-900 mb-3">Payment Information</h4>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Method</span>
-                  <span className="text-sm font-medium capitalize">
-                    {order.paymentMethod}
-                  </span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Status</span>
-                  <span className={`text-sm font-medium ${
-                    order.paymentStatus === 'paid' ? 'text-green-600' :
-                    order.paymentStatus === 'pending' ? 'text-yellow-600' :
-                    order.paymentStatus === 'failed' ? 'text-red-600' :
-                    'text-gray-600'
-                  }`}>
-                    {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
-                  </span>
-                </div>
-                {/* {order.paymentStatus === 'pending' && (
-                  <div className="pt-2 space-y-2">
-                    <Button
-                      onClick={handleVerifyPayment}
-                      disabled={verifying}
-                      className="w-full"
-                    >
-                      {verifying ? (
-                        <span className="flex items-center justify-center">
-                          <LoadingSpinner size="small" className="mr-2" />
-                          Verifying...
-                        </span>
-                      ) : 'Verify Payment'}
-                    </Button>
-                    <Button
-                      onClick={handleConfirmPayment}
-                      disabled={confirmingPayment}
-                      variant="success"
-                      className="w-full"
-                    >
-                      {confirmingPayment ? (
-                        <span className="flex items-center justify-center">
-                          <LoadingSpinner size="small" className="mr-2" />
-                          Confirming...
-                        </span>
-                      ) : (
-                        <>
-                          <FiDollarSign className="mr-2" />
-                          Confirm Payment
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                )} */}
               </div>
             </div>
 
-            <div className="bg-gray-50 p-4 rounded-md">
-              <h4 className="text-sm font-medium text-gray-900 mb-3">Order Summary</h4>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Subtotal</span>
-                  <span className="text-sm font-medium">{formatCurrency(order.subtotal)}</span>
-                </div>
-                {parseFloat(order.discount) > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span className="text-sm">Discount</span>
-                    <span className="text-sm font-medium">-{formatCurrency(order.discount)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Shipping</span>
-                  <span className="text-sm font-medium">{formatCurrency(order.deliveryFee)}</span>
-                </div>
-                {parseFloat(order.tax) > 0 && (
+            {/* Payment Information and Actions */}
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-gray-50 p-4 rounded-md">
+                <h4 className="text-sm font-medium text-gray-900 mb-3">Payment Information</h4>
+                <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Tax</span>
-                    <span className="text-sm font-medium">{formatCurrency(order.tax)}</span>
+                    <span className="text-sm text-gray-600">Method</span>
+                    <span className="text-sm font-medium capitalize">
+                      {order.paymentMethod}
+                    </span>
                   </div>
-                )}
-                <div className="border-t border-gray-200 pt-2 flex justify-between">
-                  <span className="text-sm font-medium text-gray-900">Total</span>
-                  <span className="text-sm font-medium text-gray-900">
-                    {formatCurrency(order.total)}
-                  </span>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Status</span>
+                    <span className={`text-sm font-medium ${
+                      order.paymentStatus === 'paid' ? 'text-green-600' :
+                      order.paymentStatus === 'pending' ? 'text-yellow-600' :
+                      order.paymentStatus === 'failed' ? 'text-red-600' :
+                      'text-gray-600'
+                    }`}>
+                      {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
+                    </span>
+                  </div>
+                  {/* {order.paymentStatus === 'pending' && (
+                    <div className="pt-2 space-y-2">
+                      <Button
+                        onClick={handleVerifyPayment}
+                        disabled={verifying}
+                        className="w-full"
+                      >
+                        {verifying ? (
+                          <span className="flex items-center justify-center">
+                            <LoadingSpinner size="small" className="mr-2" />
+                            Verifying...
+                          </span>
+                        ) : 'Verify Payment'}
+                      </Button>
+                      <Button
+                        onClick={handleConfirmPayment}
+                        disabled={confirmingPayment}
+                        variant="success"
+                        className="w-full"
+                      >
+                        {confirmingPayment ? (
+                          <span className="flex items-center justify-center">
+                            <LoadingSpinner size="small" className="mr-2" />
+                            Confirming...
+                          </span>
+                        ) : (
+                          <>
+                            <FiDollarSign className="mr-2" />
+                            Confirm Payment
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  )} */}
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-md">
+                <h4 className="text-sm font-medium text-gray-900 mb-3">Order Summary</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Subtotal</span>
+                    <span className="text-sm font-medium">{formatCurrency(order.subtotal)}</span>
+                  </div>
+                  {parseFloat(order.discount) > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span className="text-sm">Discount</span>
+                      <span className="text-sm font-medium">-{formatCurrency(order.discount)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Shipping</span>
+                    <span className="text-sm font-medium">{formatCurrency(order.deliveryFee)}</span>
+                  </div>
+                  {parseFloat(order.tax) > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Tax</span>
+                      <span className="text-sm font-medium">{formatCurrency(order.tax)}</span>
+                    </div>
+                  )}
+                  <div className="border-t border-gray-200 pt-2 flex justify-between">
+                    <span className="text-sm font-medium text-gray-900">Total</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {formatCurrency(order.total)}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="mt-6 flex justify-end space-x-3">
-            <button
-              onClick={() => window.print()}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-            >
-              <FiPrinter className="mr-2" />
-              Print Invoice
-            </button>
-
-            {/* {order.status === 'pending' && (
+            <div className="mt-6 flex justify-end space-x-3">
               <button
-                onClick={handleCancelOrder}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700"
+                onClick={() => window.print()}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
               >
-                Cancel Order
+                <FiPrinter className="mr-2" />
+                Print Invoice
               </button>
-            )} */}
+
+              {/* {order.status === 'pending' && (
+                <button
+                  onClick={handleCancelOrder}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700"
+                >
+                  Cancel Order
+                </button>
+              )} */}
+            </div>
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

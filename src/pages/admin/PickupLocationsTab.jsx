@@ -128,11 +128,12 @@ const PickupLocationsTab = ({
                                             classNames="mb-5 lg:mb-0"
                                         />
                                     </div>  
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-5 mt-5">
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-5 mt-5 lg:mt-0">
                                         <InputField
                                             label="Address"
                                             name="address"
                                             placeholder="Enter pickup station address"
+                                            classNames="mb-5 lg:mb-0"
                                         />
 
                                         <InputField
@@ -142,7 +143,7 @@ const PickupLocationsTab = ({
                                             classNames="mb-5 lg:mb-0"
                                         />
                                     </div> 
-                                    <div className="my-5">
+                                    <div className="my-5 lg:my-0">
                                         <InputField
                                             name="fee"
                                             label="Fee (₦)"

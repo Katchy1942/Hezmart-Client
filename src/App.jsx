@@ -17,6 +17,7 @@ import ConfirmEmail from './pages/auth/ConfirmEmail';
 import Login from './pages/auth/Login'
 import ForgotPassword from './pages/auth/ForgotPassword'
 import ResetPassword from './pages/auth/ResetPassword';
+import AuthCallback from './pages/auth/AuthCallBack';
 
 
 //Admin Pages
@@ -85,6 +86,8 @@ function App() {
         <Route path='login' element={<Login />}></Route>
         <Route path='forgot-password' element={<ForgotPassword />}></Route>
         <Route path='resetPassword' element={<ResetPassword />}></Route>
+       
+        <Route path="/auth/callback" element={<AuthCallback />} />
 
         <Route path='shops' element={<Shops />}></Route>
         <Route path='returns-refunds-policy' element={<ReturnsRefundsPolicy />} />

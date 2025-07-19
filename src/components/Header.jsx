@@ -32,7 +32,6 @@ const Header = () => {
     const topBarRef = useRef(null);
     const location = useLocation();
 
-    
     const [selectedResult, setSelectedResult] = useState(null);
     const [searchResults, setSearchResults] = useState([]);
     const [searchLoading, setSearchLoading] = useState(false);
@@ -45,7 +44,6 @@ const Header = () => {
 
         setSearchLoading(true);
         try {
-            // Replace with your actual API call
             const response = await axios.get(`/api/v1/search?q=${query}`);
             setSearchResults(response.data.data.results);
         } catch (error) {
@@ -54,23 +52,19 @@ const Header = () => {
         } finally {
             setSearchLoading(false);
         }
-      
     };
 
     const handleResultSelect = (result) => {
-        // Navigate to the product/category page based on the result type
         if (result.type === 'product') {
             navigate(`/product/${result.id}`);
         } else if (result.type === 'category') {
             navigate(`/category/${result.id}`);
-        }else if(result.type ==='subcategory'){
+        } else if(result.type ==='subcategory') {
             navigate(`/category/${result.category.id}/${result.id}`); 
         }
-        // Clear search results after selection
         setSearchResults([]);
     };
 
-    // Close mobile menu when route changes
     useEffect(() => {
         setIsMobileMenuOpen(false);
         document.body.style.overflow = '';
@@ -161,13 +155,32 @@ const Header = () => {
         }
     };
 
+    // User avatar component
+    const UserAvatar = ({ user }) => {
         return (
+            <div className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center overflow-hidden">
+                {user?.photo ? (
+                    <img 
+                        src={user.photo} 
+                        alt={`${user.firstName || 'User'} profile`}
+                        className="w-full h-full object-cover"
+                    />
+                ) : (
+                    <span className="text-white">
+                        {user?.firstName?.charAt(0) || <FiUser />}
+                    </span>
+                )}
+            </div>
+        );
+    };
+
+    return (
         <div className="bg-white">
             {/* Call-to-action */}
             <div className="bg-primary-light flex justify-center lg:justify-end items-center py-2 px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center gap-2 text-white text-sm sm:text-base">
                     <span>CALL TO ORDER:</span>
-                     <a 
+                    <a 
                         href={`https://wa.me/2349160002490`}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -186,19 +199,17 @@ const Header = () => {
                 }`}
             >
                 <div className="flex lg:items-center flex-col lg:flex-row justify-center lg:justify-between px-4 sm:px-6 lg:px-8 py-2">
-                   
                     <Link to='/' className="text-primary-light text-center lg:text-left font-bold text-sm hover:underline">
                         Ship items to UK/Canada/US
                     </Link>
 
-                   <div className="flex justify-between mt-4 lg:mt-0 items-center">
+                    <div className="flex justify-between mt-4 lg:mt-0 items-center">
                         <div className="grow">
-                             <Link to='/'>
+                            <Link to='/'>
                                 <img src={logo_png} alt="Logo" width={76} className="mx-auto lg:mx-0 lg:-translate-x-8"/>
                             </Link>
                         </div>
                        
-                    
                         {/* Mobile cart icon */}
                         {isMobile && (
                             <div className="flex items-center gap-4">
@@ -215,7 +226,7 @@ const Header = () => {
                                 </button>
                             </div>
                         )}
-                   </div>
+                    </div>
                 </div>
                 <div className="lg:hidden pt-3 px-4 sm:px-6 lg:px-8">
                     <SearchBar
@@ -229,13 +240,10 @@ const Header = () => {
            
                 {/* Desktop Navigation */}
                 <nav className="hidden px-4 sm:px-6 lg:px-8 lg:flex items-center bg-white shadow py-3 justify-between">
-                    <button onClick={toggleMobileMenu} className="text-black">
-                        {isMobileMenuOpen ? <FiX size={24} /> : <LuMenu size={24} />}
-                    </button>
                     <Link to='/'>
                         <img src={logo} alt="Logo" className="w-48"/>
                     </Link>
-                   <SearchBar
+                    <SearchBar
                         placeholder="Search products, brands and categories"
                         onSearch={handleSearch}
                         results={searchResults}
@@ -250,9 +258,7 @@ const Header = () => {
                                         onClick={toggleDropdown}
                                         className="flex items-center gap-2 focus:outline-none group"
                                     >
-                                        <div className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center text-white">
-                                            {user.firstName?.charAt(0) || <FiUser />}
-                                        </div>
+                                        <UserAvatar user={user} />
                                         <div className="flex items-center">
                                             <span className="text-gray-700 mr-1">
                                                 {user.firstName || 'Profile'}
@@ -313,9 +319,7 @@ const Header = () => {
                                     className="flex items-center gap-2 text-gray-700 hover:text-primary-dark transition-colors"
                                     title="Go to Dashboard"
                                 >
-                                    <div className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center text-white">
-                                        {user.firstName?.charAt(0) || <FiGrid />}
-                                    </div>
+                                    <UserAvatar user={user} />
                                     <FiGrid className="text-xl" />
                                 </Link>
                             )
@@ -364,6 +368,13 @@ const Header = () => {
                     {user ? (
                         userRole === 'customer' ? (
                             <>
+                                <div className="flex items-center gap-3 px-4 py-3 mb-2">
+                                    <UserAvatar user={user} />
+                                    <div>
+                                        <p className="font-medium">{user.firstName} {user.lastName}</p>
+                                        <p className="text-xs text-gray-500">{user.email}</p>
+                                    </div>
+                                </div>
                                 <p className="text-gray-700 text-xs px-4 mb-3">MY HEZMART ACCOUNT</p>
                                 <Link 
                                     to="/profile" 

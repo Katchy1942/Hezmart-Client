@@ -35,10 +35,7 @@ const CartSummary = ({
 
   // Memoized address validation
   const isValidAddress = useMemo(() => {
-    // console.log('Validating address:', selectedAddress);
-    
     if (!selectedAddress || typeof selectedAddress !== 'object') {
-      console.log('Invalid address object');
       return false;
     }
 
@@ -53,7 +50,6 @@ const CartSummary = ({
 
     for (const field of requiredFields) {
       if (!selectedAddress[field]?.trim()) {
-        console.log(`Missing required field: ${field}`);
         return false;
       }
     }
@@ -85,20 +81,17 @@ const CartSummary = ({
 
   // Comprehensive checkout disabled logic
   const isCheckoutDisabled = () => {
-    // Early returns for loading states
     if (checkoutLoading || (paymentMethod === 'crypto' && loadingCryptoRate)) {
       return true;
     }
 
-    // Validate all requirements
     const requirements = {
-      addressValid: isValidAddress, // Using memoized value directly
+      addressValid: isValidAddress,
       deliveryValid: isDeliveryValid(),
       paymentValid: isPaymentValid(),
       itemsAvailable: allItemsAvailable
     };
-
-    console.log('Validation Requirements:', requirements);
+    if(parseFloat(summary.total) <=8000) return true
     
     return !requirements.addressValid || 
            !requirements.deliveryValid || 
@@ -304,61 +297,83 @@ const CartSummary = ({
           )}
 
           {/* Order Summary */}
-          <div className="flex justify-between">
-            <span className="text-gray-600 text-sm w-[300px]">Delivery Charges: </span>
-            {pathname === '/cart' ? (
-              <span className="text-[9px] text-right">Add your Delivery address at checkout to see delivery charges</span>
-            ) : (
-              <span className='font-medium'>{deliveryFee ? `₦${deliveryFee.toLocaleString()}` : 0}</span>
-            )}
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Subtotal ({(summary.totalItems || 0)} items)</span>
-            <span className="font-medium">₦{(summary.subtotal || 0).toLocaleString()}</span>
-          </div>
-
-          {(summary.discount || summary.totalDiscount || 0) > 0 && (
-            <div className="flex justify-between text-primary-light">
-              <span>Discount</span>
-              <span>-₦{(summary.discount || summary.totalDiscount || 0).toLocaleString()}</span>
-            </div>
-          )}
-
-          <div className="border-t border-gray-200 pt-4">
+          <div className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-lg font-bold text-gray-900">Total</span>
-              <div className="text-right">
-                <div className="text-lg font-bold text-gray-900">
-                  ₦{(summary.total + (deliveryFee || 0)).toLocaleString()}
-                </div>
-                {paymentMethod === 'crypto' && (
-                  <>
-                    {cryptoEquivalent && !loadingCryptoRate ? (
-                      <div className="text-sm text-primary-light mt-1">
-                        ≈ {cryptoEquivalent.amount.toFixed(6)} {cryptoEquivalent.currency}
-                        <div className="text-xs text-gray-500 mt-1 flex items-center">
-                          <span className="truncate max-w-[160px] inline-block align-middle">
-                            Send to: {selectedWallet.walletAddress}
-                          </span>
-                          <button 
-                            onClick={handleCopyAddress}
-                            className="ml-1 text-gray-400 hover:text-gray-600 cursor-pointer"
-                            aria-label="Copy wallet address"
-                          >
-                            <FiCopy className="inline" size={14} />
-                          </button>
-                          {copied && (
-                            <span className="text-xs text-green-500 ml-1">Copied!</span>
-                          )}
+              <span className="text-gray-600">Items total ({(summary.totalItems || 0)})</span>
+              <span className="font-medium">₦{(summary.subtotal || 0).toLocaleString()}</span>
+            </div>
+
+            {(summary.productDiscount || 0) > 0 && (
+              <div className="flex justify-between text-primary-light">
+                <span>Discount</span>
+                <span>-₦{(summary.productDiscount || 0).toLocaleString()}</span>
+              </div>
+            )}
+
+            {(summary.couponDiscount || 0) > 0 && (
+              <div className="flex justify-between text-primary-light">
+                <span>Coupon Discount</span>
+                <span>-₦{(summary.couponDiscount || 0).toLocaleString()}</span>
+              </div>
+            )}
+
+            <div className="flex justify-between pt-2 border-t border-gray-200">
+              <span className="text-gray-600">Subtotal</span>
+              <span className="font-medium">₦{(summary.subtotal - (summary.totalDiscount || 0)).toLocaleString()}</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="text-gray-600 text-sm w-[300px]">Delivery Charges</span>
+              {pathname === '/cart' ? (
+                <span className="text-[9px] text-right">Add your Delivery address at checkout to see delivery charges</span>
+              ) : (
+                <span className='font-medium'>{deliveryFee ? `₦${deliveryFee.toLocaleString()}` : 0}</span>
+              )}
+            </div>
+
+            {(summary.tax || 0) > 0 && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Tax</span>
+                <span className="font-medium">₦{(summary.tax || 0).toLocaleString()}</span>
+              </div>
+            )}
+
+            <div className="border-t border-gray-200 pt-4">
+              <div className="flex justify-between">
+                <span className="text-lg font-bold text-gray-900">Total</span>
+                <div className="text-right">
+                  <div className="text-lg font-bold text-gray-900">
+                    ₦{(summary.total + (deliveryFee || 0)).toLocaleString()}
+                  </div>
+                  {paymentMethod === 'crypto' && (
+                    <>
+                      {cryptoEquivalent && !loadingCryptoRate ? (
+                        <div className="text-sm text-primary-light mt-1">
+                          ≈ {cryptoEquivalent.amount.toFixed(6)} {cryptoEquivalent.currency}
+                          <div className="text-xs text-gray-500 mt-1 flex items-center">
+                            <span className="truncate max-w-[160px] inline-block align-middle">
+                              Send to: {selectedWallet.walletAddress}
+                            </span>
+                            <button 
+                              onClick={handleCopyAddress}
+                              className="ml-1 text-gray-400 hover:text-gray-600 cursor-pointer"
+                              aria-label="Copy wallet address"
+                            >
+                              <FiCopy className="inline" size={14} />
+                            </button>
+                            {copied && (
+                              <span className="text-xs text-green-500 ml-1">Copied!</span>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="text-sm text-gray-500 mt-1">
-                        {loadingCryptoRate ? 'Loading conversion rate...' : 'Calculating crypto amount...'}
-                      </div>
-                    )}
-                  </>
-                )} 
+                      ) : (
+                        <div className="text-sm text-gray-500 mt-1">
+                          {loadingCryptoRate ? 'Loading conversion rate...' : 'Calculating crypto amount...'}
+                        </div>
+                      )}
+                    </>
+                  )} 
+                </div>
               </div>
             </div>
           </div>
@@ -395,6 +410,7 @@ const CartSummary = ({
                 {!isDeliveryValid() && deliveryOption === 'pickup' && <div>• Please select a pickup station</div>}
                 {!isPaymentValid() && paymentMethod === 'crypto' && <div>• Please select a crypto wallet</div>}
                 {!allItemsAvailable && <div>• Some items in your cart are unavailable</div>}
+                 {summary.total < 8000 && <div>• Orders with a total under ₦8,000 will not be shipped.</div>}
               </div>
             )}
           </div>

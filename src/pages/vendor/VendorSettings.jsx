@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { toast } from 'react-toastify';
 import axios from "../../lib/axios";
 import ProfileTab from "../../components/common/ProfileTab";
-import PaymentSettingsTab from "./PaymentSettingsTab";
-import ShippingSettingsTab from "./ShippingSettingsTab";
-import PickupLocationsTab from './PickupLocationsTab'
-import StateFeesTab from "./StateFeesTab";
+// import PaymentSettingsTab from "./PaymentSettingsTab";
+// import ShippingSettingsTab from "./ShippingSettingsTab";
+// import PickupLocationsTab from './PickupLocationsTab'
+// import StateFeesTab from "./StateFeesTab";
 
-const AdminSettings = () => {
+const VendorSettings = () => {
     const [user, setUser] = useState(null);
     const [isUpdating, setIsUpdating] = useState(false);
     const [activeTab, setActiveTab] = useState('profile');
@@ -63,7 +63,7 @@ const AdminSettings = () => {
     return (
         <section className='bg-gray-100 min-h-screen'>
             <div className="">
-                <h1 className="text-2xl font-bold text-gray-800 mb-6">Admin Settings</h1>
+                <h1 className="text-2xl font-bold text-gray-800 mb-6">Settings</h1>
                 
                 {/* Responsive Tabs Navigation */}
                 <div className="border-b border-gray-200 mb-6 overflow-x-auto">
@@ -74,30 +74,12 @@ const AdminSettings = () => {
                         >
                             Profile
                         </button>
-                        <button
+                        {/* <button
                             onClick={() => setActiveTab('payment')}
                             className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'payment' ? 'border-primary-dark text-primary-dark' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                         >
                             Payment
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('shipping')}
-                            className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'shipping' ? 'border-primary-dark text-primary-dark' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
-                        >
-                            Shipping
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('pickup')}
-                            className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'pickup' ? 'border-primary-dark text-primary-dark' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
-                        >
-                            Pickup Stations
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('stateFee')}
-                            className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'stateFee' ? 'border-primary-dark text-primary-dark' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
-                        >
-                            State Fee
-                        </button>
+                        </button> */}
                     </nav>
                 </div>
                 
@@ -113,31 +95,21 @@ const AdminSettings = () => {
                         />
                     )}
 
-                    {activeTab === 'payment' && (
-                        <PaymentSettingsTab
-                            paymentSettings={paymentSettings}
-                        />
-                    )}
+                   
 
-                    {activeTab === 'shipping' && (
-                        <ShippingSettingsTab/>
-                    )}
+                   
 
-                    {activeTab === 'pickup' && (
+                    {/* {activeTab === 'pickup' && (
                         <PickupLocationsTab 
                             nigerianStates={nigerianStates} 
                         />
-                    )}
+                    )} */}
 
-                    {activeTab === 'stateFee' && (
-                        <StateFeesTab 
-                            nigerianStates={nigerianStates}
-                        />
-                    )}
+                   
                 </div>
             </div>
         </section>
     );
 };
 
-export default AdminSettings;
+export default VendorSettings;

@@ -1,12 +1,13 @@
 import React from "react";
 
 const SelectField = ({
-  name,
+ name,
   onChange,
   options = [],
   isRequired = true,
   classNames = "",
-  value,
+  value, 
+  defaultValue, 
   variant = "default",
   label,
   icon,
@@ -71,7 +72,8 @@ const SelectField = ({
       <div className="relative">
         <select
           name={name}
-          value={value}
+          value={onChange ? value : undefined}  // Only use value if onChange is provided
+          defaultValue={!onChange ? (value || defaultValue) : undefined}  // Use defaultValue if no onChange
           onChange={onChange}
           className={`${selectClasses} ${defaultValue ? 'pt-5' : ''}`}
           required={isRequired}
@@ -102,7 +104,8 @@ const SelectField = ({
       <div className="relative">
         <select
           name={name}
-          value={value}
+          value={onChange ? value : undefined}  // Only use value if onChange is provided
+          defaultValue={!onChange ? (value || defaultValue) : undefined}  // Use defaultValue if no onChange
           onChange={onChange}
           className={selectClasses}
           required={isRequired}

@@ -150,23 +150,26 @@ const Login = () => {
 
           {/* Moved Social Auth Buttons to the top */}
           <div className="mb-6">
-            <div className="grid grid-cols-2 gap-3">
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={handleGoogleError}
-                render={(renderProps) => (
-                  <button
-                    onClick={renderProps.onClick}
-                    disabled={renderProps.disabled || !!socialProcessing}
-                    className="cursor-pointer w-full inline-flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                  >
-                    <FaGoogle className="text-red-500 mr-2" />
-                    {socialProcessing === 'google' ? 'Processing...' : 'Google'}
-                  </button>
-                )}
-              />
+            <div className="grid grid-cols-2 gap-3 ">
+              <div className="col-span-2 flex justify-center">
+                <GoogleLogin
+                
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleError}
+                  render={(renderProps) => (
+                    <button
+                      onClick={renderProps.onClick}
+                      disabled={renderProps.disabled || !!socialProcessing}
+                      className="cursor-pointer w-full inline-flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                    >
+                      <FaGoogle className="text-red-500 mr-2" />
+                      {socialProcessing === 'google' ? 'Processing...' : 'Google'}
+                    </button>
+                  )}
+                />
+              </div>
 
-              <AppleSignin
+              {/* <AppleSignin
                 authOptions={{
                   clientId: import.meta.env.REACT_APP_APPLE_CLIENT_ID,
                   scope: 'email name',
@@ -191,7 +194,7 @@ const Login = () => {
                     {socialProcessing === 'apple' ? 'Processing...' : 'Apple'}
                   </button>
                 )}
-              />
+              /> */}
             </div>
 
             <div className="relative mt-6 mb-6">

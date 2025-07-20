@@ -152,7 +152,8 @@ const CustomerRegister = () => {
             {/* Social Auth Buttons */}
             <div className="mb-6">
               <div className="grid grid-cols-2 gap-3">
-                <GoogleLogin
+               <div className="col-span-2 flex justify-center">
+                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
                   onError={handleGoogleError}
                   render={(renderProps) => (
@@ -167,8 +168,9 @@ const CustomerRegister = () => {
                     </button>
                   )}
                 />
+               </div>
 
-                <AppleSignin
+                {/* <AppleSignin
                   authOptions={{
                     clientId: import.meta.env.REACT_APP_APPLE_CLIENT_ID,
                     scope: 'email name',
@@ -193,7 +195,7 @@ const CustomerRegister = () => {
                       {socialProcessing === 'apple' ? 'Processing...' : 'Apple'}
                     </button>
                   )}
-                />
+                /> */}
               </div>
 
               <div className="relative mt-6 mb-6">

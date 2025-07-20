@@ -45,19 +45,21 @@ const Dashboard = ({ isAdmin = false }) => {
   }
 
   // Format stats data for cards
-  const statsData = [
+ const statsData = [
+  { 
+    title: 'Total Revenue', 
+    value: `₦${parseFloat(stats.totalRevenue).toLocaleString()}`, 
+    secondaryValue: `${stats.totalOrders} orders` 
+  },
+  { 
+    title: 'Total Orders', 
+    value: stats.totalOrders, 
+    secondaryValue: `₦${parseFloat(stats.totalRevenue).toLocaleString()}` 
+  },
+  // Only include user-related stats for admin
+  ...(isAdmin ? [
     { 
-      title: 'Total Revenue', 
-      value: `₦${parseFloat(stats.totalRevenue).toLocaleString()}`, 
-      secondaryValue: `${stats.totalOrders} orders` 
-    },
-    { 
-      title: 'Total Orders', 
-      value: stats.totalOrders, 
-      secondaryValue: `₦${parseFloat(stats.totalRevenue).toLocaleString()}` 
-    },
-    { 
-      title: isAdmin ? 'New Users' : 'New Customers', 
+      title: 'New Users', 
       value: stats.newUsers, 
       secondaryValue: `${stats.activeUsers} active` 
     },
@@ -66,7 +68,8 @@ const Dashboard = ({ isAdmin = false }) => {
       value: stats.activeUsers, 
       secondaryValue: `${stats.newUsers} new` 
     }
-  ];
+  ] : [])
+].filter(Boolean); // Filter out any undefined values
 
   // Format chart data from daily sales
   const chartData = {

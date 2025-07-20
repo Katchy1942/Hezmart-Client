@@ -19,7 +19,6 @@ import ForgotPassword from './pages/auth/ForgotPassword'
 import ResetPassword from './pages/auth/ResetPassword';
 import AuthCallback from './pages/auth/AuthCallBack';
 
-
 //Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard'
 import ShopManager from './pages/admin/ShopManager';
@@ -34,7 +33,6 @@ import CustomersManager from './pages/admin/CustomersManager';
 import AdminSettings from './pages/admin/AdminSettings';
 import Subscribers from './pages/admin/Subscribers';
 
-
 //Vendor pages
 import PendingVerification from './pages/vendor/PendingVerification';
 import VendorDashboard from './pages/vendor/VendorDashbaord'
@@ -44,9 +42,7 @@ import EditProduct from './pages/vendor/EditProduct';
 import VendorProductsPage from './pages/VendorProductsPage';
 import VendorOrdersManager from './pages/vendor/VendorOrdersManager';
 import VendorOrderDetails from './pages/vendor/VendorOrderDetails';
-
-
-
+import VendorSettings from './pages/vendor/VendorSettings';
 
 //Customer Pages;
 import OrderPage from './pages/customer/OrderPage';
@@ -58,7 +54,6 @@ import WishlistPage from './pages/customer/WishListPage';
 import ProductDetails from './pages/product/ProductDetails';
 import CategoryProducts from './pages/CategoryProducts';
 
-
 //Others
 import NotFound from './pages/NotFound';
 import Error from './components/Error';
@@ -67,6 +62,7 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Shops from './pages/Shops';
 import ReturnsRefundsPolicy from './pages/ReturnsRefundsPolicy';
+
 
 
 function App() {
@@ -132,6 +128,7 @@ function App() {
           <Route path='edit-product/:id' element={<EditProduct />}></Route>
           <Route path='orders' element={<VendorOrdersManager />}></Route>
           <Route path='orders/:orderId' element={<VendorOrderDetails />}></Route>
+          <Route path='settings' element={<VendorSettings />}></Route>
 
         </Route>
        

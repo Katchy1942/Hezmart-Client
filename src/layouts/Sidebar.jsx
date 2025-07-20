@@ -21,6 +21,7 @@ const Sidebar = ({ user, isToggle, setToggle }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [processing, setProcessing] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   
   const vendorLinks = [
     { name: "Dashboard", path: "vendor/dashboard", icon: <FaTachometerAlt /> },
@@ -43,10 +44,18 @@ const Sidebar = ({ user, isToggle, setToggle }) => {
 
   const links = user?.role === "admin" ? adminLinks : vendorLinks;
 
-  // Lock body scroll when sidebar is open on mobile
+  // Check if mobile and handle scroll lock
   useEffect(() => {
-    const isMobile = window.innerWidth <= 768;
-    
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    // Initial check
+    handleResize();
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+
     if (isMobile && isToggle) {
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
@@ -58,30 +67,30 @@ const Sidebar = ({ user, isToggle, setToggle }) => {
     }
 
     return () => {
-      // Cleanup - ensure body scroll is unlocked when component unmounts
+      window.removeEventListener('resize', handleResize);
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.width = '';
     };
-  }, [isToggle]);
+  }, [isToggle, isMobile]);
 
   const handleLogout = async () => {
     setProcessing(true);
     try {
-      const res = await logout(navigate);
-      setProcessing(false);
+      await logout(navigate);
     } catch (err) {
-      setProcessing(false);
       console.log(err);
+    } finally {
+      setProcessing(false);
     }
   };
 
   return (
     <>
       {/* Overlay for mobile */}
-      {isToggle && (
+      {isToggle && isMobile && (
         <div 
-          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-10"
+          className="fixed inset-0 bg-black bg-opacity-50 z-10"
           onClick={() => setToggle(false)}
         />
       )}
@@ -93,12 +102,14 @@ const Sidebar = ({ user, isToggle, setToggle }) => {
       >
         <div className="h-full flex flex-col text-white">
           {/* Close button */}
-          <button 
-            onClick={() => setToggle(false)}
-            className="md:hidden absolute top-4 right-4 text-white hover:text-gray-200"
-          >
-            <FaTimes className="w-5 h-5" />
-          </button>
+          {isMobile && (
+            <button 
+              onClick={() => setToggle(false)}
+              className="md:hidden absolute top-4 right-4 text-white hover:text-gray-200"
+            >
+              <FaTimes className="w-5 h-5" />
+            </button>
+          )}
 
           {/* Logo */}
           <div className="h-16 px-3 flex items-center justify-center border-b border-orange-300">
@@ -119,7 +130,7 @@ const Sidebar = ({ user, isToggle, setToggle }) => {
                         ? 'bg-white text-[#E67002] font-medium' 
                         : 'text-white hover:bg-orange-500'
                     }`}
-                    onClick={() => setToggle(false)}
+                    onClick={() => isMobile && setToggle(false)}
                   >
                     <span className="mr-3">{link.icon}</span>
                     <span>{link.name}</span>
@@ -129,12 +140,12 @@ const Sidebar = ({ user, isToggle, setToggle }) => {
             </ul>
           </nav>
 
-          {/* User Profile & Logout */}
+          {/* User Profile & Logout - Always visible */}
           <div className="p-4 border-t border-orange-300">
             <div className="flex items-center mb-3">
               <div className="w-10 h-10 rounded-full bg-orange-200 flex items-center justify-center overflow-hidden">
-                {user?.avatar ? (
-                  <img src={user.avatar} alt="User" className="w-full h-full object-cover" />
+                {user?.photo ? (
+                  <img src={user.photo} alt="User" className="w-full h-full object-cover" />
                 ) : (
                   <FaUserCircle className="text-[#E67002] text-xl" />
                 )}
@@ -148,6 +159,7 @@ const Sidebar = ({ user, isToggle, setToggle }) => {
             <button 
               onClick={handleLogout}
               className="w-full flex items-center justify-center py-2 px-4 rounded-md bg-orange-600 hover:bg-orange-700 text-white transition-colors"
+              disabled={processing}
             >
               {processing ? (
                 <FaSpinner className="animate-spin mr-2" />

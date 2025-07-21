@@ -17,6 +17,7 @@ const Login = () => {
   const message = searchParams.get("message") || null;
   const [processing, setProcessing] = useState(false);
   const [socialProcessing, setSocialProcessing] = useState(null);
+  const [redirecting, setRedirecting] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -56,34 +57,39 @@ const Login = () => {
   };
 
   const handleSuccessfulLogin = async (response) => {
-    await axios.post('api/v1/cart/merge');
-    localStorage.setItem("user", JSON.stringify(response.data.data.user));
-    if (rememberMe) {
-      localStorage.setItem("rememberMe", "true");
-    } else {
-      localStorage.removeItem("rememberMe");
-    }
+    setRedirecting(true);
+    try {
+      await axios.post('api/v1/cart/merge');
+      localStorage.setItem("user", JSON.stringify(response.data.data.user));
+      if (rememberMe) {
+        localStorage.setItem("rememberMe", "true");
+      } else {
+        localStorage.removeItem("rememberMe");
+      }
 
-    let goTo;
-    switch (response.data.data.user.role) {
-      case 'user':
-      case 'customer':
-        goTo = pathname || '/';
-        break;
-      case 'vendor':
-        goTo = pathname || (
-          response.data.data.user.status !== 'active'
-            ? '/pending_verification'
-            : '/manage/vendor/dashboard'
-        );
-        break;
-      case 'admin':
-        goTo = pathname || '/manage/admin/dashboard';
-        break;
-      default:
-        goTo = '/';
+      let goTo;
+      switch (response.data.data.user.role) {
+        case 'user':
+        case 'customer':
+          goTo = pathname || '/';
+          break;
+        case 'vendor':
+          goTo = pathname || (
+            response.data.data.user.status !== 'active'
+              ? '/pending_verification'
+              : '/manage/vendor/dashboard'
+          );
+          break;
+        case 'admin':
+          goTo = pathname || '/manage/admin/dashboard';
+          break;
+        default:
+          goTo = '/';
+      }
+      navigate(goTo, { replace: true });
+    } finally {
+      setRedirecting(false);
     }
-    navigate(goTo, { replace: true });
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
@@ -97,8 +103,7 @@ const Login = () => {
         await handleSuccessfulLogin(response);
       }
     } catch (err) {
-    console.log(err);
-    
+      console.log(err);
       setError(err.response?.data?.message || 'Google login failed');
     } finally {
       setSocialProcessing(null);
@@ -129,11 +134,22 @@ const Login = () => {
   };
 
   return (
-    <div className="flex justify-center items-center py-10 bg-[#F5F6FA]">
+    <div className="flex justify-center items-center py-10 bg-[#F5F6FA] relative min-h-screen">
+      {/* Loading overlay */}
+      {redirecting && (
+        <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+            <p className="text-gray-700">Redirecting you...</p>
+          </div>
+        </div>
+      )}
+
       <div className="w-full max-w-md">
         <form
           onSubmit={submit}
           className="bg-white rounded-lg border border-[#D9E1EC] shadow-sm p-8"
+          style={{ opacity: redirecting ? 0.7 : 1 }}
         >
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800">Welcome Back</h2>
@@ -148,18 +164,16 @@ const Login = () => {
             </div>
           )}
 
-          {/* Moved Social Auth Buttons to the top */}
           <div className="mb-6">
             <div className="grid grid-cols-2 gap-3 ">
               <div className="col-span-2 flex justify-center">
                 <GoogleLogin
-                
                   onSuccess={handleGoogleSuccess}
                   onError={handleGoogleError}
                   render={(renderProps) => (
                     <button
                       onClick={renderProps.onClick}
-                      disabled={renderProps.disabled || !!socialProcessing}
+                      disabled={renderProps.disabled || !!socialProcessing || redirecting}
                       className="cursor-pointer w-full inline-flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                     >
                       <FaGoogle className="text-red-500 mr-2" />
@@ -186,7 +200,7 @@ const Login = () => {
                 render={(props) => (
                   <button
                     {...props}
-                    disabled={!!socialProcessing}
+                    disabled={!!socialProcessing || redirecting}
                     type="button"
                     className="cursor-pointer w-full inline-flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                   >
@@ -219,6 +233,7 @@ const Login = () => {
               onChange={handleChange}
               icon={<FiMail className="text-gray-400" />}
               required
+              disabled={redirecting}
             />
           </div>
 
@@ -232,6 +247,7 @@ const Login = () => {
               onChange={handleChange}
               icon={<FaLock className="text-gray-400" />}
               required
+              disabled={redirecting}
             />
           </div>
 
@@ -242,6 +258,7 @@ const Login = () => {
                 checked={rememberMe}
                 onChange={() => setRememberMe(!rememberMe)}
                 className="rounded text-blue-600 focus:ring-blue-500"
+                disabled={redirecting}
               />
               <span className="ml-2 text-sm text-gray-600">Remember me</span>
             </label>
@@ -256,9 +273,9 @@ const Login = () => {
 
           <Button
             type="submit"
-            disabled={processing}
-            isLoading={processing}
-            loadingText="Logging in..."
+            disabled={processing || redirecting}
+            isLoading={processing || redirecting}
+            loadingText={redirecting ? "Redirecting..." : "Logging in..."}
             className="w-full py-3"
           >
             Login

@@ -262,6 +262,7 @@ const Checkout = () => {
             selectedWallet={selectedWallet}
             selectedPickupStation={selectedPickupStation}
             selectedStateFee={selectedStateFee}
+            shippingSettings={shippingSettings}
           />
         </div>
       </div>

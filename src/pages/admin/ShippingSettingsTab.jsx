@@ -9,10 +9,10 @@ const ShippingSettingsTab = ({
 }) => {
     // Shipping settings state
     const [shippingSettings, setShippingSettings] = useState({
-        doorDeliveryEnabled: true,
-        pickupEnabled: true,
-        freeShippingEnabled: false,
-        freeShippingMinAmount: 10000,
+        doorDeliveryEnabled: false,
+        pickupEnabled: false,
+        minShippingEnabled: false,
+        shippingMinAmount: 8000,
     });
     const[isUpdating, setIsUpdating] = useState(false);
     const [errors, setErrors] = useState({
@@ -22,9 +22,9 @@ const ShippingSettingsTab = ({
     // Fetch shipping settings
     const getShippingSettings = async () => {
         try {
-            const res = await axios.get('api/v1/shipping-settings/active'); 
-            if (res.data.status === 'success') {
-                setShippingSettings(res.data.data.settings);
+            const res = await axios.get('api/v1/shipping-settings/all'); 
+            if (res.data.status === 'success') { 
+                setShippingSettings(res.data.data.settings[0]);
             }
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to fetch shipping settings');
@@ -42,10 +42,9 @@ const ShippingSettingsTab = ({
             const settingsRes = await axios.post('api/v1/shipping-settings', {
                 doorDeliveryEnabled: shippingSettings.doorDeliveryEnabled,
                 pickupEnabled: shippingSettings.pickupEnabled,
-                freeShippingEnabled: shippingSettings.freeShippingEnabled,
-                freeShippingMinAmount: shippingSettings.freeShippingMinAmount
+                minShippingEnabled: shippingSettings.minShippingEnabled,
+                shippingMinAmount: shippingSettings.shippingMinAmount
             });
-            console.log(settingsRes);
             
             toast.success('Shipping settings updated successfully');
             setShippingSettings(settingsRes.data.data);
@@ -105,37 +104,37 @@ const ShippingSettingsTab = ({
                             </div>
                         </div>
                         
-                        {/* <div className="hidden grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="flex items-center">
                                 <input
                                     type="checkbox"
                                     id="freeShippingEnabled"
-                                    checked={shippingSettings.freeShippingEnabled}
+                                    checked={shippingSettings.minShippingEnabled}
                                     onChange={(e) => setShippingSettings({
                                         ...shippingSettings,
-                                        freeShippingEnabled: e.target.checked
+                                        minShippingEnabled: e.target.checked
                                     })}
                                     className="h-4 w-4 text-primary-dark focus:ring-primary-dark border-gray-300 rounded"
                                 />
                                 <label htmlFor="freeShippingEnabled" className="ml-2 block text-sm text-gray-900">
-                                    Enable Free Shipping Threshold
+                                    Enable Shipping Threshold
                                 </label>
                             </div>
-                            {shippingSettings.freeShippingEnabled && (
+                            {shippingSettings.minShippingEnabled && (
                                 <InputField
                                     label="Minimum Order Amount (₦)"
                                     name="freeShippingMinAmount"
                                     type="number"
-                                    value={shippingSettings.freeShippingMinAmount}
+                                    value={shippingSettings.shippingMinAmount}
                                     onChange={(e) => setShippingSettings({
                                         ...shippingSettings,
-                                        freeShippingMinAmount: e.target.value
+                                        shippingMinAmount: e.target.value
                                     })}
                                     min="0"
                                     step="100"
                                 />
                             )}
-                        </div> */}
+                        </div>
                     </div>
                 </div>
 

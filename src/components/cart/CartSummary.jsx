@@ -20,7 +20,8 @@ const CartSummary = ({
   selectedWallet,
   selectedPickupStation,
   deliveryOption,
-  selectedStateFee
+  selectedStateFee,
+  shippingSettings
 }) => {
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [couponCode, setCouponCode] = useState('');
@@ -32,6 +33,7 @@ const CartSummary = ({
   const location = useLocation();
   const pathname = location.pathname;
   const [selectedShipping, setSelectedShipping] = useState('standard');
+  console.log(shippingSettings)
 
   // Memoized address validation
   const isValidAddress = useMemo(() => {
@@ -91,7 +93,9 @@ const CartSummary = ({
       paymentValid: isPaymentValid(),
       itemsAvailable: allItemsAvailable
     };
-    if(parseFloat(summary.total) <=8000) return true
+    if (shippingSettings?.minShippingEnabled && parseFloat(summary.total) < shippingSettings?.shippingMinAmount) {
+    return true;
+  }
     
     return !requirements.addressValid || 
            !requirements.deliveryValid || 
@@ -403,14 +407,18 @@ const CartSummary = ({
               {paymentMethod === 'crypto' ? 'Confirm Crypto Payment' : 'Confirm Order'}
             </Button>
             
-            {isCheckoutDisabled() && !checkoutLoading && (
+           {isCheckoutDisabled() && !checkoutLoading && (
               <div className="text-xs text-red-500 mt-2 space-y-1">
                 {!isValidAddress && <div>• Please provide complete delivery information</div>}
                 {!isDeliveryValid() && deliveryOption === 'door' && <div>• Please select a state for delivery</div>}
                 {!isDeliveryValid() && deliveryOption === 'pickup' && <div>• Please select a pickup station</div>}
                 {!isPaymentValid() && paymentMethod === 'crypto' && <div>• Please select a crypto wallet</div>}
                 {!allItemsAvailable && <div>• Some items in your cart are unavailable</div>}
-                 {summary.total < 8000 && <div>• Orders with a total under ₦8,000 will not be shipped.</div>}
+                {shippingSettings?.minShippingEnabled && summary.total < shippingSettings?.shippingMinAmount && (
+                  <div>
+                    • Orders with a total under ₦{shippingSettings.shippingMinAmount.toLocaleString()} will not be shipped
+                  </div>
+                )}
               </div>
             )}
           </div>

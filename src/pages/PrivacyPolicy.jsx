@@ -7,7 +7,7 @@ const PrivacyPolicy = () => {
             {/* Header */}
             <div className="text-center mb-8">
                 <h1 className="text-3xl font-bold text-primary-light mb-2">Hezmart Privacy Notice</h1>
-                <p className="text-gray-600">Last updated: July 10, 2025</p>
+               
             </div>
 
             {/* Introduction */}

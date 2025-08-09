@@ -62,6 +62,7 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Shops from './pages/Shops';
 import ReturnsRefundsPolicy from './pages/ReturnsRefundsPolicy';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 
 
@@ -87,6 +88,7 @@ function App() {
 
         <Route path='shops' element={<Shops />}></Route>
         <Route path='returns-refunds-policy' element={<ReturnsRefundsPolicy />} />
+        <Route path='privacy-policy' element={<PrivacyPolicy />} />
 
         {/* Customer Routes */}
         <Route path='orders' element={<OrderPage />}></Route>

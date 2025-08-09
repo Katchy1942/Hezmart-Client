@@ -99,7 +99,7 @@ const Footer = () => {
             <h3 className="text-lg font-bold text-[#111827] mb-4">About Hezmart</h3>
             <ul className="space-y-2">
               <li><Link to="/" className="text-[#6B7280] hover:text-primary-dark">About Us</Link></li>
-              <li><Link to="/" className="text-[#6B7280] hover:text-primary-dark">Privacy Notice</Link></li>
+              <li><Link to="/privacy-policy" className="text-[#6B7280] hover:text-primary-dark">Privacy Notice</Link></li>
               <li><Link to="/" className="text-[#6B7280] hover:text-primary-dark">Terms and Conditions</Link></li>
               <li><Link to="/" className="text-[#6B7280] hover:text-primary-dark">Cookie Notice</Link></li>
             </ul>

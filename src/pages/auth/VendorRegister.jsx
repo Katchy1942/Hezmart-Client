@@ -101,6 +101,10 @@ const VendorRegister = () => {
     setErrors({});
 
     const formDataToSend = new FormData(e.target);
+    // Append the file if it exists
+    if (formData.businessLogo) {
+      formDataToSend.append('businessLogo', formData.businessLogo);
+    }
 
     try {
       const response = await axios.post("/api/v1/users/signup", formDataToSend);

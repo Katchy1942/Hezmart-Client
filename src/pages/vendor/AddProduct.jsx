@@ -113,11 +113,10 @@ const AddProduct = () => {
   };
 
   // Handle tag operations
-  const handleAddTag = (e) => {
-    if (e.key === "Enter" && newTag.trim()) {
+  const handleAddTag = () => {
+    if (newTag.trim()) {
       setTags([...tags, newTag.trim()]);
       setNewTag("");
-      e.preventDefault();
     }
   };
 
@@ -128,18 +127,15 @@ const AddProduct = () => {
   };
 
   // Handle option operations
-  const handleAddOptionValue = (optionIndex, e) => {
-    if (e.key === "Enter") {
-      const value = options[optionIndex].newValue.trim();
-      if (!value) return;
+  const handleAddOptionValue = (optionIndex) => {
+    const value = options[optionIndex].newValue.trim();
+    if (!value) return;
 
-      const updatedOptions = [...options];
-      if (!updatedOptions[optionIndex].values.includes(value)) {
-        updatedOptions[optionIndex].values.push(value);
-        updatedOptions[optionIndex].newValue = "";
-        setOptions(updatedOptions);
-      }
-      e.preventDefault();
+    const updatedOptions = [...options];
+    if (!updatedOptions[optionIndex].values.includes(value)) {
+      updatedOptions[optionIndex].values.push(value);
+      updatedOptions[optionIndex].newValue = "";
+      setOptions(updatedOptions);
     }
   };
 
@@ -413,14 +409,24 @@ const AddProduct = () => {
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Tags</h2>
           <div>
-            <InputField
-              label='Tag'
-              placeholder="Enter tag name"
-              value={newTag}
-              onChange={(e) => setNewTag(e.target.value)}
-              onKeyDown={handleAddTag}
-              isRequired={false}
-            />
+            <div className="flex gap-2">
+              <InputField
+                label='Tag'
+                placeholder="Enter tag name"
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
+                isRequired={false}
+                className="flex-1"
+              />
+              <button
+                type="button"
+                onClick={handleAddTag}
+                className="mt-6 px-4 bg-primary-dark text-white rounded-lg"
+              >
+                Add
+              </button>
+            </div>
             <div className="flex flex-wrap gap-2 mt-3">
               {tags.map((tag, index) => (
                 <span
@@ -508,13 +514,15 @@ const AddProduct = () => {
             <div className="space-y-4">
               {/* Add new option */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
-                <InputField
-                  label="New Option Name"
-                  placeholder="e.g. Color, Material"
-                  value={newOptionName}
-                  onChange={(e) => setNewOptionName(e.target.value)}
-                  isRequired={false}
-                />
+                <div className="sm:col-span-2">
+                  <InputField
+                    label="New Option Name"
+                    placeholder="e.g. Color, Material"
+                    value={newOptionName}
+                    onChange={(e) => setNewOptionName(e.target.value)}
+                    isRequired={false}
+                  />
+                </div>
                 <Button 
                   type="button" 
                   onClick={handleAddOption}
@@ -540,18 +548,28 @@ const AddProduct = () => {
                     </div>
                     
                     <div className="space-y-2">
-                      <InputField
-                        label={`Add ${option.name} Values`}
-                        placeholder={`Enter ${option.name} value`}
-                        value={option.newValue}
-                        onChange={(e) => {
-                          const updatedOptions = [...options];
-                          updatedOptions[optionIndex].newValue = e.target.value;
-                          setOptions(updatedOptions);
-                        }}
-                        onKeyDown={(e) => handleAddOptionValue(optionIndex, e)}
-                        isRequired={false}
-                      />
+                      <div className="flex gap-2">
+                        <InputField
+                          label={`Add ${option.name} Values`}
+                          placeholder={`Enter ${option.name} value`}
+                          value={option.newValue}
+                          onChange={(e) => {
+                            const updatedOptions = [...options];
+                            updatedOptions[optionIndex].newValue = e.target.value;
+                            setOptions(updatedOptions);
+                          }}
+                          onKeyDown={(e) => e.key === "Enter" && handleAddOptionValue(optionIndex)}
+                          isRequired={false}
+                          className="flex-1"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleAddOptionValue(optionIndex)}
+                          className="mt-6 px-4 bg-primary-dark text-white rounded-lg"
+                        >
+                          Add
+                        </button>
+                      </div>
                       
                       <div className="flex flex-wrap gap-2 mt-2">
                         {option.values.map((value, valueIndex) => (

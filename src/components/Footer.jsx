@@ -5,6 +5,7 @@ import InputField from './common/InputField';
 import axios from '../lib/axios';
 import { toast } from 'react-toastify';
 import Button from "./../components/common/Button";
+import { FaTiktok } from 'react-icons/fa';
 
 const Footer = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -70,14 +71,14 @@ const Footer = () => {
             <img src={logo} alt="logo" className='w-48' />
           </Link>
           <div className="flex items-center w-29 justify-between">
-            <Link href="/">
+            <Link to="https://web.facebook.com/profile.php?id=61566347349473" target='_blank'>
               <img src={facebook} width={25} height={25} />
             </Link>
-            <Link href="/">
+            <Link to="https://www.instagram.com/hezmart_ng/?igsh=bzYwY2c1YmxhcDlo#" target='_blank'>
               <img src={instagram} width={25} height={25} />
             </Link>
-            <Link href="/">
-              <img src={twitter} width={25} height={25} />
+            <Link to="https://www.tiktok.com/@hezmart.com?_t=ZS-8z4XfDw4EXy&_r=1" target='_blank'  className="p-2 bg-gradient-to-r from-primary-light to-primary-dark">
+              <FaTiktok width={25} height={25} className='text-white'/>
             </Link>
           </div>
         </div>

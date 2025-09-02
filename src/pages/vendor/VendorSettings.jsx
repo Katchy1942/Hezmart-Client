@@ -2,28 +2,21 @@ import { useState, useEffect } from "react";
 import { toast } from 'react-toastify';
 import axios from "../../lib/axios";
 import ProfileTab from "../../components/common/ProfileTab";
-// import PaymentSettingsTab from "./PaymentSettingsTab";
-// import ShippingSettingsTab from "./ShippingSettingsTab";
-// import PickupLocationsTab from './PickupLocationsTab'
-// import StateFeesTab from "./StateFeesTab";
+import BusinessTab from "./BusinessTab"; 
 
 const VendorSettings = () => {
     const [user, setUser] = useState(null);
     const [isUpdating, setIsUpdating] = useState(false);
     const [activeTab, setActiveTab] = useState('profile');
+    const [categories, setCategories] = useState([]);
+    const [loadingCategories, setLoadingCategories] = useState(false);
     const [errors, setErrors] = useState({
         account: {},
         address: {},
         password: {},
         payment: {},
-        shipping: {}
-    });
- 
-    // Payment settings state
-    const [paymentSettings, setPaymentSettings] = useState({
-        paymentMethods: [],
-        defaultPaymentMethod: '',
-        paymentInstructions: ''
+        shipping: {},
+        business: {} // Added business errors
     });
     
     const nigerianStates = [
@@ -47,9 +40,68 @@ const VendorSettings = () => {
         }
     };
 
+    // Fetch categories for business category selection
+    const fetchCategories = async () => {
+        setLoadingCategories(true);
+        try {
+            const res = await axios.get('api/v1/categories?fields=name,id,icon');
+            setCategories(res.data.data.categories);
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+            toast.error("Failed to load categories");
+        } finally {
+            setLoadingCategories(false);
+        }
+    };
+
+    // Update business information
+    const updateBusinessInfo = async (businessData) => {
+        setIsUpdating(true);
+        try {
+            const formData = new FormData();
+            
+            // Append all business data to formData
+            Object.keys(businessData).forEach(key => {
+                if (key === 'businessLogo' && businessData[key]) {
+                    formData.append(key, businessData[key]);
+                } else if (businessData[key] !== null && businessData[key] !== undefined) {
+                    formData.append(key, businessData[key]);
+                }
+            });
+
+            const res = await axios.patch('api/v1/users/updateMe', formData);
+
+            if (res.data.status === 'success') {
+                setUser(res.data.data.user);
+                toast.success('Business information updated successfully');
+                setErrors(prev => ({...prev, business: {}}));
+                return true;
+            }
+        } catch (err) {
+            const backendErrors = err.response?.data?.errors || {};
+            const newErrors = {};
+            
+            Object.entries(backendErrors).forEach(([field, msg]) => {
+                newErrors[field] = msg;
+            });
+            
+            setErrors(prev => ({...prev, business: newErrors}));
+            
+            if (err.response?.data?.message && !Object.keys(newErrors).length) {
+                toast.error(err.response.data.message);
+            } else {
+                toast.error('Failed to update business information');
+            }
+            return false;
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
     // Initial data loading
     useEffect(() => {
         getUser();
+        fetchCategories();
     }, []);
 
     if (!user) {
@@ -74,12 +126,12 @@ const VendorSettings = () => {
                         >
                             Profile
                         </button>
-                        {/* <button
-                            onClick={() => setActiveTab('payment')}
-                            className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'payment' ? 'border-primary-dark text-primary-dark' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                        <button
+                            onClick={() => setActiveTab('business')}
+                            className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'business' ? 'border-primary-dark text-primary-dark' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                         >
-                            Payment
-                        </button> */}
+                            Business
+                        </button>
                     </nav>
                 </div>
                 
@@ -94,18 +146,16 @@ const VendorSettings = () => {
                             nigerianStates={nigerianStates}
                         />
                     )}
-
-                   
-
-                   
-
-                    {/* {activeTab === 'pickup' && (
-                        <PickupLocationsTab 
-                            nigerianStates={nigerianStates} 
+                    {activeTab === 'business' && (
+                        <BusinessTab 
+                            user={user}
+                            updateBusinessInfo={updateBusinessInfo}
+                            errors={errors.business}
+                            isUpdating={isUpdating}
+                            categories={categories}
+                            loadingCategories={loadingCategories}
                         />
-                    )} */}
-
-                   
+                    )}
                 </div>
             </div>
         </section>

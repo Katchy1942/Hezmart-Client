@@ -16,8 +16,6 @@ const VendorRegister = () => {
     email: "",
     ninNumber: "",
     primaryAddress: "",
-    // city: "",
-    // region: "",
     state: "",
     password: "",
     passwordConfirm: "",
@@ -229,41 +227,6 @@ const VendorRegister = () => {
               error={errors.primaryAddress}
             />
           </div>
-
-          {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-5 mt-5">
-            <InputField
-              label="City"
-              name="city"
-              value={formData.city}
-              onChange={handleChange}
-              placeholder="Enter city"
-              error={errors.city}
-            />
-
-            <InputField
-              label="Region"
-              name="region"
-              value={formData.region}
-              onChange={handleChange}
-              placeholder="Enter region"
-              error={errors.region}
-            />
-          </div> */}
-
-          {/* <div className="mt-5">
-            <SelectField
-              name="country"
-              label="Country"
-              value={formData.country}
-              onChange={handleChange}
-              options={[
-                { value: "ng", label: "Nigeria" },
-                { value: "us", label: "United States" },
-                { value: "uk", label: "United Kingdom" },
-              ]}
-              error={errors.country}
-            />
-          </div> */}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-5 mt-5">
             <InputField

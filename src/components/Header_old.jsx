@@ -191,42 +191,6 @@ const Header = () => {
                 </div>
             </div>
             
-            {/* App Download Badges - Added to top bar */}
-            <div className="bg-gray-100 py-2 px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center">
-                    <div className="text-xs text-gray-600 hidden lg:block">
-                        Download our app for better experience
-                    </div>
-                    <div className="flex items-center gap-2 mx-auto lg:mx-0">
-                        <a 
-                            href="https://apps.apple.com/app/hezmart/id6751547294" 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="block"
-                        >
-                            <img 
-                                src="https://developer.apple.com/app-store/marketing/guidelines/images/badge-download-on-the-app-store.svg" 
-                                alt="Download on the App Store" 
-                                className="h-8 w-auto object-contain"
-                            />
-                        </a>
-                        <a 
-                            href="https://play.google.com/store/apps/details?id=com.hezmart.shoppingapp" 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="block"
-                        >
-                            <img 
-                                src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" 
-                                alt="GET IT ON Google Play" 
-                                className="h-8 w-auto object-contain"
-                            />
-                        </a>
-                    </div>
-                    <div className="hidden lg:block"></div> {/* Spacer for alignment */}
-                </div>
-            </div>
-            
             {/* Top Bar */}
             <div 
                 ref={topBarRef}

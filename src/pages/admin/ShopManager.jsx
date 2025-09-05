@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { FaSearch, FaEllipsisV } from 'react-icons/fa';
 import { FiShoppingBag } from 'react-icons/fi';
 import axios from '../../lib/axios';
@@ -16,7 +17,6 @@ const ShopManager = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [statusUpdating, setStatusUpdating] = useState(null);
   const [statusError, setStatusError] = useState(null);
-  const [activeTab, setActiveTab] = useState('all');
   
   // Use the pagination hook
   const { pagination, updatePagination } = usePagination();
@@ -25,7 +25,7 @@ const ShopManager = () => {
   const fetchVendors = async (page = 1, search = '', status = '') => {
     setLoading(true);
     try {
-      let url = `api/v1/users?role=vendor&page=${page}&limit=${pagination.perPage}&search=${search}&fields=firstName,lastName,email,status,id,primaryAddress,primaryPhone,businessName,businessLogo,createdAt`;
+      let url = `api/v1/users?role=vendor&page=${page}&limit=${pagination.perPage}&search=${search}&fields=firstName,lastName,email,status,id,businessName,businessLogo,createdAt`;
       if (status && status !== 'all') {
         url += `&status=${status}`;
       }
@@ -33,17 +33,16 @@ const ShopManager = () => {
       const res = await axios.get(url);
       
       if (res.data.status === 'success') {
+        console.log('RESULT:', res.data.data);
+        
         setShops(res.data.data.users.map(user => ({
           id: user.id,
           name: user.businessName,
           owner: `${user.firstName} ${user.lastName}`,
           logo: user.businessLogo,
-          email: user.email,
-          mobile: user.primaryPhone,
           category: user.category?.name || 'Uncategorized',
-          address: user.primaryAddress,
           status: user.status,
-          joinDate:user.createdAt
+          joinDate: user.createdAt
         })));
         
         updatePagination({
@@ -63,12 +62,12 @@ const ShopManager = () => {
   // Handle search
   const handleSearch = (e) => {
     e.preventDefault();
-    fetchVendors(1, searchQuery, activeTab === 'all' ? '' : activeTab);
+    fetchVendors(1, searchQuery, statusFilter === 'all' ? '' : statusFilter);
   };
 
   // Handle page change
   const handlePageChange = (page) => {
-    fetchVendors(page, searchQuery, activeTab === 'all' ? '' : activeTab);
+    fetchVendors(page, searchQuery, statusFilter === 'all' ? '' : statusFilter);
   };
 
   // Update vendor status
@@ -77,8 +76,6 @@ const ShopManager = () => {
     setStatusError(null);
     
     try {
-     
-      
       const res = await axios.patch(`api/v1/users/${vendorId}/status`, { 
         status: newStatus 
       });
@@ -184,14 +181,14 @@ const ShopManager = () => {
     setActiveDropdown(activeDropdown === shopId ? null : shopId);
   };
 
-   const formatDate = (dateString) => {
+  const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -225,7 +222,6 @@ const ShopManager = () => {
         </div>
       )}
 
-  
       {/* Loading state */}
       {loading && (
         <div className="flex justify-center items-center h-64">
@@ -246,16 +242,6 @@ const ShopManager = () => {
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Owner
                   </th>
-
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date On
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Mobile
-                  </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Category
                   </th>
@@ -263,7 +249,7 @@ const ShopManager = () => {
                     Status
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Address
+                    Joined
                   </th>
                   <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -288,22 +274,17 @@ const ShopManager = () => {
                             )}
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">{shop.name}</div>
+                            <Link 
+                              to={`/manage/admin/vendors/${shop.id}`} 
+                              className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                            >
+                              {shop.name}
+                            </Link>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {shop.owner}
-                      </td>
-
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatDate(shop.joinDate)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {shop.email}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {shop.mobile}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -321,7 +302,7 @@ const ShopManager = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {shop.address}
+                        {formatDate(shop.joinDate)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium relative">
                         <button 
@@ -369,6 +350,13 @@ const ShopManager = () => {
                                   )}
                                 </button>
                               ))}
+                              <div className="border-t border-gray-100 my-1"></div>
+                              <Link
+                                to={`/manage/admin/vendors/${shop.id}`}
+                                className="block py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              >
+                                View Details
+                              </Link>
                             </div>
                           </div>
                         )}
@@ -377,7 +365,7 @@ const ShopManager = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="8" className="px-6 py-4 text-center text-gray-500">
+                    <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
                       No shops found
                     </td>
                   </tr>

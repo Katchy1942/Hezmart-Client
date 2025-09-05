@@ -22,6 +22,7 @@ import AuthCallback from './pages/auth/AuthCallBack';
 //Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard'
 import ShopManager from './pages/admin/ShopManager';
+import VendorDetails from './pages/admin/VendorDetails';
 import AdminManageProducts from './pages/admin/AdminManageProducts';
 import ManageCategories from './pages/admin/ManageCategories';
 import AdminOrdersManager from './pages/admin/AdminOrdersManager';
@@ -112,6 +113,7 @@ function App() {
         <Route path='admin' loader={async({ request }) => await requireAuth(request, 'admin')}>
           <Route path='dashboard' element={<AdminDashboard />} />
           <Route path='vendors' element={<ShopManager />} />
+          <Route path="vendors/:id" element={<VendorDetails />} />
           <Route path='customers' element={<CustomersManager />}></Route>
           <Route path='products' element={<AdminManageProducts />} />
           <Route path='categories' element={<ManageCategories />}></Route>

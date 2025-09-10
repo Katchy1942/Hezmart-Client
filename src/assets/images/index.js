@@ -4,6 +4,7 @@ import logo_png from './logo_png.PNG'
 import cart from './mynaui_cart.svg';
 import logo from "./logo.PNG";
 import mail from "./mail.svg"; 
+import appleDownload from './apple-download-icon.png';
 
 import faviconlogo from './favicon.svg';
 import facebook from './facebook.svg';
@@ -40,6 +41,6 @@ export {
  carousel_1,
  carousel_2,
  carousel_3,
- carousel_4
-
+ carousel_4,
+appleDownload
 };

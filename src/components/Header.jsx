@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { logo, logo_png } from "../assets/images";
+import { logo, logo_png ,appleDownload} from "../assets/images";
 import { LuShoppingCart, LuMenu } from "react-icons/lu";
 import { 
   FiUser, 
@@ -205,9 +205,9 @@ const Header = () => {
                             className="block"
                         >
                             <img 
-                                src="https://developer.apple.com/app-store/marketing/guidelines/images/badge-download-on-the-app-store.svg" 
+                                src={appleDownload}
                                 alt="Download on the App Store" 
-                                className="h-8 w-auto object-contain"
+                                className="h-16 w-auto object-contain"
                             />
                         </a>
                         <a 
@@ -219,7 +219,7 @@ const Header = () => {
                             <img 
                                 src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" 
                                 alt="GET IT ON Google Play" 
-                                className="h-8 w-auto object-contain"
+                                className="h-14 w-auto object-contain"
                             />
                         </a>
                     </div>

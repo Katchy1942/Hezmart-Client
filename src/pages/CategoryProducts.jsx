@@ -7,7 +7,7 @@ const CategoryProducts = () => {
     // Determine the fetch URL based on whether subcategoryId exists
     const fetchUrl = subcategoryId 
         ? `api/v1/products?status=active&categoryId=${categoryId}&subCategoryId=${subcategoryId}`
-        : `api/v1/products?categoryId=${categoryId}`;
+        : `api/v1/products?status=active&categoryId=${categoryId}`;
 
     // Customize header text based on whether it's a category or subcategory
     const headerTitle = subcategoryId 

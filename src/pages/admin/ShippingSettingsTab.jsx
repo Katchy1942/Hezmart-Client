@@ -5,16 +5,18 @@ import { useState, useEffect } from "react";
 import axios from "../../lib/axios";
 import { toast } from 'react-toastify';
 
-const ShippingSettingsTab = ({  
-}) => {
-    // Shipping settings state
-    const [shippingSettings, setShippingSettings] = useState({
+const ShippingSettingsTab = () => {
+    // Default shipping settings state
+    const defaultShippingSettings = {
         doorDeliveryEnabled: false,
         pickupEnabled: false,
         minShippingEnabled: false,
         shippingMinAmount: 8000,
-    });
-    const[isUpdating, setIsUpdating] = useState(false);
+    };
+
+    const [shippingSettings, setShippingSettings] = useState(defaultShippingSettings);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [errors, setErrors] = useState({
         shipping: {}
     });
@@ -22,13 +24,21 @@ const ShippingSettingsTab = ({
     // Fetch shipping settings
     const getShippingSettings = async () => {
         try {
+            setIsLoading(true);
             const res = await axios.get('api/v1/shipping-settings/all'); 
-            if (res.data.status === 'success') { 
+            if (res.data.status === 'success' && res.data.data.settings[0]) { 
                 setShippingSettings(res.data.data.settings[0]);
+            } else {
+                // Use default settings if no settings found
+                setShippingSettings(defaultShippingSettings);
             }
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to fetch shipping settings');
-            console.log(err)
+            console.log(err);
+            // Fall back to default settings on error
+            setShippingSettings(defaultShippingSettings);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -64,6 +74,16 @@ const ShippingSettingsTab = ({
     useEffect(() => {
         getShippingSettings();
     }, []);
+
+    // Show loading state while fetching settings
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-dark"></div>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6">
             <form onSubmit={handleShippingSettingsSubmit}>
@@ -76,7 +96,7 @@ const ShippingSettingsTab = ({
                                 <input
                                     type="checkbox"
                                     id="doorDeliveryEnabled"
-                                    checked={shippingSettings.doorDeliveryEnabled}
+                                    checked={shippingSettings?.doorDeliveryEnabled || false}
                                     onChange={(e) => setShippingSettings({
                                         ...shippingSettings,
                                         doorDeliveryEnabled: e.target.checked
@@ -91,7 +111,7 @@ const ShippingSettingsTab = ({
                                 <input
                                     type="checkbox"
                                     id="pickupEnabled"
-                                    checked={shippingSettings.pickupEnabled}
+                                    checked={shippingSettings?.pickupEnabled || false}
                                     onChange={(e) => setShippingSettings({
                                         ...shippingSettings,
                                         pickupEnabled: e.target.checked
@@ -109,7 +129,7 @@ const ShippingSettingsTab = ({
                                 <input
                                     type="checkbox"
                                     id="freeShippingEnabled"
-                                    checked={shippingSettings.minShippingEnabled}
+                                    checked={shippingSettings?.minShippingEnabled || false}
                                     onChange={(e) => setShippingSettings({
                                         ...shippingSettings,
                                         minShippingEnabled: e.target.checked
@@ -120,12 +140,12 @@ const ShippingSettingsTab = ({
                                     Enable Shipping Threshold
                                 </label>
                             </div>
-                            {shippingSettings.minShippingEnabled && (
+                            {shippingSettings?.minShippingEnabled && (
                                 <InputField
                                     label="Minimum Order Amount (₦)"
                                     name="freeShippingMinAmount"
                                     type="number"
-                                    value={shippingSettings.shippingMinAmount}
+                                    value={shippingSettings?.shippingMinAmount || 8000}
                                     onChange={(e) => setShippingSettings({
                                         ...shippingSettings,
                                         shippingMinAmount: e.target.value

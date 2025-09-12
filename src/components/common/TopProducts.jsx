@@ -1,7 +1,5 @@
 import { FiShoppingBag } from 'react-icons/fi';
 const TopProducts = ({ products }) => {
-    console.log(products);
-    
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h3 className="text-lg font-semibold mb-4">Top Products by Units Sold</h3>

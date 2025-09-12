@@ -3,6 +3,7 @@ import StatsCard from './StatsCard';
 import SalesChart from './SalesChart';
 import RecentTransactions from './RecentTransactions';
 import TopProducts from './TopProducts';
+import TopCustomers from './TopCustomers';
 import { FiDollarSign, FiUsers, FiShoppingBag, FiTrendingUp } from 'react-icons/fi';
 import axios from '../../lib/axios';
 import { toast } from 'react-toastify';
@@ -45,31 +46,31 @@ const Dashboard = ({ isAdmin = false }) => {
   }
 
   // Format stats data for cards
- const statsData = [
-  { 
-    title: 'Total Revenue', 
-    value: `₦${parseFloat(stats.totalRevenue).toLocaleString()}`, 
-    secondaryValue: `${stats.totalOrders} orders` 
-  },
-  { 
-    title: 'Total Orders', 
-    value: stats.totalOrders, 
-    secondaryValue: `₦${parseFloat(stats.totalRevenue).toLocaleString()}` 
-  },
-  // Only include user-related stats for admin
-  ...(isAdmin ? [
+  const statsData = [
     { 
-      title: 'New Users', 
-      value: stats.newUsers, 
-      secondaryValue: `${stats.activeUsers} active` 
+      title: 'Total Revenue', 
+      value: `₦${parseFloat(stats.totalRevenue).toLocaleString()}`, 
+      secondaryValue: `${stats.totalOrders} orders` 
     },
     { 
-      title: 'Active Users', 
-      value: stats.activeUsers, 
-      secondaryValue: `${stats.newUsers} new` 
-    }
-  ] : [])
-].filter(Boolean); // Filter out any undefined values
+      title: 'Total Orders', 
+      value: stats.totalOrders, 
+      secondaryValue: `₦${parseFloat(stats.totalRevenue).toLocaleString()}` 
+    },
+    // Only include user-related stats for admin
+    ...(isAdmin ? [
+      { 
+        title: 'New Users', 
+        value: stats.newUsers, 
+        secondaryValue: `${stats.activeUsers} active` 
+      },
+      { 
+        title: 'Active Users', 
+        value: stats.activeUsers, 
+        secondaryValue: `${stats.newUsers} new` 
+      }
+    ] : [])
+  ].filter(Boolean); // Filter out any undefined values
 
   // Format chart data from daily sales
   const chartData = {
@@ -91,10 +92,17 @@ const Dashboard = ({ isAdmin = false }) => {
     price: `₦${parseFloat(product.price).toLocaleString()}`,
     unitsSold: product.unitsSold,
     revenue: `₦${(parseFloat(product.price) * parseInt(product.unitsSold)).toLocaleString()}`,
-    coverImage:product.coverImage
+    coverImage: product.coverImage
   }));
 
-  
+  // Format top customers (only for admin)
+  const formattedTopCustomers = isAdmin && stats.topCustomers ? stats.topCustomers.map(customer => ({
+    name: customer.name,
+    email: customer.email,
+    ordersCount: customer.ordersCount,
+    totalSpent: parseFloat(customer.totalSpent),
+    photo: customer.photo
+  })) : [];
 
   return (
     <div className="">
@@ -154,6 +162,13 @@ const Dashboard = ({ isAdmin = false }) => {
         <RecentTransactions transactions={formattedTransactions} />
         <TopProducts products={formattedTopProducts} />
       </div>
+
+      {/* Top Customers Section (Admin only) */}
+      {isAdmin && formattedTopCustomers.length > 0 && (
+        <div className="mt-6">
+          <TopCustomers customers={formattedTopCustomers} />
+        </div>
+      )}
     </div>
   );
 };

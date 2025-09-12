@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { FaSearch, FaEllipsisV } from 'react-icons/fa';
-import { FiShoppingBag } from 'react-icons/fi';
+import { FiShoppingBag, FiUser } from 'react-icons/fi';
 import axios from '../../lib/axios';
 import { toast } from 'react-toastify';
 import Pagination from '../../components/common/Pagination';
@@ -20,23 +20,25 @@ const CustomersManager = () => {
 
   const { pagination, updatePagination } = usePagination();
 
-  const fetchVendors = async (page = 1, search = '', status = '') => {
+  const fetchCustomers = async (page = 1, search = '', status = '') => {
     setLoading(true);
     try {
-      let url = `api/v1/users?role=customer&page=${page}&limit=${pagination.perPage}&search=${search}&fields=firstName,lastName,email,photo,status,id,primaryAddress,primaryPhone,createdAt`;
+      let url = `api/v1/users/customers?page=${page}&limit=${pagination.perPage}&search=${search}&fields=firstName,lastName,email,photo,status,id,primaryAddress,primaryPhone,createdAt`;
       if (status && status !== 'all') url += `&status=${status}`;
 
       const res = await axios.get(url);
       if (res.data.status === 'success') {
-        setCustomers(res.data.data.users.map(user => ({
-          id: user.id,
-          name: `${user.firstName} ${user.lastName}`,
-          photo: user.photo,
-          email: user.email,
-          mobile: user.primaryPhone,
-          address: user.primaryAddress,
-          status: user.status,
-          dateJoin:user.createdAt
+        setCustomers(res.data.data.customers.map(customer => ({
+          id: customer.id,
+          name: `${customer.firstName} ${customer.lastName}`,
+          photo: customer.photo,
+          email: customer.email,
+          mobile: customer.primaryPhone,
+          address: customer.primaryAddress,
+          status: customer.status,
+          dateJoin: customer.createdAt,
+          totalOrders: customer.totalOrders || 0,
+          totalSpent: customer.totalSpent || 0
         })));
 
         updatePagination({
@@ -46,8 +48,8 @@ const CustomersManager = () => {
         });
       }
     } catch (error) {
-      console.error('Error fetching vendors:', error);
-      toast.error('Failed to load shops');
+      console.error('Error fetching customers:', error);
+      toast.error('Failed to load customers');
     } finally {
       setLoading(false);
     }
@@ -55,14 +57,14 @@ const CustomersManager = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    fetchVendors(1, searchQuery, activeTab === 'all' ? '' : activeTab);
+    fetchCustomers(1, searchQuery, activeTab === 'all' ? '' : activeTab);
   };
 
   const handlePageChange = (page) => {
-    fetchVendors(page, searchQuery, activeTab === 'all' ? '' : activeTab);
+    fetchCustomers(page, searchQuery, activeTab === 'all' ? '' : activeTab);
   };
 
-  const updateStatus = async (vendorId, newStatusKeyword) => {
+  const updateStatus = async (customerId, newStatusKeyword) => {
     const statusMap = {
       approve: 'active',
       deactivate: 'deactivated',
@@ -72,18 +74,18 @@ const CustomersManager = () => {
 
     const newStatus = statusMap[newStatusKeyword] || newStatusKeyword;
 
-    setStatusUpdating(vendorId);
+    setStatusUpdating(customerId);
     setStatusError(null);
 
     try {
-      const res = await axios.patch(`api/v1/users/${vendorId}/status`, {
+      const res = await axios.patch(`api/v1/users/${customerId}/status`, {
         status: newStatus
       });
 
       if (res.data.status === 'success') {
         toast.success(`Status updated to "${newStatus}"`);
-        setCustomers(prev => prev.map(shop =>
-          shop.id === vendorId ? { ...shop, status: newStatus } : shop
+        setCustomers(prev => prev.map(customer =>
+          customer.id === customerId ? { ...customer, status: newStatus } : customer
         ));
       } else {
         toast.warning(res.data.message || 'Status updated with warning');
@@ -110,7 +112,7 @@ const CustomersManager = () => {
   }, []);
 
   useEffect(() => {
-    fetchVendors();
+    fetchCustomers();
   }, []);
 
   const getStatusColor = (status) => {
@@ -126,19 +128,18 @@ const CustomersManager = () => {
   const getStatusActions = (currentStatus) => {
     const actions = {
       active: [
-        { label: 'Mark as Pending', value: 'pending' },
-        { label: 'Deactivate Shop', value: 'deactivate' }
+        { label: 'Deactivate Customer', value: 'deactivate' }
       ],
       pending: [
         { label: 'Approve (Active)', value: 'approve' },
-        { label: 'Deny Application', value: 'deny' }
+        { label: 'Deny Access', value: 'deny' }
       ],
       denied: [
         { label: 'Approve (Active)', value: 'approve' },
         { label: 'Mark as Pending', value: 'pending' }
       ],
       deactivated: [
-        { label: 'Reactivate Shop', value: 'approve' }
+        { label: 'Reactivate Customer', value: 'approve' }
       ]
     };
 
@@ -155,22 +156,26 @@ const CustomersManager = () => {
 
   const handleStatusChange = (status) => {
     setStatusFilter(status);
-    fetchVendors(1, searchQuery, status === 'all' ? '' : status);
+    fetchCustomers(1, searchQuery, status === 'all' ? '' : status);
   };
 
-  const toggleDropdown = (shopId) => {
-    setActiveDropdown(activeDropdown === shopId ? null : shopId);
+  const toggleDropdown = (customerId) => {
+    setActiveDropdown(activeDropdown === customerId ? null : customerId);
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
+  };
+
+  const formatCurrency = (amount) => {
+    return `₦${parseFloat(amount).toLocaleString()}`;
   };
 
   return (
@@ -205,7 +210,7 @@ const CustomersManager = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  {['Name', 'Join On', 'Email', 'Mobile', 'Status', 'Address'].map((header, idx) => (
+                  {['Name', 'Join On', 'Email', 'Mobile', 'Orders', 'Total Spent', 'Status', 'Address', 'Actions'].map((header, idx) => (
                     <th key={idx} className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${header === 'Actions' ? 'text-right' : ''}`}>
                       {header}
                     </th>
@@ -224,7 +229,7 @@ const CustomersManager = () => {
                               {customer.photo ? (
                                 <img src={customer.photo} alt={customer.name} className="h-full w-full rounded-full object-cover" />
                               ) : (
-                                <FiShoppingBag className="text-blue-600" />
+                                <FiUser className="text-blue-600" />
                               )}
                             </div>
                             <div className="ml-4">
@@ -237,13 +242,15 @@ const CustomersManager = () => {
                         <td className="px-6 py-4 text-sm text-gray-900">{formatDate(customer.dateJoin)}</td>
                         <td className="px-6 py-4 text-sm text-gray-900">{customer.email}</td>
                         <td className="px-6 py-4 text-sm text-gray-900">{customer.mobile}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900 font-semibold">{customer.totalOrders}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900 font-semibold">{formatCurrency(customer.totalSpent)}</td>
                         <td className="px-6 py-4">
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(customer.status)}`}>
                             {customer.status}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-900">{customer.address}</td>
-                        {/* <td className="px-6 py-4 text-right relative" ref={dropdownRef}>
+                        <td className="px-6 py-4 text-right relative" ref={dropdownRef}>
                           {actions.length > 0 && (
                             <div className="inline-block text-left">
                               <button
@@ -271,13 +278,13 @@ const CustomersManager = () => {
                               )}
                             </div>
                           )}
-                        </td> */}
+                        </td>
                       </tr>
                     );
                   })
                 ) : (
                   <tr>
-                    <td colSpan="8" className="text-center py-10 text-gray-500">No customers found.</td>
+                    <td colSpan="9" className="text-center py-10 text-gray-500">No customers found.</td>
                   </tr>
                 )}
               </tbody>

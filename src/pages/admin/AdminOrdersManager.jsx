@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
-import { FaEllipsisV } from 'react-icons/fa';
+import { FaEllipsisV, FaDownload } from 'react-icons/fa';
 import Pagination from '../../components/common/Pagination';
 import usePagination from '../../hooks/usePagination';
 import DataTableFilters from '../../components/common/DataTableFilters';
@@ -11,11 +11,20 @@ const AdminOrdersManager = () => {
     const { pagination, updatePagination } = usePagination();
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState("all");
+    const [paymentStatusFilter, setPaymentStatusFilter] = useState("all");
+    const [dateRangeFilter, setDateRangeFilter] = useState({ start: '', end: '' });
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [exportLoading, setExportLoading] = useState(false);
     const [statusError, setStatusError] = useState(null);
     const [statusUpdating, setStatusUpdating] = useState(null);
     const [activeDropdown, setActiveDropdown] = useState(null);
+    const [showExportModal, setShowExportModal] = useState(false);
+    const [exportFilters, setExportFilters] = useState({
+        dateRange: { start: '', end: '' },
+        status: 'all',
+        paymentStatus: 'all'
+    });
     const dropdownRef = useRef(null);
 
     // Order status options
@@ -39,13 +48,19 @@ const AdminOrdersManager = () => {
         { value: "refunded", label: "Refunded" }
     ];
 
-    const fetchOrders = async (page = 1, search = '', status = '', paymentStatus = '') => {
+    const buildQueryString = (page, search, status, paymentStatus, startDate, endDate) => {
+        let query = `page=${page}&search=${search}`;
+        if (status && status !== 'all') query += `&status=${status}`;
+        if (paymentStatus && paymentStatus !== 'all') query += `&paymentStatus=${paymentStatus}`;
+        if (startDate) query += `&startDate=${startDate}`;
+        if (endDate) query += `&endDate=${endDate}`;
+        return query;
+    };
+
+    const fetchOrders = async (page = 1, search = '', status = '', paymentStatus = '', startDate = '', endDate = '') => {
         setLoading(true);
         try {
-            let url = `api/v1/orders?page=${page}&search=${search}`;
-             if (status && status !== 'all') {
-                url += `&status=${status}`;
-            }
+            const url = `api/v1/orders?${buildQueryString(page, search, status, paymentStatus, startDate, endDate)}`;
             const response = await axios.get(url);
 
             if (response.data.status === 'success') {
@@ -58,7 +73,6 @@ const AdminOrdersManager = () => {
             }
         } catch (error) {
             console.log(error);
-            
             toast.error(error.response?.data?.message || 'Failed to fetch orders');
         } finally {
             setLoading(false);
@@ -67,18 +81,63 @@ const AdminOrdersManager = () => {
 
     const handleSearch = (e) => {
         e.preventDefault();
-        fetchOrders(1, searchQuery, statusFilter);
+        fetchOrders(1, searchQuery, statusFilter, paymentStatusFilter, dateRangeFilter.start, dateRangeFilter.end);
     };
 
     const handlePageChange = (page) => {
-        fetchOrders(page, searchQuery, statusFilter);
+        fetchOrders(page, searchQuery, statusFilter, paymentStatusFilter, dateRangeFilter.start, dateRangeFilter.end);
     };
 
     const handleStatusChange = (status) => {
         setStatusFilter(status);
-        fetchOrders(1, searchQuery,  status === 'all' ? '' : status);
-       
-        
+        fetchOrders(1, searchQuery, status === 'all' ? '' : status, paymentStatusFilter, dateRangeFilter.start, dateRangeFilter.end);
+    };
+
+    const handlePaymentStatusChange = (status) => {
+        setPaymentStatusFilter(status);
+        fetchOrders(1, searchQuery, statusFilter, status === 'all' ? '' : status, dateRangeFilter.start, dateRangeFilter.end);
+    };
+
+    const handleDateRangeChange = (type, value) => {
+        setDateRangeFilter(prev => ({ ...prev, [type]: value }));
+    };
+
+    const applyDateFilter = () => {
+        fetchOrders(1, searchQuery, statusFilter, paymentStatusFilter, dateRangeFilter.start, dateRangeFilter.end);
+    };
+
+    const clearDateFilter = () => {
+        setDateRangeFilter({ start: '', end: '' });
+        fetchOrders(1, searchQuery, statusFilter, paymentStatusFilter);
+    };
+
+    const handleExport = async () => {
+        setExportLoading(true);
+        try {
+            const query = buildQueryString(1, '', exportFilters.status, exportFilters.paymentStatus, exportFilters.dateRange.start, exportFilters.dateRange.end);
+            const url = `api/v1/orders/export?${query}&format=excel`;
+
+            const response = await axios.get(url, { responseType: 'blob' });
+
+            // Create download link
+            const blob = new Blob([response.data], { type: 'text/xlsx' });
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = `orders_export_${new Date().toISOString().split('T')[0]}.xlsx`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(downloadUrl);
+
+            toast.success('Orders exported successfully');
+            setShowExportModal(false);
+        } catch (error) {
+            console.error('Export error:', error);
+            toast.error('Failed to export orders');
+        } finally {
+            setExportLoading(false);
+        }
     };
 
     const toggleDropdown = (orderId) => {
@@ -94,7 +153,7 @@ const AdminOrdersManager = () => {
 
             if (response.data.status === 'success') {
                 toast.success('Order status updated successfully');
-                setOrders(orders.map(order => 
+                setOrders(orders.map(order =>
                     order.id === orderId ? { ...order, status: newStatus } : order
                 ));
             }
@@ -108,8 +167,7 @@ const AdminOrdersManager = () => {
 
     const getStatusActions = (currentStatus) => {
         const actions = [];
-        
-        // Define possible status transitions
+
         const statusTransitions = {
             pending: ['processing', 'cancelled'],
             processing: ['shipped', 'cancelled'],
@@ -175,10 +233,35 @@ const AdminOrdersManager = () => {
                             onChange: (e) => handleStatusChange(e.target.value),
                             options: statusFilterOptions,
                             label: 'Order Status'
+                        },
+                        {
+                            type: 'select',
+                            value: paymentStatusFilter,
+                            onChange: (e) => handlePaymentStatusChange(e.target.value),
+                            options: paymentStatusOptions,
+                            label: 'Payment Status'
+                        },
+                        {
+                            type: 'date-range',
+                            startDate: dateRangeFilter.start,
+                            endDate: dateRangeFilter.end,
+                            onStartDateChange: (e) => handleDateRangeChange('start', e.target.value),
+                            onEndDateChange: (e) => handleDateRangeChange('end', e.target.value),
+                            onApply: applyDateFilter,
+                            onClear: clearDateFilter
                         }
                     ]}
                     totalItems={pagination.totalItems}
                     searchPlaceholder="Search orders by order id..."
+                    extraButtons={
+                        <button
+                            onClick={() => setShowExportModal(true)}
+                            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center text-sm"
+                        >
+                            <FaDownload className="mr-2" />
+                            Export
+                        </button>
+                    }
                 />
             </div>
 
@@ -186,6 +269,88 @@ const AdminOrdersManager = () => {
             {statusError && (
                 <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-md">
                     {statusError}
+                </div>
+            )}
+
+            {/* Export Modal */}
+            {showExportModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-96">
+                        <h3 className="text-lg font-semibold mb-4">Export Orders</h3>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <input
+                                        type="date"
+                                        value={exportFilters.dateRange.start}
+                                        onChange={(e) => setExportFilters(prev => ({
+                                            ...prev,
+                                            dateRange: { ...prev.dateRange, start: e.target.value }
+                                        }))}
+                                        className="border rounded-md px-3 py-2 text-sm"
+                                    />
+                                    <input
+                                        type="date"
+                                        value={exportFilters.dateRange.end}
+                                        onChange={(e) => setExportFilters(prev => ({
+                                            ...prev,
+                                            dateRange: { ...prev.dateRange, end: e.target.value }
+                                        }))}
+                                        className="border rounded-md px-3 py-2 text-sm"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Order Status</label>
+                                <select
+                                    value={exportFilters.status}
+                                    onChange={(e) => setExportFilters(prev => ({ ...prev, status: e.target.value }))}
+                                    className="border rounded-md px-3 py-2 text-sm w-full"
+                                >
+                                    <option value="all">All Statuses</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="processing">Processing</option>
+                                    <option value="shipped">Shipped</option>
+                                    <option value="delivered">Delivered</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
+                                <select
+                                    value={exportFilters.paymentStatus}
+                                    onChange={(e) => setExportFilters(prev => ({ ...prev, paymentStatus: e.target.value }))}
+                                    className="border rounded-md px-3 py-2 text-sm w-full"
+                                >
+                                    <option value="all">All Statuses</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="paid">Paid</option>
+                                    <option value="failed">Failed</option>
+                                    <option value="refunded">Refunded</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end space-x-3 mt-6">
+                            <button
+                                onClick={() => setShowExportModal(false)}
+                                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleExport}
+                                disabled={exportLoading}
+                                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50"
+                            >
+                                {exportLoading ? 'Exporting...' : 'Export'}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
 
@@ -239,10 +404,10 @@ const AdminOrdersManager = () => {
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
                                                     <div className="flex-shrink-0 h-10 w-10">
-                                                        <img 
-                                                            className="h-10 w-10 rounded-full" 
-                                                            src={order.user?.photo || '/images/default-user.png'} 
-                                                            alt={order.user?.firstName} 
+                                                        <img
+                                                            className="h-10 w-10 rounded-full"
+                                                            src={order.user?.photo || '/images/default-user.png'}
+                                                            alt={order.user?.firstName}
                                                         />
                                                     </div>
                                                     <div className="ml-4">
@@ -265,31 +430,29 @@ const AdminOrdersManager = () => {
                                                 {formatCurrency(order.total)}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                                    order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                    order.status === 'processing' ? 'bg-blue-100 text-blue-800' :
-                                                    order.status === 'shipped' ? 'bg-indigo-100 text-indigo-800' :
-                                                    order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                                                    order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                                                    order.status === 'refunded' ? 'bg-purple-100 text-purple-800' :
-                                                    'bg-gray-100 text-gray-800'
-                                                }`}>
+                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                        order.status === 'processing' ? 'bg-blue-100 text-blue-800' :
+                                                            order.status === 'shipped' ? 'bg-indigo-100 text-indigo-800' :
+                                                                order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                                                                    order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                                                                        order.status === 'refunded' ? 'bg-purple-100 text-purple-800' :
+                                                                            'bg-gray-100 text-gray-800'
+                                                    }`}>
                                                     {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                                    order.paymentStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                    order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
-                                                    order.paymentStatus === 'failed' ? 'bg-red-100 text-red-800' :
-                                                    order.paymentStatus === 'refunded' ? 'bg-purple-100 text-purple-800' :
-                                                    'bg-gray-100 text-gray-800'
-                                                }`}>
+                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.paymentStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                        order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
+                                                            order.paymentStatus === 'failed' ? 'bg-red-100 text-red-800' :
+                                                                order.paymentStatus === 'refunded' ? 'bg-purple-100 text-purple-800' :
+                                                                    'bg-gray-100 text-gray-800'
+                                                    }`}>
                                                     {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium relative">
-                                                <button 
+                                                <button
                                                     onClick={() => toggleDropdown(order.id)}
                                                     className="text-gray-400 hover:text-gray-600"
                                                     disabled={statusUpdating === order.id}
@@ -303,9 +466,9 @@ const AdminOrdersManager = () => {
                                                         <FaEllipsisV />
                                                     )}
                                                 </button>
-                                                
+
                                                 {activeDropdown === order.id && (
-                                                    <div 
+                                                    <div
                                                         ref={dropdownRef}
                                                         className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
                                                     >

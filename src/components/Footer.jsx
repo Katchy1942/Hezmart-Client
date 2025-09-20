@@ -89,8 +89,8 @@ const Footer = () => {
           <div className="footer-section">
             <h3 className="text-lg font-bold text-[#111827] mb-4">Need Help</h3>
             <ul className="space-y-2">
-              <li><Link to="/chat" className="text-[#6B7280] hover:text-primary-dark">Chat with Us</Link></li>
-              <li><Link to="/help-center" className="text-[#6B7280] hover:text-primary-dark">Help Center</Link></li>
+              <li><Link to="/" className="text-[#6B7280] hover:text-primary-dark">Chat with Us</Link></li>
+              <li><Link to="/" className="text-[#6B7280] hover:text-primary-dark">Help Center</Link></li>
               <li><Link to="/contact" className="text-[#6B7280] hover:text-primary-dark">Contact Us</Link></li>
             </ul>
           </div>

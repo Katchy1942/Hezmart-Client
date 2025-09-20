@@ -148,9 +148,245 @@ const OrderDetails = () => {
     }
   };
 
+  const handlePrint = () => {
+    if (!order) return;
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Order #${order.orderNumber} - Admin Invoice</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+              max-width: 1000px;
+              margin: 0 auto;
+              padding: 20px;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 30px;
+              border-bottom: 2px solid #ddd;
+              padding-bottom: 20px;
+            }
+            .company-info {
+              margin-bottom: 20px;
+            }
+            .order-info {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 30px;
+            }
+            .section {
+              margin-bottom: 25px;
+            }
+            .section-title {
+              font-weight: bold;
+              border-bottom: 1px solid #eee;
+              padding-bottom: 8px;
+              margin-bottom: 15px;
+            }
+            .order-items {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 25px;
+            }
+            .order-items th {
+              background-color: #f8f9fa;
+              text-align: left;
+              padding: 12px;
+              border-bottom: 2px solid #ddd;
+            }
+            .order-items td {
+              padding: 12px;
+              border-bottom: 1px solid #eee;
+            }
+            .order-summary {
+              width: 100%;
+              max-width: 400px;
+              margin-left: auto;
+            }
+            .order-summary td {
+              padding: 8px 0;
+            }
+            .order-summary .total {
+              font-weight: bold;
+              border-top: 2px solid #ddd;
+              padding-top: 10px;
+            }
+            .status {
+              display: inline-block;
+              padding: 4px 8px;
+              border-radius: 4px;
+              font-weight: bold;
+            }
+            .status-pending { background-color: #fef3cd; color: #856404; }
+            .status-paid { background-color: #d4edda; color: #155724; }
+            .status-delivered { background-color: #d4edda; color: #155724; }
+            .status-shipped { background-color: #cce5ff; color: #004085; }
+            .text-right { text-align: right; }
+            .text-center { text-align: center; }
+            @media print {
+              body { padding: 15px; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>INVOICE</h1>
+            <div class="company-info">
+              <h2>Hezmart Nigeria Limited</h2>
+              <p>No 189 Ugwuaji Road, Maryland Plaza, Enugu State</p>
+              <p>Phone: (+234) 091-600-02490 | Email: hezmartng@gmail.com</p>
+            </div>
+          </div>
+
+          <div class="order-info">
+            <div>
+              <p><strong>Order Number:</strong> #${order.orderNumber}</p>
+              <p><strong>Order Date:</strong> ${formatDate(order.createdAt)}</p>
+              <p><strong>Status:</strong> <span class="status status-${order.status}">${order.status.replace(/_/g, ' ')}</span></p>
+              <p><strong>Payment Status:</strong> <span class="status status-${order.paymentStatus}">${order.paymentStatus}</span></p>
+            </div>
+            <div>
+              <p><strong>Customer:</strong> ${order.user?.firstName} ${order.user?.lastName}</p>
+              <p><strong>Email:</strong> ${order.user?.email || order.deliveryAddress?.email || 'N/A'}</p>
+              <p><strong>Phone:</strong> ${order.deliveryAddress?.primaryPhone || 'N/A'}</p>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3 class="section-title">Delivery Address</h3>
+            <p>${order.deliveryAddress?.firstName} ${order.deliveryAddress?.lastName}</p>
+            <p>${order.deliveryAddress?.primaryAddress}</p>
+            <p>${order.deliveryAddress?.city || ''} ${order.deliveryAddress?.state || ''}</p>
+          </div>
+
+          <div class="section">
+            <h3 class="section-title">Delivery Method</h3>
+            <p><strong>${order.deliveryOption === 'door' ? 'Door Delivery' : 'Pickup Station'}</strong></p>
+            ${order.deliveryOption === 'door' ? `
+              <p>State: ${order.stateFeeDetails?.state || 'N/A'}</p>
+              <p>Delivery Fee: ${formatCurrency(order.stateFeeDetails?.fee || 0)}</p>
+            ` : `
+              <p>Station: ${order.pickupStationDetails?.name || 'N/A'}</p>
+              <p>Address: ${order.pickupStationDetails?.address || 'N/A'}</p>
+              <p>State: ${order.pickupStationDetails?.state || 'N/A'}</p>
+              <p>Contact: ${order.pickupStationDetails?.contactPhone || 'N/A'}</p>
+              <p>Pickup Fee: ${formatCurrency(order.pickupStationDetails?.fee || 0)}</p>
+            `}
+          </div>
+
+          <div class="section">
+            <h3 class="section-title">Order Items</h3>
+            <table class="order-items">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Vendor</th>
+                  <th>Price</th>
+                  <th>Qty</th>
+                  <th>Status</th>
+                  <th class="text-right">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${order.items?.map(item => `
+                  <tr>
+                    <td>${item.product?.name || 'N/A'}</td>
+                    <td>${item.vendor?.businessName || 'N/A'}</td>
+                    <td>${formatCurrency(item.discountPrice || item.price || 0)}</td>
+                    <td>${item.quantity}</td>
+                    <td>${item.fulfillmentStatus?.charAt(0).toUpperCase() + item.fulfillmentStatus?.slice(1) || 'N/A'}</td>
+                    <td class="text-right">${formatCurrency((item.discountPrice || item.price || 0) * item.quantity)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="order-summary">
+            <table>
+              <tr>
+                <td>Subtotal:</td>
+                <td class="text-right">${formatCurrency(order.subtotal || 0)}</td>
+              </tr>
+              ${parseFloat(order.discount || 0) > 0 ? `
+                <tr>
+                  <td>Discount:</td>
+                  <td class="text-right">-${formatCurrency(order.discount)}</td>
+                </tr>
+              ` : ''}
+              <tr>
+                <td>Shipping:</td>
+                <td class="text-right">${formatCurrency(order.deliveryFee || 0)}</td>
+              </tr>
+              ${parseFloat(order.tax || 0) > 0 ? `
+                <tr>
+                  <td>Tax:</td>
+                  <td class="text-right">${formatCurrency(order.tax)}</td>
+                </tr>
+              ` : ''}
+              <tr class="total">
+                <td>Total:</td>
+                <td class="text-right">${formatCurrency(order.total || 0)}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="section">
+            <h3 class="section-title">Payment Information</h3>
+            <p><strong>Method:</strong> ${order.paymentMethod}</p>
+            <p><strong>Status:</strong> <span class="status status-${order.paymentStatus}">${order.paymentStatus}</span></p>
+          </div>
+
+          ${order.paymentMethod === 'crypto' && order.walletDetails ? `
+            <div class="section">
+              <h3 class="section-title">Wallet Information</h3>
+              <p><strong>Wallet:</strong> ${order.walletDetails.name}</p>
+              <p><strong>Address:</strong> ${order.walletDetails.address}</p>
+            </div>
+          ` : ''}
+
+          <div class="text-center no-print" style="margin-top: 40px;">
+            <button onclick="window.print()" style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+              Print Invoice
+            </button>
+            <button onclick="window.close()" style="padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
+              Close Window
+            </button>
+          </div>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   useEffect(() => {
     fetchOrderDetails();
   }, [orderId]);
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-NG', {
+      style: 'currency',
+      currency: 'NGN'
+    }).format(amount);
+  };
 
   if (loading) {
     return (
@@ -170,24 +406,6 @@ const OrderDetails = () => {
       </div>
     );
   }
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN'
-    }).format(amount);
-  };
 
   const getStatusBadge = (status) => {
     const baseClasses = 'px-3 py-1 rounded-full text-xs font-medium';
@@ -246,7 +464,10 @@ const OrderDetails = () => {
           <FiChevronLeft className="mr-1" /> Back to orders
         </Link>
         <div className="flex space-x-2 sm:space-x-3 w-full sm:w-auto">
-          <button className="flex items-center px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+          <button 
+            onClick={handlePrint}
+            className="flex items-center px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
             <FiPrinter className="mr-1 sm:mr-2" /> 
             <span className="hidden sm:inline">Print</span>
           </button>
@@ -475,7 +696,7 @@ const OrderDetails = () => {
                 {parseFloat(order.discount) > 0 && (
                   <div className="flex justify-between text-green-600">
                     <span className="text-xs sm:text-sm">Discount</span>
-                    <span className="text-xs sm:text-sm font-medium">-{formatCurrency(order.discount)}</span>
+                    <span className="text-xs sm:text-sm font-medium">-${formatCurrency(order.discount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
@@ -537,7 +758,7 @@ const OrderDetails = () => {
             </div>
 
             {/* Order Status Update */}
-            <div className="hidden bg-gray-50 p-3 sm:p-4 rounded-lg">
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
               <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Update Order Status</h4>
               <div className="space-y-3">
                 <select
@@ -561,7 +782,7 @@ const OrderDetails = () => {
             </div>
 
             {/* Notes */}
-            <div className=" hidden bg-gray-50 p-3 sm:p-4 rounded-lg">
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
               <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Order Notes</h4>
               <textarea
                 rows="3"

@@ -4,3 +4,26 @@
   --color-primary-light: #E67002;
   --color-primary-dark:#992002;
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #order-details-content, #order-details-content * {
+    visibility: visible;
+  }
+  #order-details-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    max-width: 100%;
+    box-shadow: none;
+  }
+  .bg-gray-50 {
+    background-color: #f9fafb !important;
+  }
+  button, .flex.justify-end {
+    display: none !important;
+  }
+}

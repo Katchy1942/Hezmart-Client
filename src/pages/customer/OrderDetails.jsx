@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { 
-  FiChevronLeft, 
-  FiClock, 
-  FiCheckCircle, 
-  FiTruck, 
+import {
+  FiChevronLeft,
+  FiClock,
+  FiCheckCircle,
+  FiTruck,
   FiXCircle,
   FiStar,
   FiEdit2,
@@ -39,7 +39,7 @@ const OrderDetails = () => {
     const fetchOrder = async () => {
       try {
         const response = await axios.get(`api/v1/orders/${id}`);
-        if(response.data.status === 'success'){
+        if (response.data.status === 'success') {
           setOrder(response.data.data.order);
         }
       } catch (error) {
@@ -55,7 +55,7 @@ const OrderDetails = () => {
   const getStatusIcon = (status) => {
     switch (status.toLowerCase()) {
       case 'pending': return <FiClock className="text-yellow-500" />;
-      case 'processing': 
+      case 'processing':
       case 'partially_shipped':
       case 'shipped':
       case 'partially_delivered':
@@ -96,7 +96,7 @@ const OrderDetails = () => {
     try {
       const res = await axios.get(`api/v1/orders/verify-payment/${order.orderNumber}`);
       if (res.data.status === 'success') {
-        toast.success("Payment Verified Successfully."); 
+        toast.success("Payment Verified Successfully.");
         setOrder(res.data.data.order);
       }
     } catch (err) {
@@ -135,8 +135,8 @@ const OrderDetails = () => {
   const handleMarkAsReceived = async (itemId) => {
     setMarkingReceived(itemId);
     try {
-      const response = await axios.patch(`/api/v1/orders/items/${itemId}/status`, {status:'received'});
-      if(response.data.status === 'success'){
+      const response = await axios.patch(`/api/v1/orders/items/${itemId}/status`, { status: 'received' });
+      if (response.data.status === 'success') {
         toast.success('Item marked as received');
         setOrder(prevOrder => ({
           ...prevOrder,
@@ -163,20 +163,20 @@ const OrderDetails = () => {
     e.preventDefault();
     setSubmittingReview(true);
     try {
-      const endpoint = editingReview ? 
-        `api/v1/reviews/${editingReview.id}` : 
+      const endpoint = editingReview ?
+        `api/v1/reviews/${editingReview.id}` :
         `api/v1/products/${newReview.productId}/reviews`;
-      
+
       const method = editingReview ? 'patch' : 'post';
-      
+
       const response = await axios[method](endpoint, {
         rating: newReview.rating,
         review: newReview.comment
       });
-      
-      if(response.data.status === 'success'){
+
+      if (response.data.status === 'success') {
         toast.success(editingReview ? 'Review updated!' : 'Review submitted!');
-      
+
         setOrder(prevOrder => ({
           ...prevOrder,
           items: prevOrder.items.map(item => {
@@ -186,9 +186,9 @@ const OrderDetails = () => {
                 product: {
                   ...item.product,
                   reviews: editingReview
-                    ? item.product.reviews.map(r => 
-                        r.id === editingReview.id ? response.data.data.review : r
-                      )
+                    ? item.product.reviews.map(r =>
+                      r.id === editingReview.id ? response.data.data.review : r
+                    )
                     : [...(item.product.reviews || []), response.data.data.review]
                 }
               };
@@ -219,6 +219,196 @@ const OrderDetails = () => {
       productId
     });
   };
+
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Order #${order.orderNumber} - Invoice</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+              max-width: 1000px;
+              margin: 0 auto;
+              padding: 20px;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 30px;
+              border-bottom: 2px solid #ddd;
+              padding-bottom: 20px;
+            }
+            .company-info {
+              margin-bottom: 20px;
+            }
+            .order-info {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 30px;
+            }
+            .section {
+              margin-bottom: 25px;
+            }
+            .section-title {
+              font-weight: bold;
+              border-bottom: 1px solid #eee;
+              padding-bottom: 8px;
+              margin-bottom: 15px;
+            }
+            .order-items {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 25px;
+            }
+            .order-items th {
+              background-color: #f8f9fa;
+              text-align: left;
+              padding: 12px;
+              border-bottom: 2px solid #ddd;
+            }
+            .order-items td {
+              padding: 12px;
+              border-bottom: 1px solid #eee;
+            }
+            .order-summary {
+              width: 100%;
+              max-width: 400px;
+              margin-left: auto;
+            }
+            .order-summary td {
+              padding: 8px 0;
+            }
+            .order-summary .total {
+              font-weight: bold;
+              border-top: 2px solid #ddd;
+              padding-top: 10px;
+            }
+            .status {
+              display: inline-block;
+              padding: 4px 8px;
+              border-radius: 4px;
+              font-weight: bold;
+            }
+            .status-pending { background-color: #fef3cd; color: #856404; }
+            .status-paid { background-color: #d4edda; color: #155724; }
+            .status-delivered { background-color: #d4edda; color: #155724; }
+            .status-shipped { background-color: #cce5ff; color: #004085; }
+            .text-right { text-align: right; }
+            .text-center { text-align: center; }
+            @media print {
+              body { padding: 15px; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>INVOICE</h1>
+            <div class="company-info">
+              <h2>Hezmart Nigeria Limited</h2>
+              <p>No 189 Ugwuaji Road, Maryland Plaza, Enugu State</p>
+              <p>Phone: (+234) 091-600-02490 | Email: hezmartng@gmail.com</p>
+            </div>
+          </div>
+
+          <div class="order-info">
+            <div>
+              <p><strong>Order Number:</strong> #${order.orderNumber}</p>
+              <p><strong>Order Date:</strong> ${formatDate(order.createdAt)}</p>
+              <p><strong>Status:</strong> <span class="status status-${order.status}">${order.status.replace(/_/g, ' ')}</span></p>
+              <p><strong>Payment Status:</strong> <span class="status status-${order.paymentStatus}">${order.paymentStatus}</span></p>
+            </div>
+            <div>
+              <p><strong>Customer:</strong> ${order.user?.firstName} ${order.user?.lastName}</p>
+              <p><strong>Email:</strong> ${order.user?.email || order.deliveryAddress?.email || 'N/A'}</p>
+              <p><strong>Phone:</strong> ${order.deliveryAddress?.primaryPhone || 'N/A'}</p>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3 class="section-title">Delivery Address</h3>
+            <p>${order.deliveryAddress?.firstName} ${order.deliveryAddress?.lastName}</p>
+            <p>${order.deliveryAddress?.primaryAddress}</p>
+            <p>${order.deliveryAddress?.city || ''} ${order.deliveryAddress?.state || ''}</p>
+          </div>
+
+          <div class="section">
+            <h3 class="section-title">Order Items</h3>
+            <table class="order-items">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Price</th>
+                  <th>Qty</th>
+                  <th class="text-right">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${order.items?.map(item => `
+                  <tr>
+                    <td>${item.product?.name}</td>
+                    <td>${formatCurrency(item.discountPrice || item.price)}</td>
+                    <td>${item.quantity}</td>
+                    <td class="text-right">${formatCurrency((item.discountPrice || item.price) * item.quantity)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="order-summary">
+            <table>
+              <tr>
+                <td>Subtotal:</td>
+                <td class="text-right">${formatCurrency(order.subtotal)}</td>
+              </tr>
+              ${parseFloat(order.discount) > 0 ? `
+                <tr>
+                  <td>Discount:</td>
+                  <td class="text-right">-${formatCurrency(order.discount)}</td>
+                </tr>
+              ` : ''}
+              <tr>
+                <td>Shipping:</td>
+                <td class="text-right">${formatCurrency(order.deliveryFee)}</td>
+              </tr>
+              ${parseFloat(order.tax) > 0 ? `
+                <tr>
+                  <td>Tax:</td>
+                  <td class="text-right">${formatCurrency(order.tax)}</td>
+                </tr>
+              ` : ''}
+              <tr class="total">
+                <td>Total:</td>
+                <td class="text-right">${formatCurrency(order.total)}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="section">
+            <h3 class="section-title">Payment Information</h3>
+            <p><strong>Method:</strong> ${order.paymentMethod}</p>
+            <p><strong>Status:</strong> <span class="status status-${order.paymentStatus}">${order.paymentStatus}</span></p>
+          </div>
+
+          <div class="text-center no-print" style="margin-top: 40px;">
+            <button onclick="window.print()" style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+              Print Invoice
+            </button>
+            <button onclick="window.close()" style="padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
+              Close Window
+            </button>
+          </div>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
 
   const renderStars = (rating, interactive = false, onChange = null) => {
     return (
@@ -284,7 +474,7 @@ const OrderDetails = () => {
                   as="textarea"
                   label="Comment"
                   value={newReview.comment}
-                  onChange={(e) => setNewReview({...newReview, comment: e.target.value})}
+                  onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
                   required
                   rows={4}
                   classNames="w-full"
@@ -293,7 +483,7 @@ const OrderDetails = () => {
               <div className="flex justify-end space-x-3">
                 <button
                   type="button"
-                  onClick={() => setNewReview({...newReview, productId: null})}
+                  onClick={() => setNewReview({ ...newReview, productId: null })}
                   className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
                 >
                   Cancel
@@ -336,8 +526,8 @@ const OrderDetails = () => {
                 <h4 className="text-sm font-medium text-gray-900 mb-3">Customer Information</h4>
                 <div className="flex items-start">
                   <div className="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden bg-gray-200">
-                    <img 
-                      src={order.user?.photo || '/images/default-user.png'} 
+                    <img
+                      src={order.user?.photo || '/images/default-user.png'}
                       alt={order.user?.firstName}
                       className="h-full w-full object-cover"
                     />
@@ -394,8 +584,8 @@ const OrderDetails = () => {
                     <p className="break-all">Address: {order.walletDetails.address}</p>
                     {order.walletDetails.barcode && (
                       <div className="mt-2">
-                        <img 
-                          src={order.walletDetails.barcode} 
+                        <img
+                          src={order.walletDetails.barcode}
                           alt="Wallet barcode"
                           className="h-24 mx-auto"
                         />
@@ -438,155 +628,154 @@ const OrderDetails = () => {
                                   />
                                 </div>
                                 <p className="text-xs text-gray-500 ml-2 truncate">
-                                    {item.vendor?.businessName}
-                                  </p>
-                                </div>
-                                {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && (
-                                  <div className="mt-1 flex flex-wrap gap-1">
-                                    {Object.entries(item.selectedOptions).map(([key, value]) => (
-                                      <span key={key} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                                        {key}: {value}
-                                      </span>
-                                    ))}
-                                  </div>
-                                )}
+                                  {item.vendor?.businessName}
+                                </p>
                               </div>
-                              <p className="text-sm font-medium text-gray-900 whitespace-nowrap pl-2">
-                                {formatCurrency(item.discountPrice || item.price)}
-                              </p>
+                              {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && (
+                                <div className="mt-1 flex flex-wrap gap-1">
+                                  {Object.entries(item.selectedOptions).map(([key, value]) => (
+                                    <span key={key} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                      {key}: {value}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
                             </div>
-                            <div className="mt-2 flex justify-between items-end">
-                              <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
-                              <p className="text-sm font-medium text-gray-900 whitespace-nowrap">
-                                Subtotal: {formatCurrency((item.discountPrice || item.price) * item.quantity)}
-                              </p>
+                            <p className="text-sm font-medium text-gray-900 whitespace-nowrap pl-2">
+                              {formatCurrency(item.discountPrice || item.price)}
+                            </p>
+                          </div>
+                          <div className="mt-2 flex justify-between items-end">
+                            <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                            <p className="text-sm font-medium text-gray-900 whitespace-nowrap">
+                              Subtotal: {formatCurrency((item.discountPrice || item.price) * item.quantity)}
+                            </p>
+                          </div>
+
+                          {/* Item Status Section */}
+                          <div className="mt-2 pt-2 border-t border-gray-100">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center">
+                                <span className="text-xs font-medium text-gray-500 mr-2">Status:</span>
+                                <span className="text-xs font-medium capitalize">
+                                  {item.fulfillmentStatus}
+                                </span>
+                              </div>
+                              {item.fulfillmentStatus === 'delivered' && !item.receivedAt && (
+                                <Button
+                                  onClick={() => handleMarkAsReceived(item.id)}
+                                  disabled={markingReceived === item.id}
+                                  size="small"
+                                  variant="primary"
+                                >
+                                  {markingReceived === item.id ? (
+                                    <LoadingSpinner size="small" />
+                                  ) : (
+                                    <>
+                                      <FiPackage className="mr-1" />
+                                      Mark as Received
+                                    </>
+                                  )}
+                                </Button>
+                              )}
+                              {item.receivedAt && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                  <FiCheckCircle className="mr-1" />
+                                  Received on {formatDate(item.receivedAt)}
+                                </span>
+                              )}
                             </div>
 
-                            {/* Item Status Section */}
-                            <div className="mt-2 pt-2 border-t border-gray-100">
-                              <div className="flex items-center justify-between">
+                            {/* Status Timestamps */}
+                            <div className="mt-1 space-y-1 text-xs text-gray-500">
+                              {item.shippedAt && (
                                 <div className="flex items-center">
-                                  <span className="text-xs font-medium text-gray-500 mr-2">Status:</span>
-                                  <span className="text-xs font-medium capitalize">
-                                    {item.fulfillmentStatus}
-                                  </span>
+                                  <FiTruck className="mr-1" size={12} />
+                                  Shipped: {formatDate(item.shippedAt)}
                                 </div>
-                                {item.fulfillmentStatus === 'delivered' && !item.receivedAt && (
-                                  <Button
-                                    onClick={() => handleMarkAsReceived(item.id)}
-                                    disabled={markingReceived === item.id}
-                                    size="small"
-                                    variant="primary"
-                                  >
-                                    {markingReceived === item.id ? (
-                                      <LoadingSpinner size="small" />
-                                    ) : (
-                                      <>
-                                        <FiPackage className="mr-1" />
-                                        Mark as Received
-                                      </>
-                                    )}
-                                  </Button>
-                                )}
-                                {item.receivedAt && (
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                    <FiCheckCircle className="mr-1" />
-                                    Received on {formatDate(item.receivedAt)}
-                                  </span>
-                                )}
-                              </div>
-                              
-                              {/* Status Timestamps */}
-                              <div className="mt-1 space-y-1 text-xs text-gray-500">
-                                {item.shippedAt && (
-                                  <div className="flex items-center">
-                                    <FiTruck className="mr-1" size={12} />
-                                    Shipped: {formatDate(item.shippedAt)}
-                                  </div>
-                                )}
-                                {item.deliveredAt && (
-                                  <div className="flex items-center">
-                                    <FiPackage className="mr-1" size={12} />
-                                    Delivered: {formatDate(item.deliveredAt)}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Review Section */}
-                            <div className="mt-3 pt-3 border-t border-gray-100">
-                              <h6 className="text-xs font-medium text-gray-500 mb-1">
-                                Your Review
-                              </h6>
-                              {item.product.reviews?.find(r => r.userId === order.userId) ? (
-                                <div className="bg-gray-50 p-3 rounded-md">
-                                  <div className="flex justify-between items-start">
-                                    {renderStars(item.product.reviews.find(r => r.userId === order.userId).rating)}
-                                    <button
-                                      onClick={() => handleEditReview(
-                                        item.product.reviews.find(r => r.userId === order.userId),
-                                        item.product.id
-                                      )}
-                                      className="text-primary-light hover:text-primary-dark"
-                                    >
-                                      <FiEdit2 size={16} />
-                                    </button>
-                                  </div>
-                                  <p className="mt-1 text-sm text-gray-700">
-                                    {item.product.reviews.find(r => r.userId === order.userId).review}
-                                  </p>
+                              )}
+                              {item.deliveredAt && (
+                                <div className="flex items-center">
+                                  <FiPackage className="mr-1" size={12} />
+                                  Delivered: {formatDate(item.deliveredAt)}
                                 </div>
-                              ) : (
-                                item.fulfillmentStatus === 'received' ? (
-                                  <button
-                                    onClick={() => setNewReview({
-                                      rating: 1,
-                                      comment: '',
-                                      productId: item.product.id
-                                    })}
-                                    className="text-sm text-primary-light hover:text-primary-dark font-medium"
-                                  >
-                                    + Add Review
-                                  </button>
-                                ) : (
-                                  <p className="text-xs text-gray-500">
-                                    You can add a review after receiving this item.
-                                  </p>
-                                )
                               )}
                             </div>
                           </div>
+
+                          {/* Review Section */}
+                          <div className="mt-3 pt-3 border-t border-gray-100">
+                            <h6 className="text-xs font-medium text-gray-500 mb-1">
+                              Your Review
+                            </h6>
+                            {item.product.reviews?.find(r => r.userId === order.userId) ? (
+                              <div className="bg-gray-50 p-3 rounded-md">
+                                <div className="flex justify-between items-start">
+                                  {renderStars(item.product.reviews.find(r => r.userId === order.userId).rating)}
+                                  <button
+                                    onClick={() => handleEditReview(
+                                      item.product.reviews.find(r => r.userId === order.userId),
+                                      item.product.id
+                                    )}
+                                    className="text-primary-light hover:text-primary-dark"
+                                  >
+                                    <FiEdit2 size={16} />
+                                  </button>
+                                </div>
+                                <p className="mt-1 text-sm text-gray-700">
+                                  {item.product.reviews.find(r => r.userId === order.userId).review}
+                                </p>
+                              </div>
+                            ) : (
+                              item.fulfillmentStatus === 'received' ? (
+                                <button
+                                  onClick={() => setNewReview({
+                                    rating: 1,
+                                    comment: '',
+                                    productId: item.product.id
+                                  })}
+                                  className="text-sm text-primary-light hover:text-primary-dark font-medium"
+                                >
+                                  + Add Review
+                                </button>
+                              ) : (
+                                <p className="text-xs text-gray-500">
+                                  You can add a review after receiving this item.
+                                </p>
+                              )
+                            )}
+                          </div>
                         </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
+          </div>
 
-            {/* Payment Information and Actions */}
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-gray-50 p-4 rounded-md">
-                <h4 className="text-sm font-medium text-gray-900 mb-3">Payment Information</h4>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Method</span>
-                    <span className="text-sm font-medium capitalize">
-                      {order.paymentMethod}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Status</span>
-                    <span className={`text-sm font-medium ${
-                      order.paymentStatus === 'paid' ? 'text-green-600' :
+          {/* Payment Information and Actions */}
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-gray-50 p-4 rounded-md">
+              <h4 className="text-sm font-medium text-gray-900 mb-3">Payment Information</h4>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Method</span>
+                  <span className="text-sm font-medium capitalize">
+                    {order.paymentMethod}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Status</span>
+                  <span className={`text-sm font-medium ${order.paymentStatus === 'paid' ? 'text-green-600' :
                       order.paymentStatus === 'pending' ? 'text-yellow-600' :
-                      order.paymentStatus === 'failed' ? 'text-red-600' :
-                      'text-gray-600'
+                        order.paymentStatus === 'failed' ? 'text-red-600' :
+                          'text-gray-600'
                     }`}>
-                      {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
-                    </span>
-                  </div>
-                  {/* {order.paymentStatus === 'pending' && (
+                    {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
+                  </span>
+                </div>
+                {/* {order.paymentStatus === 'pending' && (
                     <div className="pt-2 space-y-2">
                       <Button
                         onClick={handleVerifyPayment}
@@ -620,52 +809,52 @@ const OrderDetails = () => {
                       </Button>
                     </div>
                   )} */}
-                </div>
-              </div>
-
-              <div className="bg-gray-50 p-4 rounded-md">
-                <h4 className="text-sm font-medium text-gray-900 mb-3">Order Summary</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Subtotal</span>
-                    <span className="text-sm font-medium">{formatCurrency(order.subtotal)}</span>
-                  </div>
-                  {parseFloat(order.discount) > 0 && (
-                    <div className="flex justify-between text-green-600">
-                      <span className="text-sm">Discount</span>
-                      <span className="text-sm font-medium">-{formatCurrency(order.discount)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Shipping</span>
-                    <span className="text-sm font-medium">{formatCurrency(order.deliveryFee)}</span>
-                  </div>
-                  {parseFloat(order.tax) > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Tax</span>
-                      <span className="text-sm font-medium">{formatCurrency(order.tax)}</span>
-                    </div>
-                  )}
-                  <div className="border-t border-gray-200 pt-2 flex justify-between">
-                    <span className="text-sm font-medium text-gray-900">Total</span>
-                    <span className="text-sm font-medium text-gray-900">
-                      {formatCurrency(order.total)}
-                    </span>
-                  </div>
-                </div>
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end space-x-3">
-              <button
-                onClick={() => window.print()}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-              >
-                <FiPrinter className="mr-2" />
-                Print Invoice
-              </button>
+            <div className="bg-gray-50 p-4 rounded-md">
+              <h4 className="text-sm font-medium text-gray-900 mb-3">Order Summary</h4>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Subtotal</span>
+                  <span className="text-sm font-medium">{formatCurrency(order.subtotal)}</span>
+                </div>
+                {parseFloat(order.discount) > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span className="text-sm">Discount</span>
+                    <span className="text-sm font-medium">-{formatCurrency(order.discount)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Shipping</span>
+                  <span className="text-sm font-medium">{formatCurrency(order.deliveryFee)}</span>
+                </div>
+                {parseFloat(order.tax) > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Tax</span>
+                    <span className="text-sm font-medium">{formatCurrency(order.tax)}</span>
+                  </div>
+                )}
+                <div className="border-t border-gray-200 pt-2 flex justify-between">
+                  <span className="text-sm font-medium text-gray-900">Total</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    {formatCurrency(order.total)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
 
-              {/* {order.status === 'pending' && (
+          <div className="mt-6 flex justify-end space-x-3">
+            <button
+              onClick={handlePrint}
+              className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            >
+              <FiPrinter className="mr-2" />
+              Print Invoice
+            </button>
+
+            {/* {order.status === 'pending' && (
                 <button
                   onClick={handleCancelOrder}
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700"
@@ -673,10 +862,10 @@ const OrderDetails = () => {
                   Cancel Order
                 </button>
               )} */}
-            </div>
           </div>
         </div>
       </div>
+    </div>
   );
 };
 

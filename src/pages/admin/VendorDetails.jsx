@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { FiShoppingBag, FiMail, FiPhone, FiMapPin, FiUser, FiFileText, FiCalendar, FiArrowLeft } from 'react-icons/fi';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { FiShoppingBag, FiMail, FiPhone, FiMapPin, FiUser, FiFileText, FiCalendar, FiArrowLeft, FiTrash2 } from 'react-icons/fi';
 import axios from '../../lib/axios';
 import { toast } from 'react-toastify';
 
 const VendorDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [vendor, setVendor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Fetch vendor details
   const fetchVendorDetails = async () => {
@@ -30,8 +33,10 @@ const VendorDetails = () => {
           businessLogo: userData.businessLogo,
           createdAt: userData.createdAt,
           category: userData.category?.name || 'Uncategorized',
-          ninNumber: userData.ninNumber, // Assuming this field exists
-          phoneNumber2: userData.phoneNumber2 // Assuming this field exists
+          ninNumber: userData.ninNumber,
+          phoneNumber2: userData.phoneNumber2,
+          totalProducts: userData.totalProducts || 0,
+          totalOrders: userData.totalOrders || 0
         });
       }
     } catch (error) {
@@ -61,6 +66,49 @@ const VendorDetails = () => {
       toast.error(errorData?.message || 'Failed to update status');
     } finally {
       setUpdatingStatus(false);
+    }
+  };
+
+  // Delete vendor function
+  const deleteVendor = async () => {
+    setDeleting(true);
+    try {
+      const res = await axios.delete(`api/v1/users/${id}`);
+
+      if (res.status === 204) {
+        toast.success('Vendor deleted successfully');
+        navigate('/manage/admin/vendors');
+      } else {
+        toast.warning(res.data.message || 'Vendor deleted with warning');
+      }
+    } catch (error) {
+      const errorData = error.response?.data;
+      
+      // Handle foreign key constraint error
+      if (errorData?.errno === 1451 || errorData?.code === 'ER_ROW_IS_REFERENCED_2') {
+        toast.error('Cannot delete vendor with existing products or orders. Please deactivate instead.');
+      } else {
+        const message = errorData?.message || 'Failed to delete vendor';
+        toast.error(message);
+      }
+      console.error('Error deleting vendor:', error);
+    } finally {
+      setDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
+  // Handle delete confirmation
+  const handleDeleteClick = () => {
+    if (vendor.totalProducts > 0 || vendor.totalOrders > 0) {
+      const proceed = window.confirm(
+        `⚠️ WARNING: This vendor has ${vendor.totalProducts} product(s) and ${vendor.totalOrders} order(s).\n\nDELETING WILL PERMANENTLY REMOVE:\n• All vendor data\n• All associated products\n• All order history\n\nAre you absolutely sure you want to proceed?`
+      );
+      if (proceed) {
+        setShowDeleteConfirm(true);
+      }
+    } else {
+      setShowDeleteConfirm(true);
     }
   };
 
@@ -121,8 +169,72 @@ const VendorDetails = () => {
           <FiArrowLeft className="mr-2" />
           Back to Shop Manager
         </Link>
-        <h1 className="text-2xl font-bold text-gray-800">Vendor Details</h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-gray-800">Vendor Details</h1>
+          <button
+            onClick={handleDeleteClick}
+            disabled={deleting}
+            className="cursor-pointer flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {deleting ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                Deleting...
+              </>
+            ) : (
+              <>
+                <FiTrash2 className="mr-2" />
+                Delete Vendor
+              </>
+            )}
+          </button>
+        </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <h3 className="text-lg font-semibold text-red-600 mb-2">Confirm Deletion</h3>
+            <p className="text-gray-700 mb-4">
+              Are you sure you want to permanently delete <strong>{vendor.businessName}</strong>? 
+              This action cannot be undone and will remove all vendor data.
+            </p>
+            
+            {vendor.totalProducts > 0 && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded p-3 mb-4">
+                <p className="text-yellow-800 text-sm">
+                  ⚠️ This vendor has {vendor.totalProducts} product(s) that will also be deleted.
+                </p>
+              </div>
+            )}
+            
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleting}
+                className="cursor-pointer px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={deleteVendor}
+                disabled={deleting}
+                className="cursor-pointer px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 flex items-center"
+              >
+                {deleting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete Permanently'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Status Banner */}
       <div className={`p-4 rounded-lg mb-6 flex justify-between items-center ${getStatusColor(vendor.status)}`}>
@@ -190,15 +302,14 @@ const VendorDetails = () => {
             <div>
               <h3 className="text-xl font-bold text-gray-900">{vendor.businessName}</h3>
               <p className="text-sm text-gray-500">{vendor.category}</p>
+              <div className="flex space-x-4 mt-2 text-sm text-gray-600">
+                <span>{vendor.totalProducts || 0} Products</span>
+                <span>{vendor.totalOrders || 0} Orders</span>
+              </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* <div className="flex items-center text-gray-700">
-              <FiFileText className="mr-2 text-gray-500" />
-              <span className="font-medium mr-2">Registration Number:</span>
-              <span>{vendor.registrationNumber || 'N/A'}</span>
-            </div> */}
             <div className="flex items-center text-gray-700">
               <FiCalendar className="mr-2 text-gray-500" />
               <span className="font-medium mr-2">Joined:</span>
@@ -244,12 +355,6 @@ const VendorDetails = () => {
             </div>
           </div>
         </div>
-
-        {/* Additional Sections can be added here for products, orders, etc. */}
-        {/* <div className="p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Additional Information</h2>
-          <p className="text-gray-500 italic">More vendor details and statistics can be added here.</p>
-        </div> */}
       </div>
     </div>
   );

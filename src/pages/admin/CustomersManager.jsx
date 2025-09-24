@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { FaSearch, FaEllipsisV } from 'react-icons/fa';
+import { FaSearch, FaEllipsisV, FaTrash } from 'react-icons/fa';
 import { FiShoppingBag, FiUser } from 'react-icons/fi';
 import axios from '../../lib/axios';
 import { toast } from 'react-toastify';
@@ -17,6 +17,8 @@ const CustomersManager = () => {
   const [statusUpdating, setStatusUpdating] = useState(null);
   const [statusError, setStatusError] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
+  const [deleteConfirm, setDeleteConfirm] = useState(null); // Track which customer is being deleted
+  const [deleting, setDeleting] = useState(false); // Loading state for delete operation
 
   const { pagination, updatePagination } = usePagination();
 
@@ -99,6 +101,58 @@ const CustomersManager = () => {
       setStatusUpdating(null);
       setActiveDropdown(null);
     }
+  };
+
+  // Delete customer function
+  const deleteCustomer = async (customerId) => {
+    if (!window.confirm('Are you sure you want to delete this customer? This action cannot be undone.')) {
+      return;
+    }
+
+    setDeleting(true);
+    setDeleteConfirm(customerId);
+
+    try {
+      const res = await axios.delete(`api/v1/users/${customerId}`);
+
+      if (res.status === 204) {
+        toast.success('Customer deleted successfully');
+        // Remove customer from local state
+        setCustomers(prev => prev.filter(customer => customer.id !== customerId));
+        // Refresh the list to ensure pagination is correct
+        fetchCustomers(pagination.currentPage, searchQuery, activeTab === 'all' ? '' : activeTab);
+      } else {
+        toast.warning(res.data.message || 'Customer deleted with warning');
+      }
+    } catch (error) {
+      const errorData = error.response?.data;
+      const message = errorData?.message || 'Failed to delete customer';
+      toast.error(message);
+      console.error('Error deleting customer:', error);
+    } finally {
+      setDeleting(false);
+      setDeleteConfirm(null);
+      setActiveDropdown(null);
+    }
+  };
+
+  // Enhanced delete function with more safety checks
+  const handleDeleteCustomer = async (customerId, customerName) => {
+    // Additional safety check for customers with orders
+    const customer = customers.find(c => c.id === customerId);
+    if (customer && customer.totalOrders > 0) {
+      const proceed = window.confirm(
+        `Warning: This customer has ${customer.totalOrders} order(s) and ₦${parseFloat(customer.totalSpent).toLocaleString()} in total spending. \n\nAre you absolutely sure you want to delete this customer? This may affect order history and reporting.`
+      );
+      if (!proceed) return;
+    } else {
+      const proceed = window.confirm(
+        `Are you sure you want to delete "${customerName}"? This action cannot be undone.`
+      );
+      if (!proceed) return;
+    }
+
+    await deleteCustomer(customerId);
   };
 
   useEffect(() => {
@@ -251,33 +305,54 @@ const CustomersManager = () => {
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-900">{customer.address}</td>
                         <td className="px-6 py-4 text-right relative" ref={dropdownRef}>
-                          {actions.length > 0 && (
-                            <div className="inline-block text-left">
-                              <button
-                                onClick={() => toggleDropdown(customer.id)}
-                                className="text-gray-500 hover:text-gray-700 focus:outline-none"
-                              >
-                                <FaEllipsisV />
-                              </button>
-
-                              {activeDropdown === customer.id && (
-                                <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
-                                  <div className="py-1">
-                                    {actions.map((action) => (
-                                      <button
-                                        key={action.value}
-                                        onClick={() => updateStatus(customer.id, action.value)}
-                                        disabled={statusUpdating === customer.id}
-                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                      >
-                                        {action.label}
-                                      </button>
-                                    ))}
-                                  </div>
-                                </div>
+                          <div className="inline-flex items-center space-x-2">
+                            {/* Delete button - always visible */}
+                            <button
+                              onClick={() => handleDeleteCustomer(customer.id, customer.name)}
+                              disabled={deleting && deleteConfirm === customer.id}
+                              className={`p-2 rounded-full transition-colors ${
+                                deleting && deleteConfirm === customer.id 
+                                  ? 'text-gray-400 cursor-not-allowed' 
+                                  : 'text-red-600 hover:bg-red-50 hover:text-red-700'
+                              }`}
+                              title="Delete Customer"
+                            >
+                              {deleting && deleteConfirm === customer.id ? (
+                                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-red-600"></div>
+                              ) : (
+                                <FaTrash className="w-4 h-4" />
                               )}
-                            </div>
-                          )}
+                            </button>
+
+                            {/* Status actions dropdown */}
+                            {actions.length > 0 && (
+                              <div className="inline-block text-left">
+                                <button
+                                  onClick={() => toggleDropdown(customer.id)}
+                                  className="text-gray-500 hover:text-gray-700 focus:outline-none p-2 rounded-full hover:bg-gray-100"
+                                >
+                                  <FaEllipsisV />
+                                </button>
+
+                                {activeDropdown === customer.id && (
+                                  <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                                    <div className="py-1">
+                                      {actions.map((action) => (
+                                        <button
+                                          key={action.value}
+                                          onClick={() => updateStatus(customer.id, action.value)}
+                                          disabled={statusUpdating === customer.id}
+                                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                                        >
+                                          {statusUpdating === customer.id ? 'Updating...' : action.label}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );

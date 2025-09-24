@@ -35,8 +35,8 @@ const VendorDetails = () => {
           category: userData.category?.name || 'Uncategorized',
           ninNumber: userData.ninNumber,
           phoneNumber2: userData.phoneNumber2,
-          totalProducts: userData.totalProducts || 0,
-          totalOrders: userData.totalOrders || 0
+          // totalProducts: userData.totalProducts || 0,
+          // totalOrders: userData.totalOrders || 0
         });
       }
     } catch (error) {
@@ -299,14 +299,14 @@ const VendorDetails = () => {
                 <FiShoppingBag className="text-blue-600 text-xl" />
               )}
             </div>
-            <div>
+            {/* <div>
               <h3 className="text-xl font-bold text-gray-900">{vendor.businessName}</h3>
               <p className="text-sm text-gray-500">{vendor.category}</p>
               <div className="flex space-x-4 mt-2 text-sm text-gray-600">
                 <span>{vendor.totalProducts || 0} Products</span>
                 <span>{vendor.totalOrders || 0} Orders</span>
               </div>
-            </div>
+            </div> */}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

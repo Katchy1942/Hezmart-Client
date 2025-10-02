@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from '../../lib/axios';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -13,33 +13,24 @@ import {
   FiCheckCircle,
   FiClock,
   FiXCircle,
-  FiDollarSign
+  FiDollarSign,
+  FiTrash2
 } from 'react-icons/fi';
 
 const OrderDetails = () => {
   const { orderId } = useParams();
+  const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [itemStatusUpdating, setItemStatusUpdating] = useState(null);
   const [notes, setNotes] = useState('');
+  const [cancellationReason, setCancellationReason] = useState('');
   const [confirmingPayment, setConfirmingPayment] = useState(false);
-
-  // Order status options for dropdown
-  const statusOptions = [
-    { value: 'pending', label: 'Pending' },
-    { value: 'processing', label: 'Processing' },
-    { value: 'partially_shipped', label: 'Partially Shipped' },
-    { value: 'shipped', label: 'Shipped' },
-    { value: 'partially_delivered', label: 'Partially Delivered' },
-    { value: 'delivered', label: 'Delivered' },
-    { value: 'partially_received', label: 'Partially Received' },
-    { value: 'completed', label: 'Completed' },
-    { value: 'partially_cancelled', label: 'Partially Cancelled' },
-    { value: 'cancelled', label: 'Cancelled' },
-    { value: 'closed', label: 'Closed' },
-    { value: 'refunded', label: 'Refunded' }
-  ];
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showCancelForm, setShowCancelForm] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   // Item fulfillment status options
   const fulfillmentStatusOptions = [
@@ -59,30 +50,12 @@ const OrderDetails = () => {
       if (response.data.status === 'success') {
         setOrder(response.data.data.order);
         setNotes(response.data.data.order.customerNotes || '');
+        setCancellationReason(response.data.data.order.cancellationReason || '');
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to fetch order details');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const updateOrderStatus = async (newStatus) => {
-    setStatusUpdating(true);
-    try {
-      const response = await axios.patch(`/api/v1/orders/${orderId}/status`, {
-        status: newStatus,
-        notes
-      });
-
-      if (response.data.status === 'success') {
-        toast.success('Order status updated successfully');
-        setOrder(prev => ({ ...prev, status: newStatus }));
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update order status');
-    } finally {
-      setStatusUpdating(false);
     }
   };
 
@@ -124,6 +97,34 @@ const OrderDetails = () => {
     }
   };
 
+  const cancelOrder = async () => {
+    if (!cancellationReason.trim()) {
+      toast.error('Please enter a cancellation reason');
+      return;
+    }
+
+    setCancelling(true);
+    try {
+      const response = await axios.patch(`/api/v1/orders/${orderId}/cancel`, {
+        cancellationReason: cancellationReason.trim()
+      });
+
+      if (response.data.status === 'success') {
+        toast.success('Order cancelled successfully');
+        setOrder(prev => ({ 
+          ...prev, 
+          status: 'cancelled',
+          cancellationReason: cancellationReason.trim()
+        }));
+        setShowCancelForm(false);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to cancel order');
+    } finally {
+      setCancelling(false);
+    }
+  };
+
   const sendShippingNotification = async () => {
     try {
       await axios.post(`/api/v1/orders/${orderId}/send-shipping-notification`);
@@ -145,6 +146,22 @@ const OrderDetails = () => {
       toast.error(error.response?.data?.message || 'Failed to confirm payment');
     } finally {
       setConfirmingPayment(false);
+    }
+  };
+
+  const deleteOrder = async () => {
+    setDeleting(true);
+    try {
+      const response = await axios.delete(`/api/v1/orders/${orderId}`);
+      if (response.status === 204) {
+        toast.success('Order deleted successfully');
+        navigate('/manage/admin/orders');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete order');
+    } finally {
+      setDeleting(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -457,8 +474,44 @@ const OrderDetails = () => {
     }
   };
 
+  const isCancelled = order.status === 'cancelled' || order.status === 'partially_cancelled';
+
   return (
     <div className="max-w-7xl mx-auto">
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3 text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <FiTrash2 className="h-6 w-6 text-red-600" />
+              </div>
+              <h3 className="text-lg leading-6 font-medium text-gray-900 mt-2">Delete Order</h3>
+              <div className="mt-2 px-7 py-3">
+                <p className="text-sm text-gray-500">
+                  Are you sure you want to delete order #{order.orderNumber}? This action cannot be undone.
+                </p>
+              </div>
+              <div className="flex justify-center space-x-3 mt-4">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="cursor-pointer px-4 py-2 bg-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={deleteOrder}
+                  disabled={deleting}
+                  className="cursor-pointer px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
+                >
+                  {deleting ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <Link to="/manage/admin/orders" className="flex items-center text-primary-light hover:text-primary-dark">
           <FiChevronLeft className="mr-1" /> Back to orders
@@ -470,6 +523,22 @@ const OrderDetails = () => {
           >
             <FiPrinter className="mr-1 sm:mr-2" /> 
             <span className="hidden sm:inline">Print</span>
+          </button>
+          {!isCancelled && (
+            <button 
+              onClick={() => setShowCancelForm(true)}
+              className="cursor-pointer flex items-center px-3 py-1.5 sm:px-4 sm:py-2 border border-red-300 rounded-md text-sm font-medium text-red-700 hover:bg-red-50"
+            >
+              <FiXCircle className="mr-1 sm:mr-2" /> 
+              <span className="hidden sm:inline">Cancel Order</span>
+            </button>
+          )}
+          <button 
+            onClick={() => setShowDeleteConfirm(true)}
+            className="cursor-pointer flex items-center px-3 py-1.5 sm:px-4 sm:py-2 border border-red-300 rounded-md text-sm font-medium text-red-700 hover:bg-red-50"
+          >
+            <FiTrash2 className="mr-1 sm:mr-2" /> 
+            <span className="hidden sm:inline">Delete</span>
           </button>
         </div>
       </div>
@@ -757,47 +826,72 @@ const OrderDetails = () => {
               </div>
             </div>
 
-            {/* Order Status Update */}
-            <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
-              <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Update Order Status</h4>
-              <div className="space-y-3">
-                <select
-                  value={order.status}
-                  onChange={(e) => updateOrderStatus(e.target.value)}
-                  disabled={statusUpdating}
-                  className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-light focus:border-primary-light sm:text-sm rounded-md"
-                >
-                  {statusOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                {statusUpdating && (
-                  <div className="flex justify-center">
-                    <LoadingSpinner type="dots" size={4} />
+            {/* Cancel Order Form */}
+            {showCancelForm && !isCancelled && (
+              <div className="bg-red-50 border border-red-200 p-3 sm:p-4 rounded-lg">
+                <h4 className="text-base sm:text-lg font-medium text-red-900 mb-3 sm:mb-4">Cancel Order</h4>
+                <div className="space-y-3">
+                  <div>
+                    <label htmlFor="cancellationReason" className="block text-sm font-medium text-red-700 mb-1">
+                      Reason for Cancellation *
+                    </label>
+                    <textarea
+                      id="cancellationReason"
+                      rows="3"
+                      className="shadow-sm focus:ring-red-500 focus:outline-0 px-3 py-2 focus:border-red-500 block w-full sm:text-sm border border-red-300 rounded-md"
+                      placeholder="Please provide the reason for cancelling this order..."
+                      value={cancellationReason}
+                      onChange={(e) => setCancellationReason(e.target.value)}
+                    />
                   </div>
-                )}
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={cancelOrder}
+                      disabled={cancelling || !cancellationReason.trim()}
+                      className="cursor-pointer flex-1 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {cancelling ? 'Cancelling...' : 'Proceed'}
+                    </button>
+                    <button
+                      onClick={() => setShowCancelForm(false)}
+                      className="flex-1 inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-light"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Notes */}
-            <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
-              <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Order Notes</h4>
-              <textarea
-                rows="3"
-                className="shadow-sm focus:ring-primary-light focus:border-primary-light block w-full sm:text-sm border border-gray-300 rounded-md"
-                placeholder="Add notes about this order..."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-              />
-              <button
-                onClick={saveNotes}
-                className="mt-2 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-light hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-light"
-              >
-                Save Notes
-              </button>
-            </div>
+            {/* Cancellation Reason Display */}
+            {isCancelled && order.cancellationReason && (
+              <div className="bg-red-50 border border-red-200 p-3 sm:p-4 rounded-lg">
+                <h4 className="text-base sm:text-lg font-medium text-red-900 mb-3 sm:mb-4">Cancellation Reason</h4>
+                <div className="text-sm text-red-700 bg-white p-3 rounded border border-red-100">
+                  {order.cancellationReason}
+                </div>
+              </div>
+            )}
+
+            {/* Order Notes */}
+            {/* {!isCancelled && (
+              <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Order Notes</h4>
+                <textarea
+                  rows="3"
+                  className="shadow-sm focus:ring-primary-light focus:border-primary-light block w-full sm:text-sm border border-gray-300 rounded-md"
+                  placeholder="Add notes about this order..."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
+                <button
+                  onClick={saveNotes}
+                  className="mt-2 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-light hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-light"
+                >
+                  Save Notes
+                </button>
+              </div>
+            )} */}
           </div>
         </div>
       </div>

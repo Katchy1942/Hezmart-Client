@@ -10,7 +10,8 @@ import {
   FiEdit2,
   FiPackage,
   FiPrinter,
-  FiDollarSign
+  FiDollarSign,
+  FiAlertCircle
 } from 'react-icons/fi';
 import axios from '../../lib/axios';
 import { toast } from 'react-toastify';
@@ -336,6 +337,13 @@ const OrderDetails = () => {
             <p>${order.deliveryAddress?.city || ''} ${order.deliveryAddress?.state || ''}</p>
           </div>
 
+          ${(order.status === 'cancelled' || order.status === 'partially_cancelled') && order.cancellationReason ? `
+            <div class="section">
+              <h3 class="section-title">Cancellation Details</h3>
+              <p><strong>Reason:</strong> ${order.cancellationReason}</p>
+            </div>
+          ` : ''}
+
           <div class="section">
             <h3 class="section-title">Order Items</h3>
             <table class="order-items">
@@ -409,7 +417,6 @@ const OrderDetails = () => {
     printWindow.document.close();
   };
 
-
   const renderStars = (rating, interactive = false, onChange = null) => {
     return (
       <div className="flex">
@@ -436,6 +443,8 @@ const OrderDetails = () => {
       </div>
     );
   }
+
+  const isCancelled = order.status === 'cancelled' || order.status === 'partially_cancelled';
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -518,6 +527,23 @@ const OrderDetails = () => {
               <span className="capitalize">{order.status.replace(/_/g, ' ')}</span>
             </div>
           </div>
+
+          {/* Cancellation Reason Banner */}
+          {isCancelled && order.cancellationReason && (
+            <div className="mt-4 bg-red-50 border border-red-200 rounded-md p-4">
+              <div className="flex items-start">
+                <FiAlertCircle className="h-5 w-5 text-red-400 mt-0.5 mr-3 flex-shrink-0" />
+                <div>
+                  <h4 className="text-sm font-medium text-red-800 mb-1">
+                    Order Cancelled
+                  </h4>
+                  <p className="text-sm text-red-700">
+                    <strong>Reason:</strong> {order.cancellationReason}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column - Customer and Delivery Info */}

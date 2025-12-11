@@ -4,309 +4,297 @@ import axios from "../../lib/axios";
 import InputField from "../../components/common/InputField";
 import SelectField from "../../components/common/SelectField";
 import Button from "../../components/common/Button";
-import { FaGoogle, FaApple } from "react-icons/fa";
-import { GoogleLogin } from '@react-oauth/google';
-import AppleSignin from 'react-apple-signin-auth';
+import { FaGoogle } from "react-icons/fa";
+import { useGoogleLogin } from '@react-oauth/google';
 
 const CustomerRegister = () => {
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    primaryPhone: "",
-    email: "",
-    primaryAddress: "",
-    state: "",
-    password: "",
-    passwordConfirm: "",
-    role: 'customer'
-  });
+    const [formData, setFormData] = useState({
+        firstName: "",
+        lastName: "",
+        primaryPhone: "",
+        email: "",
+        primaryAddress: "",
+        state: "",
+        password: "",
+        passwordConfirm: "",
+        role: 'customer'
+    });
 
-  const nigerianStates = [
-    "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", 
-    "Benue", "Borno", "Cross River", "Delta", "Ebonyi", "Edo", 
-    "Ekiti", "Rivers", "Enugu", "FCT", "Gombe", "Imo", "Jigawa", 
-    "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", 
-    "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", 
-    "Sokoto", "Taraba", "Yobe", "Zamfara"
-  ];
+    const nigerianStates = [
+        "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", 
+        "Benue", "Borno", "Cross River", "Delta", "Ebonyi", "Edo", 
+        "Ekiti", "Rivers", "Enugu", "FCT", "Gombe", "Imo", "Jigawa", 
+        "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", 
+        "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", 
+        "Sokoto", "Taraba", "Yobe", "Zamfara"
+    ];
 
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [socialProcessing, setSocialProcessing] = useState(null);
+    const [errors, setErrors] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [socialProcessing, setSocialProcessing] = useState(null);
 
-  const navigate = useNavigate();
-  const location = useLocation();
-  const from = location.state?.from;
+    const navigate = useNavigate();
+    const location = useLocation();
+    const from = location.state?.from;
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setErrors({});
+    const handleGoogleSuccess = async (tokenResponse) => {
+        setSocialProcessing('google');
+        setErrors({});
 
-    const formDataToSend = new FormData(e.target);
+        try {
+            const response = await axios.post('api/v1/users/auth/google', {
+                token: tokenResponse.access_token
+            });
+        
+            if (response.data.status === 'success' && response.data.data?.user) {
+                localStorage.setItem("user", JSON.stringify(response.data.data.user));
+                navigate(from || '/', { replace: true });
+            } else {
+                console.error("User data missing in response");
+            }
+        } catch (err) {
+            setErrors({
+                root: err.response?.data?.message || 'Google signup failed. Please try again.'
+            });
+        } finally {
+            setSocialProcessing(null);
+        }
+    };
+
+    const handleGoogleError = () => {
+        setErrors({ root: 'Google sign in was cancelled or failed.' });
+        setSocialProcessing(null);
+    };
+
+    const login = useGoogleLogin({
+        onSuccess: handleGoogleSuccess,
+        onError: handleGoogleError,
+    });
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        setErrors({});
+
+        const formDataToSend = new FormData(e.target);
     
-    try {
-      const response = await axios.post("/api/v1/users/signup", formDataToSend);
+        try {
+            const response = await axios.post("/api/v1/users/signup", formDataToSend);
 
-      if (response.data.status === "success") {
-        navigate(`/confirm-email`, { 
-          state: { from, email: formData.email },
-          replace: true
-        });
-      }
-    } catch (err) {
-      const backendErrors = err.response?.data?.errors || {};
-      const newErrors = {};
+            if (response.data.status === "success") {
+                navigate(`/confirm-email`, { 
+                    state: { from, email: formData.email },
+                    replace: true
+                });
+            }
+        } catch (err) {
+            const backendErrors = err.response?.data?.errors || {};
+            const newErrors = {};
 
-      Object.entries(backendErrors).forEach(([field, msg]) => {
-        newErrors[field] = msg;
-      });
+            Object.entries(backendErrors).forEach(([field, msg]) => {
+                newErrors[field] = msg;
+            });
 
-      if (err.response?.data?.message && !Object.keys(newErrors).length) {
-        newErrors.root = err.response.data.message;
-      }
+            if (err.response?.data?.message && !Object.keys(newErrors).length) {
+                newErrors.root = err.response.data.message;
+            }
 
-      setErrors(newErrors);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+            setErrors(newErrors);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };                        
 
-  const handleGoogleSuccess = async (credentialResponse) => {
-    setSocialProcessing('google');
-    try {
-      const response = await axios.post('api/v1/users/auth/google', {
-        token: credentialResponse.credential
-      });
-      
-      if (response.data.status === 'success') {
-        localStorage.setItem("user", JSON.stringify(response.data.data.user));
-        navigate(from || '/', { replace: true });
-      }
-    } catch (err) {
-      setErrors({
-        root: err.response?.data?.message || 'Google signup failed'
-      });
-    } finally {
-      setSocialProcessing(null);
-    }
-  };
+    return (
+        <div className="min-h-screen pb-12">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* Breadcrumb Navigation */}
+                <nav className="flex items-center space-x-2 py-8 text-sm text-gray-500">
+                    <Link to="/" className="hover:text-gray-900 transition-colors">Home</Link>
+                    <span className="text-gray-400">/</span>
+                    <Link to="/" className="hover:text-gray-900 transition-colors">Buy on Hezmart</Link>
+                    <span className="text-gray-400">/</span>
+                    <span className="font-semibold text-gray-900">Register</span>
+                </nav>
 
-  const handleGoogleError = () => {
-    setErrors({ root: 'Google signup failed' });
-    setSocialProcessing(null);
-  };
+                {/* Main Form Container */}
+                <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                    <div className="px-6 py-10 sm:px-12 sm:py-12">
+                        <form onSubmit={handleSubmit}>
+                            <div className="text-center mb-10">
+                                <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight font-['poppins']">
+                                    Personal Information
+                                </h1>
+                                <p className="mt-2 text-sm text-gray-500">
+                                    Please fill in your details to create your account
+                                </p>
+                            </div>
 
-  const handleAppleLogin = async (data) => {
-    setSocialProcessing('apple');
-    try {
-      const response = await axios.post('api/v1/auth/apple', {
-        token: data.authorization.id_token,
-        user: data.user || null
-      });
-      
-      if (response.data.status === 'success') {
-        localStorage.setItem("user", JSON.stringify(response.data.data.user));
-        navigate(from || '/', { replace: true });
-      }
-    } catch (err) {
-      setErrors({
-        root: err.response?.data?.message || 'Apple signup failed'
-      });
-    } finally {
-      setSocialProcessing(null);
-    }
-  };
+                            {errors.root && (
+                                <div className="mb-6 p-4 text-[14px] text-red-700 bg-red-50 border 
+                                border-red-100 rounded-lg flex items-center justify-center">
+                                    {errors.root}
+                                </div>
+                            )}
 
-  return (
-    <div className='pb-5'>
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-center gap-[10px] py-4 lg:py-10 text-[14px] lg:px-0 px-4">
-          <Link to="/">Home</Link>
-          <span>{">"}</span>
-          <Link to="/">Buy on Hezmart</Link>
-          <span>{">"}</span>
-          <strong>Register</strong>
-        </div>
+                            {/* Social Auth Buttons */}
+                            <div className="mb-8">
+                                <div className="flex flex-col gap-3">
+                                    {/* Centered container for the Google button */}
+                                    <div className="flex justify-center w-full">
+                                        <button
+                                            onClick={() => login()}
+                                            disabled={!!socialProcessing}
+                                            type="button"
+                                            className="relative w-full sm:w-auto sm:min-w-[280px] flex justify-center
+                                            items-center py-3 px-6 border border-gray-300 rounded-full shadow-sm
+                                            bg-white text-[14px] font-medium text-gray-700 hover:bg-gray-50
+                                            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 
+                                            transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                        >
+                                            <FaGoogle className="text-red-500 mr-3 text-lg" />
+                                            <span>
+                                                {socialProcessing === 'google' ? 'Processing...' : 'Continue with Google'}
+                                            </span>
+                                        </button>
+                                    </div>
 
-        <div className="px-4 mt-9 border-2 border-gray-200 rounded-lg bg-white py-5">
-          <form onSubmit={handleSubmit}>
-            <h1 className="text-xl text-[#111111] font-semibold mb-6">
-              Personal Information
-            </h1>
+                                    {/* Apple Signin code... */}
+                                </div>
 
-            {errors.root && (
-              <div className="mb-4 p-4 text-red-700 bg-red-100 rounded-lg">
-                {errors.root}
-              </div>
-            )}
+                                <div className="relative mt-8">
+                                    <div className="absolute inset-0 flex items-center">
+                                        <div className="w-full border-t border-gray-200"></div>
+                                    </div>
+                                    <div className="relative flex justify-center text-sm">
+                                        <span className="px-4 bg-white text-gray-500 font-medium">
+                                            Or register with email
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
 
-            {/* Social Auth Buttons */}
-            <div className="mb-6">
-              <div className="grid grid-cols-2 gap-3">
-               <div className="col-span-2 flex justify-center">
-                 <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleError}
-                  render={(renderProps) => (
-                    <button
-                      onClick={renderProps.onClick}
-                      disabled={renderProps.disabled || !!socialProcessing}
-                      type="button"
-                      className="cursor-pointer w-full inline-flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                    >
-                      <FaGoogle className="text-red-500 mr-2" />
-                      {socialProcessing === 'google' ? 'Processing...' : 'Google'}
-                    </button>
-                  )}
-                />
-               </div>
+                            <div className="space-y-6 text-[14px]">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <InputField
+                                        label="First Name"
+                                        name="firstName"
+                                        onChange={handleChange}
+                                        placeholder="e.g. John"
+                                        error={errors.firstName}
+                                        classNames="w-full"
+                                    />
 
-                {/* <AppleSignin
-                  authOptions={{
-                    clientId: import.meta.env.REACT_APP_APPLE_CLIENT_ID,
-                    scope: 'email name',
-                    redirectURI: `${window.location.origin}/auth/apple/callback`,
-                    state: 'state',
-                    usePopup: true,
-                  }}
-                  onSuccess={handleAppleLogin}
-                  onError={(error) => {
-                    console.log('Apple error:', error)
-                    setErrors({ root: 'Apple signup failed' });
-                    setSocialProcessing(null);
-                  }}
-                  render={(props) => (
-                    <button
-                      {...props}
-                      disabled={!!socialProcessing}
-                      type="button"
-                      className="cursor-pointer w-full inline-flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                    >
-                      <FaApple className="text-black mr-2" />
-                      {socialProcessing === 'apple' ? 'Processing...' : 'Apple'}
-                    </button>
-                  )}
-                /> */}
-              </div>
+                                    <InputField
+                                        label="Last Name"
+                                        name="lastName"
+                                        value={formData.lastName}
+                                        onChange={handleChange}
+                                        placeholder="e.g. Eze"
+                                        error={errors.lastName}
+                                        classNames="w-full"
+                                    />
+                                </div>
 
-              <div className="relative mt-6 mb-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300"></div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <InputField
+                                        label="Phone Number"
+                                        name="primaryPhone"
+                                        value={formData.primaryPhone}
+                                        onChange={handleChange}
+                                        placeholder="080..."
+                                        type="tel"
+                                        error={errors.primaryPhone}
+                                        classNames="w-full"
+                                    />
+
+                                    <InputField
+                                        label="Email Address"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        placeholder="name@example.com"
+                                        type="email"
+                                        error={errors.email}
+                                        classNames="w-full"
+                                    />
+                                </div>
+
+                                <div>
+                                    <InputField
+                                        label="Primary Address"
+                                        name="primaryAddress"
+                                        value={formData.primaryAddress}
+                                        onChange={handleChange}
+                                        placeholder="Street address, apartment, suite, etc."
+                                        as="textarea"
+                                        error={errors.primaryAddress}
+                                        classNames="w-full"
+                                    />
+                                </div>
+
+                                <div>
+                                    <SelectField
+                                        name="state"
+                                        label="State"
+                                        value={formData.state}
+                                        onChange={handleChange}
+                                        options={nigerianStates}
+                                        error={errors.state}
+                                        classNames="w-full"
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <InputField
+                                        label="Create Password"
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        placeholder="Min. 8 characters"
+                                        type="password"
+                                        error={errors.password}
+                                        classNames="w-full"
+                                    />
+
+                                    <InputField
+                                        label="Confirm Password"
+                                        name="passwordConfirm"
+                                        value={formData.passwordConfirm}
+                                        onChange={handleChange}
+                                        placeholder="Re-enter password"
+                                        type="password"
+                                        error={errors.passwordConfirm}
+                                        classNames="w-full"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="mt-10">
+                                <Button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    isLoading={isSubmitting}
+                                    loadingText="Creating Account..."
+                                    className="w-full py-3.5 text-base text-[14px] font-semibold shadow-md hover:shadow-lg transition-all"
+                                >
+                                    Create Account
+                                </Button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">
-                    Or register with email
-                  </span>
-                </div>
-              </div>
             </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-5">
-              <InputField
-                label="First Name"
-                name="firstName"
-                onChange={handleChange}
-                placeholder="Enter First name"
-                error={errors.firstName}
-                classNames="mb-5 lg:mb-0"
-              />
-
-              <InputField
-                label="Last Name"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                placeholder="Enter Last name"
-                error={errors.lastName}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-5 mt-5">
-              <InputField
-                label="Phone Number"
-                name="primaryPhone"
-                value={formData.primaryPhone}
-                onChange={handleChange}
-                placeholder="Enter phone number"
-                type="tel"
-                error={errors.primaryPhone}
-                classNames="mb-5 lg:mb-0"
-              />
-
-              <InputField
-                label="Email Address"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Enter your email"
-                type="email"
-                error={errors.email}
-              />
-            </div>
-
-            <div className="mt-5">
-              <InputField
-                label="Primary Address"
-                name="primaryAddress"
-                value={formData.primaryAddress}
-                onChange={handleChange}
-                placeholder="Address"
-                as="textarea"
-                error={errors.primaryAddress}
-              />
-            </div>
-
-            <div className="mt-5">
-              <SelectField
-                name="state"
-                label="State"
-                value={formData.state}
-                onChange={handleChange}
-                options={nigerianStates}
-                error={errors.state}
-              />
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-5 mt-5">
-              <InputField
-                label="Password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Enter password"
-                type="password"
-                error={errors.password}
-                classNames="mb-5 lg:mb-0"
-              />
-
-              <InputField
-                label="Confirm Password"
-                name="passwordConfirm"
-                value={formData.passwordConfirm}
-                onChange={handleChange}
-                placeholder="Confirm password"
-                type="password"
-                error={errors.passwordConfirm}
-              />
-            </div>
-            <div className="mt-6">
-              <Button type="submit" disabled={isSubmitting} isLoading={isSubmitting} loadingText="Processing...">
-                Create Account
-              </Button>
-            </div>
-          </form>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default CustomerRegister;

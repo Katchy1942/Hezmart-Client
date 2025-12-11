@@ -1,122 +1,109 @@
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 const Pagination = ({ 
-  currentPage, 
-  totalPages, 
-  totalItems, 
-  perPage,
-  onPageChange,
-  loading = false
+    currentPage, 
+    totalPages, 
+    totalItems, 
+    perPage,
+    onPageChange,
+    loading = false
 }) => {
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisiblePages = 5;
-    
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else if (currentPage <= 3) {
-      // Show first 5 pages
-      for (let i = 1; i <= maxVisiblePages; i++) {
-        pages.push(i);
-      }
-    } else if (currentPage >= totalPages - 2) {
-      // Show last 5 pages
-      for (let i = totalPages - maxVisiblePages + 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      // Show current page with 2 before and 2 after
-      for (let i = currentPage - 2; i <= currentPage + 2; i++) {
-        pages.push(i);
-      }
-    }
-    
-    return pages;
-  };
+    const getPageNumbers = () => {
+        const pages = [];
+        const maxVisiblePages = 5;
 
-  const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages && page !== currentPage && !loading) {
-      onPageChange(page);
-    }
-  };
+        if (totalPages <= maxVisiblePages) {
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else if (currentPage <= 3) {
+            for (let i = 1; i <= maxVisiblePages; i++) {
+                pages.push(i);
+            }
+        } else if (currentPage >= totalPages - 2) {
+            for (let i = totalPages - maxVisiblePages + 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+                pages.push(i);
+            }
+        }
+        return pages;
+    };
 
-  const startItem = (currentPage - 1) * perPage + 1;
-  const endItem = Math.min(currentPage * perPage, totalItems);
+    const handlePageChange = (page) => {
+        if (page >= 1 && page <= totalPages && page !== currentPage && !loading) {
+            onPageChange(page);
 
-  return (
-    <div className="bg-white px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 sm:px-6">
-      {/* Mobile info (always visible) */}
-      <div className="sm:hidden mb-2 text-sm text-gray-700">
-        Page {currentPage} of {totalPages}
-      </div>
-      
-      {/* Desktop info (hidden on mobile) */}
-      <div className="hidden sm:block">
-        <p className="text-sm text-gray-700">
-          Showing <span className="font-medium">{startItem}</span> to{' '}
-          <span className="font-medium">{endItem}</span> of{' '}
-          <span className="font-medium">{totalItems}</span> results
-        </p>
-      </div>
-      
-      {/* Pagination controls (always visible) */}
-      <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-        <button 
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1 || loading}
-          className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-        >
-          <span className="sr-only">Previous</span>
-          <FaChevronLeft className="h-5 w-5" />
-        </button>
-        
-        {/* Show page numbers only on larger screens */}
-        <div className="hidden sm:flex">
-          {getPageNumbers().map((pageNum) => (
-            <button
-              key={pageNum}
-              onClick={() => handlePageChange(pageNum)}
-              disabled={loading}
-              className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                pageNum === currentPage
-                  ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                  : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-              } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {pageNum}
-            </button>
-          ))}
-        </div>
-        
-        {/* Show current page on mobile */}
-        <div className="sm:hidden">
-          <button
-            disabled
-            className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-blue-600 bg-blue-50"
-          >
-            {currentPage}
-          </button>
-        </div>
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+    };
 
-        {totalPages > 5 && currentPage < totalPages - 2 && (
-          <span className="hidden sm:inline-flex relative items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
-            ...
-          </span>
-        )}
 
-        <button 
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages || loading}
-          className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-        >
-          <span className="sr-only">Next</span>
-          <FaChevronRight className="h-5 w-5" />
-        </button>
-      </nav>
-    </div>
-  );
+    const startItem = (currentPage - 1) * perPage + 1;
+    const endItem = Math.min(currentPage * perPage, totalItems);
+
+    return (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+            {/* Desktop info */}
+            <div className="">
+                <p className="text-sm text-gray-700">
+                    Showing <span className="font-medium">{startItem}</span> to{' '}
+                    <span className="font-medium">{endItem}</span> of{' '}
+                    <span className="font-medium">{totalItems}</span> results
+                </p>
+            </div>
+            
+            <nav className="flex items-center gap-2" aria-label="Pagination">
+                <button 
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1 || loading}
+                    className="p-2 rounded-full border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                >
+                    <span className="sr-only">Previous</span>
+                    <FaChevronLeft className="h-4 w-4" />
+                </button>
+                
+                <div className="hidden sm:flex gap-3 border border-gray-300 rounded-full px-3 py-1 bg-white">
+                {getPageNumbers().map((pageNum) => (
+                    <button
+                    key={pageNum}
+                    onClick={() => handlePageChange(pageNum)}
+                    disabled={loading}
+                    className={`text-sm font-medium ${
+                        pageNum === currentPage
+                        ? 'text-primary-light'
+                        : 'text-gray-700'
+                    } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                    {pageNum}
+                    </button>
+                ))}
+                </div>
+                
+                {/* Mobile page indicator */}
+                <button
+                    disabled
+                    className="sm:hidden px-4 py-2 rounded-full border border-gray-300 bg-white text-sm font-medium text-primary-light cursor-default"
+                >
+                    {currentPage}
+                </button>
+
+                <button 
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages || loading}
+                    className="p-2 rounded-full border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                >
+                <span className="sr-only">Next</span>
+                <FaChevronRight className="h-4 w-4" />
+                </button>
+            </nav>
+        </div>  
+    );
 };
 
 export default Pagination;

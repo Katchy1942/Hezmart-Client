@@ -35,17 +35,6 @@ const Header = ({ user, toggle, setToggle }) => {
 
         {/* Right side icons */}
         <div className="flex items-center space-x-4">
-          <button className="relative text-gray-600 hover:text-gray-900">
-            <FaBell className="text-xl" />
-            {/* Notification will be display here
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">3</span> */}
-          </button>
-          
-          <button className="relative text-gray-600 hover:text-gray-900">
-            <FaShoppingCart className="text-xl" />
-            {/* Cart total will be display here
-            <span className="absolute -top-1 -right-1 bg-blue-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">5</span> */}
-          </button>
           
           <div className="flex items-center">
             <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">

@@ -1,110 +1,104 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "../../lib/axios";
 import InputField from "../../components/common/InputField";
 import Button from "../../components/common/Button";
 import { FiMail } from "react-icons/fi";
 
 const ForgotPassword = () => {
-  const[processing, setProcessing] = useState(false)
-  const [errors, setErrors] = useState({email:''})
-  const[message, setMessage] = useState()
-  const[status, setStatus] = useState('')
+    const navigate = useNavigate();
+    const[processing, setProcessing] = useState(false)
+    const [errors, setErrors] = useState({email:''})
+    const[message, setMessage] = useState()
+    const[status, setStatus] = useState('')
 
-  const submit = async(e) => {
-    e.preventDefault();
-    setProcessing(true)
-     
-    try {
-      let data = new FormData(e.target)
-      let jsonData = Object.fromEntries(data);
-      const response = await axios.post('api/v1/users/forgotPassword', jsonData);
-      if(response.data.status == 'success'){
-          setMessage(response.data.message)
-      }
-      setProcessing(false)
-    } catch (err) {
-      setProcessing(false)
-  
-      if (err && !err.response) {
-        alert(err);
-      } else { 
-        const errors = {};
-        if(err.response.data.message){
-          setStatus(err.response.data.message)
-      }
-
-        if(err.response.data.errors){
-          err.response.data.errors.forEach(el =>{
-            for(let key in el){
-                errors[key] = el[key]
-              }
-            })
-          setErrors(errors)
-        }
+    const submit = async(e) => {
+        e.preventDefault();
+        setProcessing(true)
         
-      }
-    }
-  };
+        try {
+            let data = new FormData(e.target)
+            let jsonData = Object.fromEntries(data);
+            const response = await axios.post('api/v1/users/forgotPassword', jsonData);
+            if(response.data.status == 'success'){
+                setMessage(response.data.message)
+            };
+
+            setProcessing(false);
+        } catch (err) {
+            setProcessing(false)
+        
+            if (err && !err.response) {
+                alert(err);
+            } else { 
+                const errors = {};
+                if(err.response.data.message){
+                    setStatus(err.response.data.message)
+                }
+
+                if(err.response.data.errors){
+                    err.response.data.errors.forEach(el =>{
+                        for(let key in el){
+                            errors[key] = el[key]
+                        }
+                    })
+                    setErrors(errors)
+                }        
+            }
+        }
+    };
  
 
-  return (
-    <div className="flex justify-center items-center py-10 bg-[#F5F6FA] ">
-      <div className="w-full max-w-md">
-        <form
-          onSubmit={submit}
-          className="bg-white rounded-lg border border-[#D9E1EC] shadow-sm p-8"
-        >
-           <h1
-                className="
-                text-2xl text-center font-bold text-[#111111]  mb-2"
-            >
-                Forgot Password?
-            </h1>
-            <p className="text-sm text-[#5A607F] mb-4 text-center">
-              Forgot your password? No problem. Just let us know your email address 
-              and we will email you a password
-              reset link that will allow you to choose a new one.
-            </p>
+    return (
+        <div className="min-h-screen flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
+            <div className="w-full max-w-md">
+                <form
+                    onSubmit={submit}
+                    className="bg-white rounded-2xl border border-[#D9E1EC] shadow-sm p-8 text-center"
+                >
+                    <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight font-serif mb-2">
+                        Forgot Password?
+                    </h2>
 
-            {message && <div className="mb-7 font-medium text-center text-sm text-green-600">{message}</div>}
-            {status && <div className="mb-7 font-medium text-center text-sm text-red-600">{status}</div>}
-         
+                    <p className="text-xs text-gray-500 leading-relaxed mb-4">
+                        Enter your email address and we'll send you a password reset link.
+                    </p>
 
-          <div className="mb-4">
-            <InputField
-              type="email"
-              name="email"
-              label="Email Address"
-              placeholder="Enter your email"
-              icon={<FiMail className="text-gray-400" />}
-            />
-          </div>
+                    {message && <div className="mb-7 font-medium text-center text-sm text-green-600">{message}</div>}
+                    {status && <div className="mb-7 font-medium text-center text-sm text-red-600">{status}</div>}
 
-          <div className="flex justify-between items-center mb-6">
-            <Link
-              to="/login"
-              className="text-sm text-blue-600 hover:text-blue-800"
-            >
-               Remembered your Password? Back to Sign in
-            </Link>
-          </div>
+                    <div className="mb-4">
+                        <InputField
+                            type="email"
+                            name="email"
+                            label="Email Address"
+                            placeholder="Enter your email"
+                            icon={<FiMail className="text-gray-400" />}
+                        />
+                    </div>
 
-          <Button
-            type="submit"
-            disabled={processing}
-            isLoading={processing}
-            loadingText="Processing..."
-            className="w-full py-3"
-          >
-            Send Link
-          </Button>
+                    <div className="mb-6">
+                        <Link
+                            to="/login"
+                            className="text-sm text-blue-600 hover:text-blue-800 underline"
+                        >
+                            Back to Sign in
+                        </Link>
+                    </div>
 
-          
-        </form>
-      </div>
-    </div>
-  );
+                    <Button
+                        type="submit"
+                        disabled={processing}
+                        isLoading={processing}
+                        loadingText="Processing..."
+                        className="w-full py-3 font-medium shadow-md hover:shadow-lg transition-all"
+                    >
+                        Send Link
+                    </Button>
+                </form>
+            </div>
+        </div>
+    );
 };
 
 export default ForgotPassword;

@@ -1,70 +1,118 @@
-const InputField = ({
-  onChange,
-  onKeyDown,
-  name,
-  classNames = "",
-  type = "text",
-  placeholder,
-  value,
-  isRequired = true,
-  variant = "default",
-  label,
-  icon,
-  id,
-  error,
-  as = "input",
-  multiple = false,
-  accept,
-}) => {
-  const baseStyles =
-    "w-full py-2 px-4 transition-all duration-200 focus:outline-none";
+import React, { forwardRef, useId } from 'react';
 
-  const variants = {
-    default:
-      "border-1 border-solid border-[#D9E1EC] rounded-lg placeholder-[#A1A7C4] text-black focus:border-primary-light",
-    outline: "border-b-2 border-gray-300 bg-transparent focus:border-blue-500",
-    filled:
-      "bg-gray-100 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500",
-    floating:
-      "border border-gray-300 rounded-lg peer focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-  };
-
-  const inputClasses = `${baseStyles} ${
-    variants[variant] || variants.default
-  } ${classNames}`;
-
-  const InputComponent = as === "textarea" ? "textarea" : "input";
-
-  const inputProps = {
-    type,
-    id,
+const InputField = forwardRef(({
+    label,
     name,
-    placeholder,
-    className: inputClasses,
-    required: isRequired,
-    onChange,
-    onKeyDown,
-    rows: as === "textarea" ? 3 : undefined,
-    ...(type === "file"
-      ? { multiple, accept } // file-specific props
-      : { defaultValue: value }),
-  };
+    type = "text",
+    error,
+    icon,
+    className = "",
+    classNames,
+    value,
+    variant = "default",
+    isRequired = false,
+    helperText,
+    as = "input",
+    autoComplete,
+    onChange, // Destructured to check for existence
+    readOnly, // Destructured to check for existence
+    ...props
+}, ref) => {
+    const id = useId();
+    const inputId = props.id || id;
+    const errorId = `${inputId}-error`;
+    const helperId = `${inputId}-helper`;
 
-  return (
-    <div className="relative">
-      {label && (
-        <label htmlFor={name} className="block text-md text-[#5A607F] mb-1">
-          {label}
-          {isRequired && <span className="text-red-500">*</span>}
-        </label>
-      )}
-      <div className="relative">
-        <InputComponent {...inputProps} />
-        {icon && <div className="absolute right-3 top-3.5 text-gray-400">{icon}</div>}
-      </div>
-      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
-    </div>
-  );
-};
+    const Component = as === "textarea" ? "textarea" : "input";
+
+    const radiusClass = as === "textarea" ? "rounded-xl" : "rounded-full";
+
+    const baseStyles = `block w-full ${radiusClass} border-0 py-2 px-4 text-gray-900 text-sm shadow-sm 
+    ring-1 ring-inset transition-all duration-200 ease-in-out placeholder:text-gray-400 focus:ring-2 
+    focus:ring-inset sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-gray-50`;
+
+    const variantStyles = {
+        default: "bg-white ring-gray-300 focus:ring-indigo-600",
+        filled: "bg-gray-100 ring-transparent focus:bg-white focus:ring-indigo-600",
+    };
+
+    const stateStyles = error
+        ? "bg-white ring-red-300 text-red-900 placeholder-red-300 focus:ring-red-500"
+        : variantStyles[variant] || variantStyles.default;
+
+    const inputClasses = `${baseStyles} ${stateStyles} ${icon ? 'pr-11' : ''} ${as === 'textarea' ? 'resize-y' : ''} 
+    ${className} ${classNames || ""}`;
+
+    const ariaDescribedBy = [];
+    if (error) ariaDescribedBy.push(errorId);
+    if (helperText && !error) ariaDescribedBy.push(helperId);
+
+    const safeValue = value === null ? "" : value;
+    
+    // Fix: Convert boolean true to "on" to prevent React warning
+    const safeAutoComplete = autoComplete === true ? "on" : autoComplete;
+
+    // Fix: Handle case where value is provided without onChange (avoids read-only warning)
+    // If value exists but no onChange/readOnly, we treat it as defaultValue (uncontrolled) 
+    // to allow typing.
+    const isReadOnly = readOnly || props.disabled;
+    const isMissingHandler = (safeValue !== undefined) && !onChange && !isReadOnly;
+
+    return (
+        <div className="w-full">
+            {label && (
+                <label 
+                    htmlFor={inputId} 
+                    className="block text-sm font-semibold leading-6 text-gray-900 mb-2"
+                >
+                    {label}
+                    {isRequired && <span className="text-red-500 ml-1" aria-hidden="true">*</span>}
+                </label>
+            )}
+
+            <div className="relative">
+                <Component
+                    ref={ref}
+                    id={inputId}
+                    name={name}
+                    type={type}
+                    // If handler is missing, use defaultValue to keep field editable. 
+                    // Otherwise use standard controlled value.
+                    {...(isMissingHandler ? { defaultValue: safeValue } : { value: safeValue })}
+                    onChange={onChange}
+                    readOnly={readOnly}
+                    required={isRequired}
+                    className={inputClasses}
+                    autoComplete={safeAutoComplete}
+                    aria-invalid={!!error}
+                    aria-describedby={ariaDescribedBy.length > 0 ? ariaDescribedBy.join(' ') : undefined}
+                    rows={as === "textarea" ? (props.rows || 4) : undefined}
+                    {...props}
+                />
+
+                {icon && (
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 
+                    text-gray-400 peer-focus:text-gray-600">
+                        {icon}
+                    </div>
+                )}
+            </div>
+
+            {error && (
+                <p className="mt-2 text-sm text-red-600 flex items-center gap-1" id={errorId} role="alert">
+                    {error}
+                </p>
+            )}
+
+            {!error && helperText && (
+                <p className="mt-2 text-sm text-gray-500" id={helperId}>
+                    {helperText}
+                </p>
+            )}
+        </div>
+    );
+});
+
+InputField.displayName = "InputField";
 
 export default InputField;

@@ -30,7 +30,10 @@ const VendorManageProducts = () => {
                 url += `&status=${status}`;
             }
 
-            const res = await axios.get(url);
+            const res = await axios.get(url, {
+                params: {showAll: false}
+            });
+
             if (res.data.status === 'success') {
                 setProducts(res.data.data.products);
                 updatePagination({

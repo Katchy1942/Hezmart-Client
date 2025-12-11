@@ -1,168 +1,227 @@
-import React, { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "../../lib/axios";
-import InputField from "../../components/common/InputField";
 import Button from "../../components/common/Button";
-import { mail } from "../../assets/images";
 import { toast } from 'react-toastify';
+import { FiMail } from "react-icons/fi";
 
 const ConfirmEmail = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const queryParams = new URLSearchParams(location.search);
+    const location = useLocation();
+    const navigate = useNavigate();
+    const queryParams = new URLSearchParams(location.search);
 
-   // Get the redirect path and email from state
-   const from = location.state?.from || "/";
-   const email = location.state?.email ||  queryParams.get("email");
+    const from = location.state?.from || "/";
+    const email = location.state?.email || queryParams.get("email");
 
-  const [code, setCode] = useState("");
-  const [serverError, setServerError] = useState("");
-  const [resendStatus, setResendStatus] = useState("");
-  const [resending, setResending] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState({});
+    const [otp, setOtp] = useState(new Array(4).fill(""));
+    const [activeOtpIndex, setActiveOtpIndex] = useState(0);
+    const inputRef = useRef(null);
 
-  const validateCode = () => {
-    const newErrors = {};
-    if (!code) {
-      newErrors.code = "Verification code is required";
-    } else if (code.length !== 4) {
-      newErrors.code = "Verification code must be exactly 4 digits";
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    const [serverError, setServerError] = useState("");
+    const [resendStatus, setResendStatus] = useState("");
+    const [resending, setResending] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    setServerError("");
-    
-    if (!validateCode()) return;
+    const handleOnChange = ({ target }, index) => {
+        const { value } = target;
+        const newOtp = [...otp];
+        newOtp[index] = value.substring(value.length - 1);
+        setOtp(newOtp);
 
-    setIsSubmitting(true);
-    try {
-      const response = await axios.post("/api/v1/users/verify_email", {
-        code,
-      });
+        if (!value) setActiveOtpIndex(index - 1);
+        else setActiveOtpIndex(index + 1);
+    };
 
-      if (response.data.status === "success") {
-        // Store user data 
-        localStorage.setItem("user", JSON.stringify(response.data.data.user));
-        const role = response.data.data?.user?.role;
-        toast.success("Email Verified Successfully.");
-        // Redirect based on user role or purpose
-        if (role === "vendor") {
-          setTimeout(() => {
-            navigate("/pending_verification");
-        }, 3000);
-         
-        } else if (role === "customer") {
-          setTimeout(() => {
-            navigate(from, { replace: true });
-        }, 3000);
-        } else {
-          navigate("/"); // fallback route
+    const handleOnKeyDown = ({ key }, index) => {
+        if (key === "Backspace") {
+            if (index === 0) return;
+            setActiveOtpIndex(index - 1);
         }
-        //Merge cart
-        await axios.post('api/v1/cart/merge')
-      }
-    } catch (err) {
-      const msg = err.response?.data?.message || "Something went wrong.";
-      setServerError(msg);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    };
 
-  const resendEmail = async () => {
-    if (!email) return;
-    setResendStatus("");
-    setResending(true);
-    try {
-      const response = await axios.post("/api/v1/users/resend_verification", {
-        email,
-      });
+    const handlePaste = (e) => {
+        e.preventDefault();
+        const pastedData = e.clipboardData.getData("text").slice(0, 4).split("");
+        if (pastedData.length > 0) {
+            const newOtp = [...otp];
+            pastedData.forEach((val, index) => {
+                if (index < 4) newOtp[index] = val;
+            });
+            setOtp(newOtp);
+            setActiveOtpIndex(4);
+        }
+    };
 
-      if (response.data.status === "success") {
-        setResendStatus("Verification email sent successfully.");
-      } else {
-        setResendStatus("Unable to resend verification email.");
-      }
-    } catch (err) {
-      const msg = err.response?.data?.message || "Error resending email.";
-      setResendStatus(msg);
-    } finally {
-      setResending(false);
-    }
-  };
+    useEffect(() => {
+        inputRef.current?.focus();
+    }, [activeOtpIndex]);
 
-  return (
-    <div className="bg-[#F5F6FA]  flex justify-center items-center py-10">
-      <form
-        onSubmit={onSubmit}
-        className="bg-white max-w-135 border-1 rounded border-solid border-[#D9E1EC] shadow-sm
-        lg:px-15 py-6 px-4"
-      >
-        <img src={mail} alt="Mail Icon" className="block mx-auto h-20" />
-        <h1 className="text-2xl text-[#131523] font-bold text-center mb-2">
-          Almost There!
-        </h1>
+    const onSubmit = async (e) => {
+        e.preventDefault();
+        setServerError("");
+        const code = otp.join("");
 
-        <p className="text-sm text-gray-600 mb-4 text-center">
-          We've sent a four-digit verification code to{" "}
-          <strong>{email}</strong>. Please check your inbox.
-        </p>
+        if (code.length !== 4) {
+            setServerError("Please enter the complete 4-digit code.");
+            return;
+        }
 
-        {serverError && (
-          <p className="text-red-500 text-sm text-center mb-4">
-            {serverError}
-          </p>
-        )}
+        setIsSubmitting(true);
+        try {
+            const response = await axios.post("/api/v1/users/verify_email", {
+                code,
+            });
 
-        <InputField
-          name="code"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          placeholder="Enter verification code"
-          error={errors.code}
-        />
+            if (response.data.status === "success") {
+                localStorage.setItem("user", JSON.stringify(response.data.data.user));
+                const role = response.data.data?.user?.role;
+                toast.success("Email Verified Successfully.");
+                
+                if (role === "vendor") {
+                    setTimeout(() => {
+                        navigate(from, { replace: true });
+                    }, 3000);
+                } else if (role === "customer") {
+                    setTimeout(() => {
+                        navigate(from, { replace: true });
+                    }, 3000);
+                } else {
+                    navigate("/");
+                }
+                
+                await axios.post('api/v1/cart/merge');
+            }
+        } catch (err) {
+            const msg = err.response?.data?.message || "Something went wrong.";
+            setServerError(msg);
+            setOtp(new Array(4).fill(""));
+            setActiveOtpIndex(0);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
-       <div className="flex justify-center mt-2">
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          isLoading={isSubmitting}
-          loadingText="Processing..."
-        >
-          Confirm Email
-        </Button>
-       </div>
+    const resendEmail = async () => {
+        if (!email) return;
+        setResendStatus("");
+        setResending(true);
+        try {
+            const response = await axios.post("/api/v1/users/resend_verification", {
+                email,
+            });
 
-        <hr className="text-[#D7DBEC] my-8" />
+            if (response.data.status === "success") {
+                setResendStatus("Verification email sent successfully.");
+            } else {
+                setResendStatus("Unable to resend verification email.");
+            }
+        } catch (err) {
+            const msg = err.response?.data?.message || "Error resending email.";
+            setResendStatus(msg);
+        } finally {
+            setResending(false);
+        }
+    };
 
-        <div className="text-sm text-center text-gray-600 mt-4">
-          Didn't get an email?{" "}
-          <button
-            type="button"
-            onClick={resendEmail}
-            disabled={resending}
-            className="text-blue-500 underline cursor-pointer disabled:text-gray-400"
-          >
-            {resending ? "Resending..." : "Resend email"}
-          </button>
-          {resendStatus && (
-            <p className="mt-2 text-xs text-green-600">{resendStatus}</p>
-          )}
+    return (
+        <div className="min-h-screen flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+                <div className="px-8 pt-8 pb-6 text-center">
+                    <div className="mx-auto h-20 w-20 bg-blue-50 rounded-full flex items-center justify-center mb-6">
+                        <FiMail className="h-8 w-8" />
+                    </div>
+                    
+                    <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight font-serif mb-2">
+                        Verify your email
+                    </h2>
+                    
+                    <p className="text-sm text-gray-500 mb-8 leading-relaxed">
+                        We've sent a 4-digit verification code to <br />
+                        <span className="font-semibold text-gray-900">{email}</span>
+                    </p>
+
+                    <form onSubmit={onSubmit}>
+                        <div className="flex justify-center gap-3 mb-8">
+                            {otp.map((_, index) => (
+                                <input
+                                    key={index}
+                                    ref={index === activeOtpIndex ? inputRef : null}
+                                    type="number"
+                                    className={`w-14 h-14 border-2 rounded-lg text-center text-2xl font-bold 
+                                        text-gray-700 bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 
+                                        focus:outline-none transition-all duration-200 spin-button-none ${
+                                        serverError ? "border-red-300 bg-red-50" : "border-gray-200"
+                                    }`}
+                                    onChange={(e) => handleOnChange(e, index)}
+                                    onKeyDown={(e) => handleOnKeyDown(e, index)}
+                                    onPaste={handlePaste}
+                                    value={otp[index]}
+                                />
+                            ))}
+                        </div>
+
+                        {serverError && (
+                            <div className="bg-red-50 text-red-600 text-sm py-2 px-3 rounded-md mb-6 animate-pulse">
+                                {serverError}
+                            </div>
+                        )}
+
+                        <div className="w-full">
+                            <Button
+                                type="submit"
+                                disabled={isSubmitting || otp.join("").length !== 4}
+                                isLoading={isSubmitting}
+                                loadingText="Verifying..."
+                                className="w-full py-3 text-base font-medium shadow-md hover:shadow-lg transition-all"
+                            >
+                                Verify Email
+                            </Button>
+                        </div>
+                    </form>
+                </div>
+
+                <div className="bg-gray-50 px-8 py-6 border-t border-gray-100">
+                    <div className="flex flex-col items-center space-y-4">
+                        <div className="text-sm text-gray-600">
+                            Didn't receive the email?{" "}
+                            <button
+                                type="button"
+                                onClick={resendEmail}
+                                disabled={resending}
+                                className="font-semibold text-blue-600 hover:text-blue-500 
+                                transition-colors disabled:opacity-50 disabled:cursor-not-allowed ml-1"
+                            >
+                                {resending ? "Sending..." : "Click to resend"}
+                            </button>
+                        </div>
+                        
+                        {resendStatus && (
+                            <p className={`text-xs font-medium ${resendStatus.includes("success") ? "text-green-600" : "text-red-500"}`}>
+                                {resendStatus}
+                            </p>
+                        )}
+                        
+                        <div className="w-full pt-4 px-4">
+                            <p className="text-xs text-gray-500 text-center leading-relaxed">
+                                If you don't see the email, please check your spam folder, verify the address spelling, or ensure no firewalls are blocking us.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <style>{`
+                .spin-button-none::-webkit-outer-spin-button,
+                .spin-button-none::-webkit-inner-spin-button {
+                    -webkit-appearance: none;
+                    margin: 0;
+                }
+                .spin-button-none {
+                    -moz-appearance: textfield;
+                }
+            `}</style>
         </div>
-
-        <ul className="text-sm text-gray-600 mt-4 list-disc pl-5">
-          <li>Make sure you've entered your email correctly.</li>
-          <li>Check your spam folder.</li>
-          <li>Make sure the email isn't blocked by firewalls or filters.</li>
-        </ul>
-      </form>
-    </div>
-  );
+    );
 };
 
 export default ConfirmEmail;

@@ -4,12 +4,10 @@ import ProductsGrid from "../components/products/ProductsGrid";
 const CategoryProducts = () => {
     const { categoryId, subcategoryId } = useParams();
     
-    // Determine the fetch URL based on whether subcategoryId exists
     const fetchUrl = subcategoryId 
         ? `api/v1/products?status=active&categoryId=${categoryId}&subCategoryId=${subcategoryId}`
         : `api/v1/products?status=active&categoryId=${categoryId}`;
 
-    // Customize header text based on whether it's a category or subcategory
     const headerTitle = subcategoryId 
         ? `Products in Subcategory` 
         : `Products in Category`;
@@ -19,12 +17,14 @@ const CategoryProducts = () => {
         : `Browse all products in this category`;
 
     return (
-        <ProductsGrid 
-            fetchUrl={fetchUrl}
-            showHeader={true}
-            headerTitle={headerTitle}
-            headerSubtitle={headerSubtitle}
-        />
+        <div className="py-12">
+            <ProductsGrid 
+                fetchUrl={fetchUrl}
+                showHeader={true}
+                headerTitle={headerTitle}
+                headerSubtitle={headerSubtitle}
+            />
+        </div>
     );
 };
 

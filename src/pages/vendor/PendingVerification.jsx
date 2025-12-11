@@ -1,87 +1,120 @@
-import ExtraLayout from '../../layouts/ExtraLayout';
+import {ExtraLayout} from '../../layouts/ExtraLayout';
 import { useNavigate } from 'react-router-dom';
-import { BiHomeAlt } from 'react-icons/bi';
 import { useState } from 'react';
 import { logout } from '../../utils/logout';
+import { FaCheckCircle, FaHourglassHalf, FaTimesCircle } from 'react-icons/fa';
 
 const PendingVerification = () => {
-    
     const user = JSON.parse(localStorage.getItem('user'));
-    const navigate = useNavigate()
-    const [processing, setProcessing] = useState(false)
+    const navigate = useNavigate();
+    const [processing, setProcessing] = useState(false);
 
-    const handleLogout = async()=>{
+    const handleLogout = async () => {
         setProcessing(true);
-       try{
-            const res = await logout(navigate);
-            setProcessing(false)
-       }catch(err){
-        setProcessing(false)
-       }
-    }
+        try {
+            await logout(navigate);
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    const handleContinue = () => {
+        navigate('/vendor/dashboard');
+    };
+
+    const status = user?.status || 'pending';
 
     return (
         <ExtraLayout>
-           
-            <section className="w-full max-w-3xl mx-auto">
-                <div className='px-4 py-6 md:p-10 w-full bg-white dark:bg-slate-800 rounded-lg shadow-lg dark:text-white'>
-                    <aside>
-                        {user.status === 'pending' ?
-                            (<h4 className="font-bold text-2xl mb-3">Pending Account Approval</h4>)
-                        :
-                           ( <h4 className="font-bold text-2xl mb-3">Account Denied</h4>)
-                        }
+            <div className="text-center">
+
+                {status === 'active' && (
+                    <div className="mx-auto w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mb-3">
+                        <FaCheckCircle className="text-green-500 text-xl" />
+                    </div>
+                )}
+                {status === 'pending' && (
+                    <div className="mx-auto w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-3">
+                        <FaHourglassHalf className="text-amber-500 text-xl" />
+                    </div>
+                )}
+                {status === 'denied' && (
+                    <div className="mx-auto w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mb-3">
+                        <FaTimesCircle className="text-red-500 text-xl" />
+                    </div>
+                )}
+
+                <h1 className="text-xl font-bold text-slate-900 mb-1">
+                    {status === 'active' && 'Account Verified!'}
+                    {status === 'pending' && 'Account Under Review'}
+                    {status === 'denied' && 'Application Declined'}
+                </h1>
+
+                <p className="text-sm text-slate-500 mb-6">
+                    Dear <span className="font-semibold text-slate-700">{user?.firstName}</span>,
+                </p>
+
+                {status === 'active' && (
+                    <div className="space-y-3 text-slate-600 text-sm">
+                        <p>Great news! Your vendor documentation has been verified.</p>
+                        <p>You now have full access to the Hezmart Vendor Dashboard and can start listing your products immediately.</p>
+                    </div>
+                )}
+
+                {status === 'pending' && (
+                    <div className="space-y-4 text-slate-600 leading-relaxed text-sm">
+                        <p>Your account was created successfully and is currently being processed by our compliance team.</p>
                         
-                        <div className="form-group">
-                            <label className="col-form-label mb-2">Dear <strong>{ user.firstName} <i>!</i></strong></label>
-        
-                            {(user.status === 'pending') ?
-                                (<>
-                                <label className="col-form-label block my-4">
-                                    <p>
-                                        Your account have been created successfully and it is been reviewed.
-                                    </p>
-                                    <p>
-                                        This might take upto 30 minutes or more.
-                                        Kindly hold on for a while as our customer support team swiftly verify your account credentials.
-                                    </p>
-                                </label>
-                                <label className="block py-3">
-                                        <div className="mb-3 text-primary py-1 px-2" style={{backgroundColor: 'rgba(0, 174, 255, 0.075)', fontWeight: '600'}}>
-                                            <small>
-                                                <i>You will be redirected automatically when this process is done.</i>
-                                            </small>
-                                        </div>
-                                        <p>
-                                            You will also be notified via email. Kindly check your email if this page doesn't redirect you automatically after 30 minutes.
-                                        </p>
-                                    </label><label className="col-form-label">
-                                        <p>
-                                            Best Regards, <br /> <strong>Customer Support Team.</strong>
-                                        </p>
-                                    </label></>)
-                            :
-                            (<label className="block my-2">
-                                <p>
-                                    Your account creation was denied due to some violation of our policies.
-                                </p>
-                                <p>
-                                    Kindly contact our <strong>Support Team</strong> for more information!
-                                </p>
-                            </label>)
-                           }
+                        <div className="bg-amber-50 border border-amber-100 rounded-lg p-3 text-amber-800">
+                            <p className="font-medium mb-1">Expected Wait Time: ~30 Minutes</p>
+                            <p className="opacity-80 text-[10px]">This page will automatically redirect once approved. You can also check your email for updates.</p>
                         </div>
+                    </div>
+                )}
 
-                        <div className="pt-4">
-                            <button onClick={handleLogout} className={`font-bold cursor-pointer md:gap-2 bg-primary-light  text-slate-100 rounded-full inline-flex gap-2 items-center justify-center py-2 px-6 md:px-4 border `}>
-                                <BiHomeAlt className={`h-6 w-6`} /> <span className={`text-sm md:text-base`}> Logout & <span> Return&nbsp;Home</span> </span>
-                            </button>
+                {status === 'denied' && (
+                    <div className="space-y-3 text-slate-600 leading-relaxed text-sm">
+                        <p>Unfortunately, we could not verify your vendor application at this time.</p>
+                        <div className="bg-red-50 border border-red-100 rounded-lg p-3 text-red-700">
+                            This is often due to unclear document uploads or invalid business registration numbers (NIN/RC).
                         </div>
-                    </aside>
+                        <p>Please contact support or try registering again with clear documents.</p>
+                    </div>
+                )}
+
+                <div className="mt-8 flex flex-col gap-2.5">
+                    {status === 'active' && (
+                        <button
+                            onClick={handleContinue}
+                            className="w-full inline-flex items-center justify-center rounded-full bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2.5 text-sm transition-all shadow-sm hover:shadow-md"
+                        >
+                            Continue to Dashboard
+                        </button>
+                    )}
+
+                    <button
+                        onClick={handleLogout}
+                        disabled={processing}
+                        className={`w-full inline-flex items-center justify-center rounded-full font-medium px-6 py-2.5 text-sm transition-all
+                            ${status === 'active' 
+                                ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' 
+                                : 'bg-primary-light hover:bg-primary text-white shadow-sm hover:shadow-md'
+                            }
+                        `}
+                    >
+                        {processing ? 'Logging out...' : (status === 'active' ? 'Log Out' : 'Logout & Return Home')}
+                    </button>
+
+                    {status === 'denied' && (
+                         <button className="text-primary hover:text-primary-dark text-sm font-medium mt-1">
+                            Contact Support
+                         </button>
+                    )}
                 </div>
-            </section>
-        </ExtraLayout>
-    )
-}
 
-export default PendingVerification
+            </div>
+        </ExtraLayout>
+    );
+};
+
+export default PendingVerification;

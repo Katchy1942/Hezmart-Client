@@ -1,4 +1,5 @@
 import axios from "../lib/axios";
+
 export const logout = async (navigate) => {
     try {
         const res = await axios.get('/api/v1/users/logout');

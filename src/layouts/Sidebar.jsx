@@ -43,7 +43,7 @@ const Sidebar = ({ user, isToggle, setToggle }) => {
   ];
 
   const links = user?.role === "admin" ? adminLinks : vendorLinks;
-
+  
   // Check if mobile and handle scroll lock
   useEffect(() => {
     const handleResize = () => {
@@ -112,7 +112,7 @@ const Sidebar = ({ user, isToggle, setToggle }) => {
           )}
 
           {/* Logo */}
-          <div className="h-16 px-3 flex items-center justify-center border-b border-orange-300">
+          <div className="h-16 px-3 flex items-center justify-center">
             <Link to='/' className='block w-full'>
               <img src={logo} className='w-2/4' alt="Logo"/>
             </Link>
@@ -151,7 +151,7 @@ const Sidebar = ({ user, isToggle, setToggle }) => {
                 )}
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium">{user?.name || 'User'}</p>
+                <p className="text-sm font-medium">{user?.firstName || 'User'}</p>
                 <p className="text-xs text-orange-100 capitalize">{user?.role || 'user'}</p>
               </div>
             </div>

@@ -11,7 +11,7 @@ const FlashSales = () => {
             
             <div>
                 <ProductsGrid 
-                    count={10}
+                    count={16}
                     fetchUrl="api/v1/products?status=active&flashSale=true" 
                     enableHorizontalScroll={true}
                     showPagination={false}

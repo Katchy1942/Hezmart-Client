@@ -15,7 +15,7 @@ import ConfirmEmail from './pages/auth/ConfirmEmail';
 import Login from './pages/auth/Login'
 import ForgotPassword from './pages/auth/ForgotPassword'
 import ResetPassword from './pages/auth/ResetPassword';
-import AuthCallback from './pages/auth/AuthCallBack';
+import AuthCallback from './pages/auth/AuthCallback';
 
 //Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard'

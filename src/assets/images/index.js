@@ -5,6 +5,7 @@ import cart from './mynaui_cart.svg';
 import logo from "./logo.png";
 import mail from "./mail.svg"; 
 import appleDownload from './apple-download-icon.png';
+import sales_happy from './sales_happy.png'
 
 import subcat_woman from './subcat_woman.svg'
 import subcat_man from './subcat_man.svg'
@@ -63,5 +64,6 @@ export {
     subcat_woman,
     subcat_phone,
     subcat_skin,
-    empty_box
+    empty_box,
+    sales_happy
 };

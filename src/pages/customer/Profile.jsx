@@ -1,25 +1,21 @@
 import Button from "../../components/common/Button";
 import InputField from "../../components/common/InputField";
 import SelectField from "../../components/common/SelectField";
+import SalesRepresentativeProgram from "../../components/SalesRepresentativeProgram";
 import { toast } from 'react-toastify';
 import axios from "../../lib/axios";
 import { useEffect, useState, useRef } from 'react';
 import { 
     FaUserCircle, 
     FaCamera, 
-    FaTimes, 
-    FaLock,
-    FaMapMarkerAlt,
-    FaUser
+    FaTimes,
+    FaQuestionCircle 
 } from 'react-icons/fa';
 
 const Profile = () => {
     const [user, setUser] = useState(null);
     const [isUpdating, setIsUpdating] = useState(false);
-    const [
-        isChangingPassword, 
-        setIsChangingPassword
-    ] = useState(false);
+    const [showSalesModal, setShowSalesModal] = useState(false);
     
     const [photoPreview, setPhotoPreview] = useState(null);
     const [errors, setErrors] = useState({
@@ -140,23 +136,62 @@ const Profile = () => {
 
     if (!user) {
         return (
-            <div className="flex justify-center items-center h-64">
-                <div className="
-                    animate-spin 
-                    rounded-full 
-                    h-12 
-                    w-12 
-                    border-t-2 
-                    border-b-2 
-                    border-primary-dark 
-                    mx-auto
-                "></div>
+            <div className="max-w-7xl mx-auto lg:px-8 py-10 animate-pulse">
+                {/* Header Skeleton */}
+                <div className="mb-8">
+                    <div className="h-8 w-48 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-4 w-64 bg-gray-200 rounded"></div>
+                </div>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Left Column Skeleton (Profile Card) */}
+                    <div className="lg:col-span-1">
+                        <div className="bg-white shadow-sm rounded-2xl p-6 text-center">
+                            <div className="w-32 h-32 rounded-full bg-gray-200 mx-auto mb-4"></div>
+                            <div className="h-6 w-3/4 bg-gray-200 rounded mx-auto mb-2"></div>
+                            <div className="h-4 w-1/2 bg-gray-200 rounded mx-auto mb-6"></div>
+                            <div className="h-10 w-full bg-gray-200 rounded-lg"></div>
+                        </div>
+                    </div>
+
+                    {/* Right Column Skeleton (Forms) */}
+                    <div className="lg:col-span-2 space-y-6">
+                        <div className="bg-white shadow-sm rounded-2xl p-6">
+                            <div className="h-6 w-32 bg-gray-200 rounded mb-6"></div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div className="h-12 bg-gray-200 rounded"></div>
+                                <div className="h-12 bg-gray-200 rounded"></div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div className="h-12 bg-gray-200 rounded"></div>
+                                <div className="h-12 bg-gray-200 rounded"></div>
+                            </div>
+                            <div className="h-10 w-32 bg-gray-200 rounded ml-auto"></div>
+                        </div>
+
+                        <div className="bg-white shadow-sm rounded-2xl p-6">
+                            <div className="h-6 w-32 bg-gray-200 rounded mb-6"></div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div className="h-12 bg-gray-200 rounded"></div>
+                                <div className="h-12 bg-gray-200 rounded"></div>
+                            </div>
+                            <div className="h-10 w-32 bg-gray-200 rounded ml-auto"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }
 
     return (
-        <section className='min-h-screen'>
+        <section className='min-h-screen relative'>
+            {/* Modal Overlay */}
+            {showSalesModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity">
+                    <SalesRepresentativeProgram onClose={() => setShowSalesModal(false)} />
+                </div>
+            )}
+
             <div className="
                 max-w-7xl 
                 mx-auto
@@ -204,7 +239,7 @@ const Profile = () => {
                                                 rounded-full 
                                                 object-cover 
                                                 border-2
-                                                border-gray-800                                                
+                                                border-gray-800                                                                     
                                             "
                                         />
                                         <button
@@ -212,8 +247,8 @@ const Profile = () => {
                                             onClick={handleRemovePhoto}
                                             className="
                                                 absolute 
-                                                -top-1 
-                                                -right-1 
+                                                -top-2
+                                                -right-2
                                                 bg-red-500 
                                                 text-white 
                                                 rounded-full 
@@ -253,9 +288,41 @@ const Profile = () => {
                             ">
                                 {user.firstName} {user.lastName}
                             </h2>
-                            <p className="text-gray-500 text-sm mb-6">
+                            <p className="text-gray-500 text-sm mb-4">
                                 {user.email}
                             </p>
+
+                            {/* Total Earnings Badge */}
+                            <div className="flex justify-center mb-6">
+                                <span 
+                                    className="
+                                        text-green-600 
+                                        font-bold 
+                                        text-xs 
+                                        bg-green-50 
+                                        px-4 
+                                        py-2 
+                                        rounded-full 
+                                        border 
+                                        border-green-200 
+                                        w-fit 
+                                        flex 
+                                        items-center 
+                                        gap-2 
+                                        shadow-sm 
+                                        cursor-pointer
+                                        hover:bg-green-100
+                                        transition
+                                    "
+                                    onClick={() => setShowSalesModal(true)}
+                                >
+                                    Total Earnings
+                                    <span>
+                                        NGN 0.00
+                                    </span>
+                                    <FaQuestionCircle className="text-sm" />
+                                </span>
+                            </div>
 
                             <button
                                 type="button"
@@ -324,7 +391,6 @@ const Profile = () => {
                                 onSubmit={handleAccountUpdate} 
                                 className="p-6 space-y-6"
                             >
-                                {/* Hidden input for photo ref */}
                                 <input
                                     type="file"
                                     name="photo"

@@ -176,7 +176,7 @@ const SellOnHezmart = () => {
                         to="/vendor-register"
                         className="inline-flex w-full sm:w-[25%] items-center justify-center
                         bg-primary-light text-white font-semibold py-3
-                        shadow-lg text-lg group px-6 rounded-full"
+                        shadow-lg text-sm group px-6 rounded-full"
                     >
                         Continue
                     </Link>

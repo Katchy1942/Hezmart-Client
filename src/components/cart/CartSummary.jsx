@@ -203,7 +203,7 @@ const CartSummary = ({
         <div className="mt-8 lg:mt-0 lg:col-span-4">
             <div className="bg-white shadow-lg rounded-2xl overflow-hidden border border-gray-100 sticky top-6">
                 <div className="bg-gray-50/50 px-6 py-4 border-b border-gray-100">
-                    <h2 className="text-lg font-bold text-gray-800 tracking-tight">Order Summary</h2>
+                    <h2 className="text-md font-bold text-gray-900 uppercase tracking-wider">Order Summary</h2>
                 </div>
 
                 <div className="p-6 space-y-6">

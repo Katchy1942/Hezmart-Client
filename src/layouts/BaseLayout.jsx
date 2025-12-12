@@ -38,7 +38,7 @@ const BaseLayout = () => {
     };
 
     useEffect(() => {
-        // buildSmartsuppWidget()
+        buildSmartsuppWidget()
     }, [])
 
     return (

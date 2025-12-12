@@ -47,7 +47,7 @@ import VendorSettings from './pages/vendor/VendorSettings';
 import OrderPage from './pages/customer/OrderPage';
 import OrderDetails from './pages/customer/OrderDetails';
 import Profile from './pages/customer/Profile'
-import WishlistPage from './pages/customer/WishListPage';
+import WishListPage from './pages/customer/WishListPage';
 
 //Product Pages;
 import ProductDetails from './pages/product/ProductDetails';
@@ -93,7 +93,7 @@ const App = () => {
 
                 {/* Customer Routes */}
                 <Route path='orders' element={<OrderPage />}></Route>
-                <Route path='wishlist' element={<WishlistPage />}></Route>
+                <Route path='wishlist' element={<WishListPage />}></Route>
                 <Route path='orders/:id' element={<OrderDetails />}></Route>
                 <Route path='profile' element={<Profile />}></Route>
 

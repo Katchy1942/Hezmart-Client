@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
-    FiChevronLeft, 
     FiTrash2,
     FiClock
 } from 'react-icons/fi';
@@ -37,7 +36,7 @@ const CountdownTimer = ({ targetDate }) => {
     return <span>{timeLeft}</span>;
 };
 
-const WishlistPage = () => {
+const WishListPage = () => {
     const [wishlist, setWishlist] = useState([]);
     const [loading, setLoading] = useState(true);
     const [removingItemId, setRemovingItemId] = useState(null);
@@ -263,4 +262,4 @@ const WishlistPage = () => {
     );
 };
 
-export default WishlistPage;
+export default WishListPage;

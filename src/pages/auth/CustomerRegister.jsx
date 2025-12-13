@@ -115,7 +115,7 @@ const CustomerRegister = () => {
 
     return (
         <div className="min-h-screen pb-12">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-5xl mx-auto">
                 {/* Breadcrumb Navigation */}
                 <nav className="flex items-center space-x-2 py-8 text-sm text-gray-500">
                     <Link to="/" className="hover:text-gray-900 transition-colors">Home</Link>

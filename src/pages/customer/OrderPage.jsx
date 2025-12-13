@@ -18,6 +18,7 @@ const OrderPage = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
+                setLoading(true);
                 const response = await axios.get('api/v1/orders?view=buyer');
                 if(response.data.status === 'success'){
                     setOrders(response.data.data.orders);
@@ -60,7 +61,7 @@ const OrderPage = () => {
         });
     };
 
-    if (!loading) {
+    if (loading) {
         return (
             <div className='min-h-screen sm:py-12'>
                 <h1 className="text-2xl 

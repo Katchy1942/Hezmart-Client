@@ -9,6 +9,7 @@ import {
 } from 'react-icons/fi';
 import axios from '../../lib/axios';
 import { toast } from 'react-toastify';
+import { OrderSkeleton } from './OrderSkeleton';
 
 const OrderPage = () => {
     const [orders, setOrders] = useState([]);
@@ -17,7 +18,7 @@ const OrderPage = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const response = await axios.get('api/v1/orders');
+                const response = await axios.get('api/v1/orders?view=buyer');
                 if(response.data.status === 'success'){
                     setOrders(response.data.data.orders);
                 }
@@ -59,10 +60,18 @@ const OrderPage = () => {
         });
     };
 
-    if (loading) {
+    if (!loading) {
         return (
-            <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-dark"></div>
+            <div className='min-h-screen sm:py-12'>
+                <h1 className="text-2xl 
+                    font-semibold 
+                    text-gray-900 
+                    font-['poppins']
+                    mb-4"
+                >
+                    My Orders
+                </h1>
+                <OrderSkeleton />
             </div>
         );
     }

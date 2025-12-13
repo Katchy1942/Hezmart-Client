@@ -453,7 +453,7 @@ const Header = () => {
                                                     />
                                                     My Profile
                                                 </Link>
-                                                {/* <Link
+                                                <Link
                                                     to="/orders"
                                                     className="flex items-center px-4 py-2
                                                     text-sm text-gray-700 hover:bg-gray-50"
@@ -462,7 +462,7 @@ const Header = () => {
                                                         className="mr-2 text-gray-500"
                                                     />
                                                     My Orders
-                                                </Link> */}
+                                                </Link>
                                                 <Link
                                                     to="/wishlist"
                                                     className="flex items-center px-4 py-2
@@ -619,14 +619,14 @@ const Header = () => {
                                 <FiUser className="mr-3" />
                                 My Profile
                             </Link>
-                            {/* <Link
+                            <Link
                                 to="/orders"
                                 className="flex text-sm items-center py-2 px-4
                                 text-gray-700 hover:bg-gray-100 rounded"
                             >
                                 <FiShoppingBag className="mr-3" />
                                 My Orders
-                            </Link> */}
+                            </Link>
                             <Link
                                 to="/wishlist"
                                 className="flex text-sm items-center px-4 py-2

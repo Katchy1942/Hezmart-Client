@@ -10,12 +10,11 @@ const FlashSales = () => {
             </div>
             
             <div>
-                <ProductsGrid 
-                    count={10}
+                <ProductsGrid
                     fetchUrl="api/v1/products?status=active&flashSale=true" 
                     enableHorizontalScroll={true}
                     showPagination={false}
-                    itemsPerPage={10}
+                    itemsPerPage={15}
                     variant="flash"
                 />
             </div>

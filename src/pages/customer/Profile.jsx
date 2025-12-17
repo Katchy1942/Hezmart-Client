@@ -5,6 +5,7 @@ import SalesRepresentativeProgram from "../../components/SalesRepresentativeProg
 import { toast } from 'react-toastify';
 import axios from "../../lib/axios";
 import { useEffect, useState, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { 
     FaUserCircle, 
     FaCamera, 
@@ -25,6 +26,16 @@ const Profile = () => {
     });
     
     const fileInputRef = useRef(null);
+
+    const location = useLocation();
+
+    useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        
+        if (searchParams.get('open_sales') === 'true') {
+            setShowSalesModal(true);
+        }
+    }, [location]);
 
     const nigerianStates = [
         "Abia", "Adamawa", "Akwa Ibom", "Anambra", 
@@ -187,7 +198,9 @@ const Profile = () => {
         <section className='min-h-screen relative'>
             {/* Modal Overlay */}
             {showSalesModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 
+                    bg-black/50 backdrop-blur-sm transition-opacity
+                ">
                     <SalesRepresentativeProgram onClose={() => setShowSalesModal(false)} />
                 </div>
             )}

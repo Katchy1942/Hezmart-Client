@@ -113,7 +113,12 @@ const Footer = () => {
                         <div className="footer-section">
                             <h3 className="text-lg font-bold text-[#111827] mb-4">Make Money With Hezmart</h3>
                             <ul className="space-y-3">
-                                <li><Link to="/sell-on-hezmart" className="text-[#6B7280] hover:text-primary-dark transition-colors">Sell on Hezmart</Link></li>
+                                <li>
+                                    <Link to="/sell-on-hezmart" className="text-[#6B7280] hover:text-primary-dark transition-colors">Sell on Hezmart</Link>
+                                </li>
+                                <li>
+                                    <Link to="/profile?open_sales=true" className="text-[#6B7280] hover:text-primary-dark transition-colors">Hezmart Sales Representative Program</Link>
+                                </li>
                             </ul>
                         </div>
                     </div>

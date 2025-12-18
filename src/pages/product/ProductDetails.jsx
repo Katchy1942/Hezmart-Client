@@ -37,15 +37,6 @@ const ProductDetails = () => {
                 setProduct(res.data.data.product);
                 setLikesCount(res.data.data.product.likesCount || 0);
 
-                const initialOptions = {};
-                if (res.data.data.product.options) {
-                    res.data.data.product.options.forEach(option => {
-                        if (option.values && option.values.length > 0) {
-                            initialOptions[option.name] = option.values[0].value;
-                        }
-                    });
-                }
-
                 if (user) {
                     fetchLikeStatus();
                 }
@@ -122,6 +113,15 @@ const ProductDetails = () => {
 
     const handleAddToCart = async () => {
         if (!product) return;
+
+        const hasUnselectedOptions = product.options?.some(
+            option => !selectedOptions[option.name]
+        );
+
+        if (hasUnselectedOptions) {
+            toast.error('Please select a product option, Eg. Size');
+            return;
+        }
         
         const result = await addToCart(product, quantity, selectedOptions);
         if (result.success) {

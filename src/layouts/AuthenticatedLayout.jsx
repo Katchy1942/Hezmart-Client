@@ -11,10 +11,9 @@ export default function AuthenticatedLayout() {
     return (
         <div className="min-h-screen bg-slate-100 relative">
             <ScrollToTop />
-            {/* Mobile Overlay - only visible when sidebar is open on mobile */}
             {toggle && (
                 <div 
-                    className="fixed inset-0 bg-black bg-opacity-50 z-10 md:hidden"
+                    className="fixed inset-0 bg-black bg-opacity-50 z-[15] md:hidden"
                     onClick={() => setToggle(false)}
                 />
             )}
@@ -24,7 +23,6 @@ export default function AuthenticatedLayout() {
 
             {/* Main Content */}
             <div className="md:ml-56 min-h-full relative">
-                {/* Header */}
                 <Header setToggle={setToggle} toggle={toggle} user={user} />
                
                 {/* Main Content Area */}

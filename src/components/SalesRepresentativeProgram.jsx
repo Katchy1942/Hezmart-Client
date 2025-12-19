@@ -1,7 +1,5 @@
 import { useState, useRef } from 'react';
-import { 
-    FaCloudUploadAlt, 
-    FaTrash, 
+import {
     FaTimes, 
     FaMoneyBillWave, 
     FaCheckCircle 
@@ -11,44 +9,9 @@ import axios from '../lib/axios';
 const SalesRepresentativeProgram = ({ onClose }) => {
     const [name, setName] = useState('');
     const [motive, setMotive] = useState('');
-    const [files, setFiles] = useState({
-        image1: null,
-        image2: null,
-        image3: null,
-        image4: null
-    });
-    const [previews, setPreviews] = useState({
-        image1: null,
-        image2: null,
-        image3: null,
-        image4: null
-    });
-
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState('');
     const [error, setError] = useState('');
-
-    const fileInputRefs = useRef({});
-
-    const handleFileChange = (e, key) => {
-        const file = e.target.files[0];
-        if (file) {
-            setFiles(prev => ({ ...prev, [key]: file }));
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreviews(prev => ({ ...prev, [key]: reader.result }));
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    const removeFile = (key) => {
-        setFiles(prev => ({ ...prev, [key]: null }));
-        setPreviews(prev => ({ ...prev, [key]: null }));
-        if (fileInputRefs.current[key]) {
-            fileInputRefs.current[key].value = '';
-        }
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -60,22 +23,14 @@ const SalesRepresentativeProgram = ({ onClose }) => {
         formData.append("name", name);
         formData.append("motive", motive);
 
-        Object.keys(files).forEach((key) => {
-            if (files[key]) {
-                formData.append(key, files[key]);
-            }
-        });
-
         try {
             const res = await axios.post('/api/v1/sales-rep/apply', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
+                headers: { 'Content-Type': 'application/json' }
             });
 
             setSuccess('Application submitted successfully!');
             setName('');
             setMotive('');
-            setFiles({ image1: null, image2: null, image3: null, image4: null });
-            setPreviews({ image1: null, image2: null, image3: null, image4: null });
         } catch (err) {
             console.error(err);
             setError(err.response?.data?.message || 'Something went wrong. Please try again.');
@@ -83,13 +38,6 @@ const SalesRepresentativeProgram = ({ onClose }) => {
             setLoading(false);
         }
     };
-
-    const uploadFields = [
-        { key: 'image1', label: 'Whatsapp Group 1' },
-        { key: 'image2', label: 'Whatsapp Group 2' },
-        { key: 'image3', label: 'Whatsapp Group 3' },
-        { key: 'image4', label: 'Total Contacts Screenshot' }
-    ];
 
     return (
         <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl flex flex-col max-h-[90vh] relative overflow-hidden">
@@ -170,34 +118,6 @@ const SalesRepresentativeProgram = ({ onClose }) => {
                             placeholder="Enter your full name"
                             required
                         />
-                    </div>
-
-                    {/* Upload Images */}
-                    <div>
-                        <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">Verification Screenshots</label>
-                        <div className="grid grid-cols-2 gap-3">
-                            {uploadFields.map((field) => (
-                                <div key={field.key} className="relative group">
-                                    {previews[field.key] ? (
-                                        <div className="relative h-24 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-                                            <img src={previews[field.key]} alt={field.label} className="w-full h-full object-cover" />
-                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                                                <button type="button" onClick={() => removeFile(field.key)} className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition">
-                                                    <FaTrash size={12} />
-                                                </button>
-                                            </div>
-                                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] px-2 py-1 text-center truncate">{field.label}</div>
-                                        </div>
-                                    ) : (
-                                        <div onClick={() => fileInputRefs.current[field.key].click()} className="h-24 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition">
-                                            <FaCloudUploadAlt className="text-gray-400 text-2xl mb-1" />
-                                            <span className="text-[10px] text-gray-500 font-medium text-center px-1">{field.label}</span>
-                                        </div>
-                                    )}
-                                    <input type="file" ref={el => fileInputRefs.current[field.key] = el} onChange={(e) => handleFileChange(e, field.key)} className="hidden" accept="image/*" />
-                                </div>
-                            ))}
-                        </div>
                     </div>
 
                     {/* Motive */}

@@ -114,7 +114,7 @@ const ProductDetails = () => {
     const handleAddToCart = async () => {
         if (!product) return;
 
-        const hasUnselectedOptions = product.options?.some(
+        const hasUnselectedOptions = product.options?.filter(option => option.values?.length).some(
             option => !selectedOptions[option.name]
         );
 

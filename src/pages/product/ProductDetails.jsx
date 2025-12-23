@@ -158,11 +158,12 @@ const ProductDetails = () => {
 
         if (diff <= 0) return null;
 
-        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-        return { hours, minutes, seconds };
+        return { days, hours, minutes, seconds };
     };
 
     const handleShare = () => {
@@ -386,9 +387,21 @@ const ProductDetails = () => {
                                     </span>
                                 </div>
                                 
-                                <div className="flex items-center justify-center gap-3">
+                                <div className="flex items-center justify-center gap-3 flex-wrap">
                                     <div className="flex flex-col items-center bg-white rounded-lg 
-                                    px-3 py-2 min-w-[60px] shadow-sm">
+                                    px-4 py-2 min-w-[72px] shadow-sm">
+                                        <span className="text-2xl font-bold text-red-600">
+                                            {String(timeRemaining.days).padStart(2, '0')}
+                                        </span>
+                                        <span className="text-xs text-gray-500 font-medium">
+                                            Days
+                                        </span>
+                                    </div>
+
+                                    <span className="text-2xl font-bold text-red-600">:</span>
+
+                                    <div className="flex flex-col items-center bg-white 
+                                    rounded-lg px-3 py-2 min-w-[60px] shadow-sm">
                                         <span className="text-2xl font-bold text-red-600">
                                             {String(timeRemaining.hours).padStart(2, '0')}
                                         </span>
@@ -396,9 +409,9 @@ const ProductDetails = () => {
                                             Hours
                                         </span>
                                     </div>
-                                    
+
                                     <span className="text-2xl font-bold text-red-600">:</span>
-                                    
+
                                     <div className="flex flex-col items-center bg-white 
                                     rounded-lg px-3 py-2 min-w-[60px] shadow-sm">
                                         <span className="text-2xl font-bold text-red-600">
@@ -408,9 +421,9 @@ const ProductDetails = () => {
                                             Mins
                                         </span>
                                     </div>
-                                    
+
                                     <span className="text-2xl font-bold text-red-600">:</span>
-                                    
+
                                     <div className="flex flex-col items-center bg-white 
                                     rounded-lg px-3 py-2 min-w-[60px] shadow-sm">
                                         <span className="text-2xl font-bold text-red-600">

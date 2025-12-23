@@ -6,9 +6,7 @@ import RecentlyViewed from "../components/products/RecentlyViewed";
 const Home = () => {
     return (
         <div className="min-h-screen max-w-7xl mx-auto pt-4 sm:px-4">
-            
-            
-            <div className="flex flex-col gap-12 mt-8">
+            <div className="flex flex-col gap-12">
                 <FlashSales />
                 <HotRightNow />
                 <RecentlyViewed />

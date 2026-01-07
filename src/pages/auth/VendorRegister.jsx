@@ -41,6 +41,7 @@ const VendorRegister = () => {
     const fileInputRef = useRef(null);
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [loadingMessage, setLoadingMessage] = useState("Creating Account...");
 
     const navigate = useNavigate();
 
@@ -69,7 +70,6 @@ const VendorRegister = () => {
             };
         } catch (error) {
             console.error("Error checking user status:", error);
-            alert("Failed to verify user status. Please try again.");
         } finally {
             setLoadingForm(false);
         }
@@ -119,6 +119,12 @@ const VendorRegister = () => {
         e.preventDefault();
         setIsSubmitting(true);
         setErrors({});
+        
+        if (formData.businessLogo) {
+            setLoadingMessage("Uploading business logo...");
+        } else {
+            setLoadingMessage("Verifying details...");
+        }
 
         const vendorRaw = localStorage.getItem('user');
         const vendor = vendorRaw ? JSON.parse(vendorRaw) : null;
@@ -134,17 +140,20 @@ const VendorRegister = () => {
             data.append('user_id', user_id);
         }
 
-
         try {
             const response = await axios.post("/api/v1/users/auth/vendor_registration", data);
 
             if (response.data.status === "success") {
+                setLoadingMessage("Account created! Redirecting...");
                 const updatedUser = response.data.data.user;
                 localStorage.setItem('user', JSON.stringify(updatedUser));
 
-                navigate(`/pending_verification`);
+                setTimeout(() => {
+                    navigate(`/pending_verification`);
+                }, 1000);
             }
         } catch (err) {
+            setLoadingMessage("Creating Account...");
             const backendErrors = err.response?.data?.errors || {};
             const newErrors = {};
 
@@ -158,7 +167,9 @@ const VendorRegister = () => {
 
             setErrors(newErrors);
         } finally {
-            setIsSubmitting(false);
+            if (!newErrors.root) {
+                setIsSubmitting(false);
+            }
         }
     };
 
@@ -432,7 +443,7 @@ const VendorRegister = () => {
                                     type="submit"
                                     disabled={isSubmitting}
                                     isLoading={isSubmitting}
-                                    loadingText="Creating Account..."
+                                    loadingText={loadingMessage}
                                     className="w-full flex justify-center py-3 px-4 border border-transparent 
                                     rounded-full shadow-sm text-sm font-medium text-white hover:bg-primary-light 
                                     focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"

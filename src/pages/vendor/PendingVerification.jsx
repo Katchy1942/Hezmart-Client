@@ -1,7 +1,6 @@
 import {ExtraLayout} from '../../layouts/ExtraLayout';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { logout } from '../../utils/logout';
 import { FaCheckCircle, FaHourglassHalf, FaTimesCircle } from 'react-icons/fa';
 
 const PendingVerification = () => {

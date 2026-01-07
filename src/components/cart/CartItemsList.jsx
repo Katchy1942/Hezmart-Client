@@ -22,7 +22,7 @@ const CartItemsList = ({
 
     return (
         <div className="lg:col-span-8">
-            <div className="bg-white shadow-lg rounded-2xl overflow-hidden">
+            <div className="bg-white shadow-sm rounded-2xl overflow-hidden">
                 <ul className="divide-y divide-gray-200">
                     {items.map((item) => {
                         const itemPrice = getItemPrice(item);

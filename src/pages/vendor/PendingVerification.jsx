@@ -94,7 +94,7 @@ const PendingVerification = () => {
                     <button
                         onClick={handleResponse}
                         disabled={processing}
-                        className={`w-full inline-flex items-center justify-center rounded-full font-medium px-6 py-2.5 text-sm transition-all
+                        className={`w-full inline-flex items-center cursor-pointer justify-center rounded-full font-medium px-6 py-2.5 text-sm transition-all
                             ${status === 'active' 
                                 ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' 
                                 : 'bg-primary-light hover:bg-primary text-white shadow-sm hover:shadow-md'
@@ -105,9 +105,9 @@ const PendingVerification = () => {
                     </button>
 
                     {status === 'denied' && (
-                         <button className="text-primary hover:text-primary-dark text-sm font-medium mt-1">
+                        <button className="text-primary hover:text-primary-dark text-sm font-medium mt-1">
                             Contact Support
-                         </button>
+                        </button>
                     )}
                 </div>
 

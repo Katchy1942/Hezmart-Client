@@ -61,9 +61,15 @@ const VendorRegister = () => {
         setLoadingForm(true);
         try {
             const response = await axios.get('/api/v1/users/me');
-            setAuthMethod(response?.data?.user?.authProvider);
+            if (response.data.status === "success") {
+                setAuthMethod(response?.data?.user?.authProvider);
+                if (response?.data?.user?.role === 'vendor') {
+                    navigate('/pending_verification');
+                }
+            };
         } catch (error) {
             console.error("Error checking user status:", error);
+            alert("Failed to verify user status. Please try again.");
         } finally {
             setLoadingForm(false);
         }

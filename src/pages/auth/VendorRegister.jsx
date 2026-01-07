@@ -119,7 +119,7 @@ const VendorRegister = () => {
         e.preventDefault();
         setIsSubmitting(true);
         setErrors({});
-        
+
         if (formData.businessLogo) {
             setLoadingMessage("Uploading business logo...");
         } else {
@@ -128,7 +128,7 @@ const VendorRegister = () => {
 
         const vendorRaw = localStorage.getItem('user');
         const vendor = vendorRaw ? JSON.parse(vendorRaw) : null;
-        const user_id = vendor.id
+        const user_id = vendor?.id;
 
         const data = new FormData();
         Object.keys(formData).forEach((key) => {
@@ -153,7 +153,15 @@ const VendorRegister = () => {
                 }, 1000);
             }
         } catch (err) {
-            setLoadingMessage("Creating Account...");
+            if (err.response?.status === 401) {
+                toast.error("Session expired. Please log in again.");
+                localStorage.removeItem('user');
+                setTimeout(() => {
+                    navigate('/login');
+                }, 2000);
+                return;
+            }
+
             const backendErrors = err.response?.data?.errors || {};
             const newErrors = {};
 
@@ -167,9 +175,7 @@ const VendorRegister = () => {
 
             setErrors(newErrors);
         } finally {
-            if (!newErrors.root) {
-                setIsSubmitting(false);
-            }
+            setIsSubmitting(false);
         }
     };
 

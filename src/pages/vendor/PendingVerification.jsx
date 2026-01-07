@@ -9,10 +9,10 @@ const PendingVerification = () => {
     const navigate = useNavigate();
     const [processing, setProcessing] = useState(false);
 
-    const handleLogout = async () => {
+    const handleResponse = async () => {
         setProcessing(true);
         try {
-            await logout(navigate);
+            navigate('/');
         } finally {
             setProcessing(false);
         }
@@ -93,7 +93,7 @@ const PendingVerification = () => {
                     )}
 
                     <button
-                        onClick={handleLogout}
+                        onClick={handleResponse}
                         disabled={processing}
                         className={`w-full inline-flex items-center justify-center rounded-full font-medium px-6 py-2.5 text-sm transition-all
                             ${status === 'active' 
@@ -102,7 +102,7 @@ const PendingVerification = () => {
                             }
                         `}
                     >
-                        {processing ? 'Logging out...' : (status === 'active' ? 'Log Out' : 'Logout & Return Home')}
+                        {processing ? 'Logging out...' : (status === 'active' ? 'Log Out' : 'Return Home')}
                     </button>
 
                     {status === 'denied' && (

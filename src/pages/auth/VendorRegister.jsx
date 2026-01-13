@@ -7,6 +7,7 @@ import Button from "../../components/common/Button";
 import { toast } from 'react-toastify';
 import { BiX } from "react-icons/bi";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const VendorRegister = () => {
     const [categories, setCategories] = useState([]);
@@ -42,6 +43,7 @@ const VendorRegister = () => {
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState("Creating Account...");
+    const [showPassword, setShowPassword] = useState(false);
 
     const navigate = useNavigate();
 
@@ -70,6 +72,15 @@ const VendorRegister = () => {
             };
         } catch (error) {
             console.error("Error checking user status:", error);
+
+            if (err.response?.status === 401) {
+                toast.error("Session expired. Please log in again.");
+                localStorage.removeItem('user');
+                setTimeout(() => {
+                    navigate('/login');
+                }, 2000);
+                return;
+            }
         } finally {
             setLoadingForm(false);
         }
@@ -299,7 +310,8 @@ const VendorRegister = () => {
                                     <div className="pt-8">
                                         <h3 className="text-lg font-semibold leading-6 text-gray-900 mb-4 font-['poppins']">Security</h3>
                                         <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-                                            <InputField
+                                            <div className="relative">
+                                                <InputField
                                                 label="Password"
                                                 name="password"
                                                 value={formData.password}
@@ -307,9 +319,17 @@ const VendorRegister = () => {
                                                 placeholder="Create a password"
                                                 type="password"
                                                 error={errors.password}
-                                            />
+                                                />
 
-                                            <InputField
+                                                <button className="absolute inset-y-0 top-1/2 right-0 pr-3 flex items-center"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                >
+                                                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                                                </button>
+                                            </div>
+
+                                            <div className="relative">
+                                                <InputField
                                                 label="Confirm Password"
                                                 name="passwordConfirm"
                                                 value={formData.passwordConfirm}
@@ -317,7 +337,14 @@ const VendorRegister = () => {
                                                 placeholder="Repeat password"
                                                 type="password"
                                                 error={errors.passwordConfirm}
-                                            />
+                                                />
+
+                                                <button className="absolute inset-y-0 top-1/2 right-0 pr-3 flex items-center"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                >
+                                                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                     </>

@@ -6,6 +6,7 @@ import SelectField from "../../components/common/SelectField";
 import Button from "../../components/common/Button";
 import { FaGoogle } from "react-icons/fa";
 import { useGoogleLogin } from '@react-oauth/google';
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const CustomerRegister = () => {
     const [formData, setFormData] = useState({
@@ -32,6 +33,7 @@ const CustomerRegister = () => {
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [socialProcessing, setSocialProcessing] = useState(null);
+    const [showPassword, setShowPassword] = useState(false);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -254,27 +256,47 @@ const CustomerRegister = () => {
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <InputField
+                                    <div className="relative">
+                                        <InputField
                                         label="Create Password"
                                         name="password"
                                         value={formData.password}
                                         onChange={handleChange}
                                         placeholder="Min. 8 characters"
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         error={errors.password}
                                         classNames="w-full"
-                                    />
+                                        />
 
-                                    <InputField
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute inset-y-0 top-1/2 right-0 pr-3 flex items-center"
+                                        >
+                                            {showPassword ? <FiEyeOff /> : <FiEye />}
+                                        </button>
+                                    </div>
+
+                                    <div className="relative">
+                                        <InputField
                                         label="Confirm Password"
                                         name="passwordConfirm"
                                         value={formData.passwordConfirm}
                                         onChange={handleChange}
                                         placeholder="Re-enter password"
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         error={errors.passwordConfirm}
                                         classNames="w-full"
-                                    />
+                                        />
+
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute inset-y-0 top-1/2 right-0 pr-3 flex items-center"
+                                        >
+                                            {showPassword ? <FiEyeOff /> : <FiEye />}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 

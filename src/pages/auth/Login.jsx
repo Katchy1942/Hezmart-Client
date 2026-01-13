@@ -8,6 +8,7 @@ import { FiMail } from "react-icons/fi";
 import { useGoogleLogin } from '@react-oauth/google';
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { BiErrorCircle } from "react-icons/bi";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -25,6 +26,7 @@ const Login = () => {
     
     const [error, setError] = useState(null);
     const [rememberMe, setRememberMe] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const [errorMessage, setErrorMessage] = useState(
         location.state?.error || searchParams.get("message") || null
     );
@@ -210,18 +212,31 @@ const Login = () => {
                         className="w-full"
                         />
 
-                        <InputField
-                        name="password"
-                        label="Password"
-                        type="password"
-                        placeholder="Enter your password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        icon={<FaLock />}
-                        required
-                        disabled={redirecting}
-                        className="w-full"
-                        />
+                        <div className="relative">
+                            <InputField
+                            name="password"
+                            label="Password"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Enter your password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            required
+                            disabled={redirecting}
+                            className="w-full"
+                            />
+
+                            <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute inset-y-0 top-1/2 right-0 pr-3 flex items-center text-sm font-medium text-gray-500 hover:text-gray-700"
+                            >
+                                {showPassword ? (
+                                    <FiEyeOff className="text-gray-500 mr-2" />
+                                ) : (
+                                    <FiEye className="text-gray-500 mr-2" />
+                                )}
+                            </button>
+                        </div>
 
                         <div className="flex items-center justify-between">
                         <div className="flex items-center">

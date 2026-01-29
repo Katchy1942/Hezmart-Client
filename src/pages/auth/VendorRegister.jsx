@@ -68,6 +68,8 @@ const VendorRegister = () => {
                 setAuthMethod(response?.data?.user?.authProvider);
                 if (response?.data?.user?.role === 'vendor') {
                     navigate('/pending_verification');
+                } else if (response?.data?.user?.role === 'admin') {
+                    navigate('/manage/admin/dashboard');
                 }
             };
         } catch (error) {

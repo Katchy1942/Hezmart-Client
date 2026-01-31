@@ -73,10 +73,8 @@ const VendorRegister = () => {
                 }
             };
         } catch (error) {
-            console.error("Error checking user status:", error);
-
-            if (err.response?.status === 401) {
-                toast.error("Session expired. Please log in again.");
+            if (error.response?.status === 401) {
+                toast.error("Please log in to continue.");
                 localStorage.removeItem('user');
                 setTimeout(() => {
                     navigate('/login');

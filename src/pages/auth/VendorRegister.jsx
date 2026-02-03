@@ -62,27 +62,42 @@ const VendorRegister = () => {
 
     const checkCustomerStatus = async () => {
         setLoadingForm(true);
+
         try {
-            const response = await axios.get('/api/v1/users/me');
-            if (response.data.status === "success") {
-                setAuthMethod(response?.data?.user?.authProvider);
-                if (response?.data?.user?.role === 'vendor') {
+            const { data } = await axios.get('/api/v1/users/me');
+
+            if (data.status === "success") {
+                const user = data.user;
+                setAuthMethod(user?.authProvider);
+
+                if (user?.role === 'vendor') {
                     navigate('/pending_verification');
-                } else if (response?.data?.user?.role === 'admin') {
+                    return;
+                } 
+                
+                if (user?.role === 'admin') {
                     navigate('/manage/admin/dashboard');
+                    return;
                 }
-            };
+            }
+            
+            setLoadingForm(false);
+
         } catch (error) {
-            if (error.response?.status === 401) {
+            const statusCode = error.response?.status;
+
+            if (statusCode === 401) {
                 toast.error("Please log in to continue.");
                 localStorage.removeItem('user');
+                
                 setTimeout(() => {
                     navigate('/login');
                 }, 2000);
                 return;
             }
-        } finally {
+
             setLoadingForm(false);
+            toast.error("An unexpected error occurred.");
         }
     };
 

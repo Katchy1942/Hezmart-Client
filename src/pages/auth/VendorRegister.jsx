@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import axios from "../../lib/axios";
 import InputField from "../../components/common/InputField";
 import SelectField from "../../components/common/SelectField";
@@ -7,7 +8,7 @@ import Button from "../../components/common/Button";
 import { toast } from 'react-toastify';
 import { BiX } from "react-icons/bi";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
-import { FiEye, FiEyeOff } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiInfo } from "react-icons/fi";
 
 const VendorRegister = () => {
     const [categories, setCategories] = useState([]);
@@ -44,6 +45,11 @@ const VendorRegister = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState("Creating Account...");
     const [showPassword, setShowPassword] = useState(false);
+    const [showInfoModal, setShowInfoModal] = useState(false);
+
+    useEffect(() => {
+        setShowInfoModal(true);
+    }, []);
 
     const navigate = useNavigate();
 
@@ -58,6 +64,7 @@ const VendorRegister = () => {
         } finally {
             setLoadingCategories(false);
         }
+        
     };
 
     const checkCustomerStatus = async () => {
@@ -103,7 +110,7 @@ const VendorRegister = () => {
 
     useEffect(() => {
         fetchCategories();
-        checkCustomerStatus();
+        // checkCustomerStatus();
     }, []);
 
     const handleChange = (e) => {
@@ -152,24 +159,26 @@ const VendorRegister = () => {
             setLoadingMessage("Verifying details...");
         }
 
-        const vendorRaw = localStorage.getItem('user');
-        const vendor = vendorRaw ? JSON.parse(vendorRaw) : null;
-        const user_id = vendor?.id;
-
         const data = new FormData();
         Object.keys(formData).forEach((key) => {
             data.append(key, formData[key]);
         });
 
-        data.append('role', 'vendor');
-        if (user_id) {
-            data.append('user_id', user_id);
-        }
-
         try {
             const response = await axios.post("/api/v1/users/auth/vendor_registration", data);
 
-            if (response.data.status === "success") {
+            if (response.data.nxt === 'verify') {
+                setLoadingMessage("Account created! Redirecting...");
+
+                setTimeout(() => {
+                    navigate(`/confirm-email`, { 
+                        state: { from: '/pending_verification', email: formData.email },
+                        replace: true
+                    });
+                }, 1000);
+            }
+
+            if (response.data.status === "success" && response.data.nxt === 'navigate') {
                 setLoadingMessage("Account created! Redirecting...");
                 const updatedUser = response.data.data.user;
                 localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -253,118 +262,120 @@ const VendorRegister = () => {
                                 </div>
                             )}
 
-                            <input type="hidden" name="role" value='vendor' />
-
                             {/* Section 1: Personal Info */}
-                            {
-                                authMethod === 'google' && (
-                                    <>
-                                    <div>
-                                        <h3 className="text-lg font-semibold leading-6 text-gray-900 mb-4 font-['poppins']">Personal Information</h3>
-                                        <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-                                            <InputField
-                                                label="First Name"
-                                                name="firstName"
-                                                value={formData.firstName}
-                                                onChange={handleChange}
-                                                placeholder="Enter First name"
-                                                error={errors.firstName}
-                                            />
+                            
+                            <div>
+                                <h3 className="text-lg font-semibold leading-6 text-gray-900 mb-4 font-['poppins']">Personal Information</h3>
+                                <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+                                    <InputField
+                                        label="First Name"
+                                        name="firstName"
+                                        value={formData.firstName}
+                                        onChange={handleChange}
+                                        placeholder="Enter First name"
+                                        error={errors.firstName}
+                                    />
 
-                                            <InputField
-                                                label="Last Name"
-                                                name="lastName"
-                                                value={formData.lastName}
-                                                onChange={handleChange}
-                                                placeholder="Enter Last name"
-                                                error={errors.lastName}
-                                            />
+                                    <InputField
+                                        label="Last Name"
+                                        name="lastName"
+                                        value={formData.lastName}
+                                        onChange={handleChange}
+                                        placeholder="Enter Last name"
+                                        error={errors.lastName}
+                                    />
 
-                                            <InputField
-                                                label="Phone Number"
-                                                name="primaryPhone"
-                                                value={formData.primaryPhone}
-                                                onChange={handleChange}
-                                                placeholder="Enter phone number"
-                                                type="tel"
-                                                error={errors.primaryPhone}
-                                            />
+                                    <InputField
+                                        label="Email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        placeholder="Enter Email"
+                                        error={errors.email}
+                                    />
 
-                                            <InputField
-                                                label="NIN"
-                                                name="ninNumber"
-                                                value={formData.ninNumber}
-                                                onChange={handleChange}
-                                                placeholder="National Identity Number"
-                                                error={errors.ninNumber}
-                                            />
+                                    <InputField
+                                        label="Phone Number"
+                                        name="primaryPhone"
+                                        value={formData.primaryPhone}
+                                        onChange={handleChange}
+                                        placeholder="Enter phone number"
+                                        type="tel"
+                                        error={errors.primaryPhone}
+                                    />
 
-                                            <SelectField
-                                                name="state"
-                                                label="State"
-                                                value={formData.state}
-                                                onChange={handleChange}
-                                                options={nigerianStates}
-                                                error={errors.state}
-                                            />
+                                    <InputField
+                                        label="NIN"
+                                        name="ninNumber"
+                                        value={formData.ninNumber}
+                                        onChange={handleChange}
+                                        placeholder="National Identity Number"
+                                        error={errors.ninNumber}
+                                    />
 
-                                            <div className="sm:col-span-2">
-                                                <InputField
-                                                    label="Primary Address"
-                                                    name="primaryAddress"
-                                                    value={formData.primaryAddress}
-                                                    onChange={handleChange}
-                                                    placeholder="Full street address"
-                                                    as="textarea"
-                                                    error={errors.primaryAddress}
-                                                />
-                                            </div>
-                                        </div>
+                                    <SelectField
+                                        name="state"
+                                        label="State"
+                                        value={formData.state}
+                                        onChange={handleChange}
+                                        options={nigerianStates}
+                                        error={errors.state}
+                                    />
+
+                                    <div className="sm:col-span-2">
+                                        <InputField
+                                            label="Primary Address"
+                                            name="primaryAddress"
+                                            value={formData.primaryAddress}
+                                            onChange={handleChange}
+                                            placeholder="Full street address"
+                                            as="textarea"
+                                            error={errors.primaryAddress}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="pt-8">
+                                <h3 className="text-lg font-semibold leading-6 text-gray-900 mb-4 font-['poppins']">Security</h3>
+                                <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+                                    <div className="relative">
+                                        <InputField
+                                        label="Password"
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        placeholder="Create a password"
+                                        type="password"
+                                        error={errors.password}
+                                        />
+
+                                        <button className="absolute inset-y-0 top-1/2 right-0 pr-3 flex items-center"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                        >
+                                            {showPassword ? <FiEyeOff /> : <FiEye />}
+                                        </button>
                                     </div>
 
-                                    <div className="pt-8">
-                                        <h3 className="text-lg font-semibold leading-6 text-gray-900 mb-4 font-['poppins']">Security</h3>
-                                        <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-                                            <div className="relative">
-                                                <InputField
-                                                label="Password"
-                                                name="password"
-                                                value={formData.password}
-                                                onChange={handleChange}
-                                                placeholder="Create a password"
-                                                type="password"
-                                                error={errors.password}
-                                                />
+                                    <div className="relative">
+                                        <InputField
+                                        label="Confirm Password"
+                                        name="passwordConfirm"
+                                        value={formData.passwordConfirm}
+                                        onChange={handleChange}
+                                        placeholder="Repeat password"
+                                        type="password"
+                                        error={errors.passwordConfirm}
+                                        />
 
-                                                <button className="absolute inset-y-0 top-1/2 right-0 pr-3 flex items-center"
-                                                    onClick={() => setShowPassword(!showPassword)}
-                                                >
-                                                    {showPassword ? <FiEyeOff /> : <FiEye />}
-                                                </button>
-                                            </div>
-
-                                            <div className="relative">
-                                                <InputField
-                                                label="Confirm Password"
-                                                name="passwordConfirm"
-                                                value={formData.passwordConfirm}
-                                                onChange={handleChange}
-                                                placeholder="Repeat password"
-                                                type="password"
-                                                error={errors.passwordConfirm}
-                                                />
-
-                                                <button className="absolute inset-y-0 top-1/2 right-0 pr-3 flex items-center"
-                                                    onClick={() => setShowPassword(!showPassword)}
-                                                >
-                                                    {showPassword ? <FiEyeOff /> : <FiEye />}
-                                                </button>
-                                            </div>
-                                        </div>
+                                        <button className="absolute inset-y-0 top-1/2 right-0 pr-3 flex items-center"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                        >
+                                            {showPassword ? <FiEyeOff /> : <FiEye />}
+                                        </button>
                                     </div>
-                                    </>
-                                )
-                            }
+                                </div>
+                            </div>
 
                             {/* Section 2: Business Info */}
                             <div className="">
@@ -398,19 +409,6 @@ const VendorRegister = () => {
                                             error={errors.businessCategoryId}
                                         />
                                     </div>
-
-                                    {
-                                        authMethod !== 'google' && (
-                                            <InputField
-                                                label="NIN"
-                                                name="ninNumber"
-                                                value={formData.ninNumber}
-                                                onChange={handleChange}
-                                                placeholder="National Identity Number"
-                                                error={errors.ninNumber}
-                                            />
-                                        )
-                                    }
 
                                     <div className="sm:col-span-2">
                                         <label className="block text-sm font-medium mb-2">Business Logo</label>
@@ -503,6 +501,44 @@ const VendorRegister = () => {
                     </div>
                 </div>
             </div>
+            
+            <AnimatePresence>
+                {showInfoModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            transition={{ duration: 0.3 }}
+                            className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden"
+                        >
+                            <div className="p-6 text-center">
+                                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-primary-light/10 mb-4">
+                                    <FiInfo className="h-6 w-6 text-primary-light" />
+                                </div>
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2 font-['poppins']">
+                                    Have an existing user account?
+                                </h3>
+                                <p className="text-sm text-gray-500 mb-6">
+                                    If you already have a user account, please continue with your existing 
+                                    info (email, password) to register as a vendor.
+                                </p>
+                                <button
+                                    onClick={() => setShowInfoModal(false)}
+                                    className="w-full inline-flex justify-center rounded-full border border-transparent cursor-pointer shadow-sm px-4 py-3 bg-primary-light text-base font-medium text-white hover:bg-primary-light/80 focus:outline-none sm:text-sm transition-colors"
+                                >
+                                    Got it, thanks!
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

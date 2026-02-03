@@ -44,9 +44,9 @@ const PendingVerification = () => {
                 )}
 
                 <h1 className="text-xl font-bold text-slate-900 mb-1">
-                    {status === 'active' && 'Account Verified!'}
-                    {status === 'pending' && 'Account Under Review'}
-                    {status === 'denied' && 'Application Declined'}
+                    {status === 'active' && 'Vendor Account Verified!'}
+                    {status === 'pending' && 'Vendor Account Under Review'}
+                    {status === 'denied' && 'Vendor Application Declined'}
                 </h1>
 
                 <p className="text-sm text-slate-500 mb-6">

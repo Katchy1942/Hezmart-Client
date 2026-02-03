@@ -346,7 +346,7 @@ const VendorRegister = () => {
                                         value={formData.password}
                                         onChange={handleChange}
                                         placeholder="Create a password"
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         error={errors.password}
                                         />
 
@@ -364,7 +364,7 @@ const VendorRegister = () => {
                                         value={formData.passwordConfirm}
                                         onChange={handleChange}
                                         placeholder="Repeat password"
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         error={errors.passwordConfirm}
                                         />
 

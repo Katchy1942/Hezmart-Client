@@ -1,7 +1,6 @@
 import Button from "../../components/common/Button";
 import InputField from "../../components/common/InputField";
 import SelectField from "../../components/common/SelectField";
-import SalesRepresentativeProgram from "../../components/SalesRepresentativeProgram";
 import { toast } from 'react-toastify';
 import axios from "../../lib/axios";
 import { useEffect, useState, useRef } from 'react';
@@ -10,7 +9,6 @@ import {
     FaUserCircle, 
     FaCamera, 
     FaTimes,
-    FaQuestionCircle 
 } from 'react-icons/fa';
 
 const Profile = () => {
@@ -196,14 +194,6 @@ const Profile = () => {
 
     return (
         <section className='min-h-screen relative'>
-            {/* Modal Overlay */}
-            {showSalesModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 
-                    bg-black/50 backdrop-blur-sm transition-opacity
-                ">
-                    <SalesRepresentativeProgram onClose={() => setShowSalesModal(false)} />
-                </div>
-            )}
 
             <div className="
                 max-w-7xl 
@@ -304,38 +294,6 @@ const Profile = () => {
                             <p className="text-gray-500 text-sm mb-4">
                                 {user.email}
                             </p>
-
-                            {/* Total Earnings Badge */}
-                            <div className="flex justify-center mb-6">
-                                <span 
-                                    className="
-                                        text-green-600 
-                                        font-bold 
-                                        text-xs 
-                                        bg-green-50 
-                                        px-4 
-                                        py-2 
-                                        rounded-full 
-                                        border 
-                                        border-green-200 
-                                        w-fit 
-                                        flex 
-                                        items-center 
-                                        gap-2 
-                                        shadow-sm 
-                                        cursor-pointer
-                                        hover:bg-green-100
-                                        transition
-                                    "
-                                    onClick={() => setShowSalesModal(true)}
-                                >
-                                    Total Earnings
-                                    <span>
-                                        NGN 0.00
-                                    </span>
-                                    <FaQuestionCircle className="text-sm" />
-                                </span>
-                            </div>
 
                             <button
                                 type="button"

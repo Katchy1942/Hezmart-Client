@@ -1,10 +1,11 @@
-import { logo, facebook, instagram, twitter, callIcon, message, tiktok } from '../assets/images';
+import { logo, facebook, instagram, message, tiktok } from '../assets/images';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import InputField from './common/InputField';
 import axios from '../lib/axios';
 import { toast } from 'react-toastify';
 import Button from "./../components/common/Button";
+import { FiPhoneCall } from 'react-icons/fi';
 
 const Footer = () => {
     const [isVisible, setIsVisible] = useState(false);
@@ -117,7 +118,7 @@ const Footer = () => {
                                     <Link to="/sell-on-hezmart" className="text-[#6B7280] hover:text-primary-dark transition-colors">Sell on Hezmart</Link>
                                 </li>
                                 <li>
-                                    <Link to="/profile?open_sales=true" className="text-[#6B7280] hover:text-primary-dark transition-colors">Hezmart Sales Representative Program</Link>
+                                    <Link to="/referral" className="text-[#6B7280] hover:text-primary-dark transition-colors">Refer and Earn</Link>
                                 </li>
                             </ul>
                         </div>
@@ -143,7 +144,7 @@ const Footer = () => {
                                     border-gray-100 shadow-sm transition hover:shadow-md group">
                                         <div className="flex-shrink-0 w-12 h-12 flex items-center 
                                         justify-center bg-orange-50 rounded-full group-hover:bg-orange-100 transition-colors">
-                                            <img src={callIcon} alt="call-icon" className="w-5 h-5" />
+                                            <FiPhoneCall className='w-5 h-5' />
                                         </div>
                                         <div className="flex flex-col">
                                             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">

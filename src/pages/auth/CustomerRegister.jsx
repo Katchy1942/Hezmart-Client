@@ -60,7 +60,7 @@ const CustomerRegister = () => {
         setSocialProcessing('google');
         setErrors({});
 
-        const referral = localStorage.getItem('referralReceived');
+        const referral = localStorage.getItem('referralReceived') || searchParams.get('referral');
 
         try {
             const response = await axios.post('api/v1/users/auth/google', {
@@ -98,7 +98,7 @@ const CustomerRegister = () => {
         setIsSubmitting(true);
         setErrors({});
 
-        const referral = localStorage.getItem('referralReceived');
+        const referral = localStorage.getItem('referralReceived') || searchParams.get('referral');
         const formDataToSend = new FormData(e.target);
         formDataToSend.append('referral', referral);
     

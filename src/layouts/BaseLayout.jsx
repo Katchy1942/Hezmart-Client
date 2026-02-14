@@ -15,10 +15,21 @@ const BaseLayout = () => {
     const [showReferralModal, setShowReferralModal] = useState(false);
     
     useEffect(() => {
-        setTimeout(() => {
-            setShowReferralModal(true);
-        }, 3000);
+        const lastClosedTime = localStorage.getItem('referralModalClosedTime');
+        const twentyFourHours = 24 * 60 * 60 * 1000;
+
+        if (!lastClosedTime || (Date.now() - parseInt(lastClosedTime) > twentyFourHours)) {
+            const timer = setTimeout(() => {
+                setShowReferralModal(true);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
     }, []);
+
+    const handleCloseModal = () => {
+        localStorage.setItem('referralModalClosedTime', Date.now().toString());
+        setShowReferralModal(false);
+    };
 
     const buildTawkChatWidget = async () => {
         var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
@@ -81,7 +92,7 @@ const BaseLayout = () => {
                         >
                             {/* Close */}
                             <button
-                                onClick={() => setShowReferralModal(false)}
+                                onClick={handleCloseModal}
                                 className="absolute top-4 right-4 rounded-full p-2 cursor-pointer hover:bg-gray-200 transition-colors"
                             >
                                 <FiX className="w-6 h-6 text-gray-600" />
@@ -116,7 +127,7 @@ const BaseLayout = () => {
 
                                 {/* Soft exit */}
                                 <button
-                                    onClick={() => setShowReferralModal(false)}
+                                    onClick={handleCloseModal}
                                     className="mt-3 text-sm text-gray-500 hover:underline"
                                 >
                                     Maybe later

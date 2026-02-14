@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import axios from "../../lib/axios";
 import InputField from "../../components/common/InputField";
 import SelectField from "../../components/common/SelectField";
@@ -37,7 +37,16 @@ const CustomerRegister = () => {
 
     const navigate = useNavigate();
     const location = useLocation();
+    const [searchParams] = useSearchParams();
+    
     const from = location.state?.from;
+    const referral = searchParams.get('referral') || location.state?.referral;
+
+    useEffect(() => {
+        if (referral) {
+            localStorage.setItem('referralReceived', referral);
+        }
+    }, [referral]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -51,9 +60,12 @@ const CustomerRegister = () => {
         setSocialProcessing('google');
         setErrors({});
 
+        const referral = localStorage.getItem('referralReceived');
+
         try {
             const response = await axios.post('api/v1/users/auth/google', {
-                token: tokenResponse.access_token
+                token: tokenResponse.access_token,
+                referral
             });
         
             if (response.data.status === 'success' && response.data.data?.user) {
@@ -86,7 +98,9 @@ const CustomerRegister = () => {
         setIsSubmitting(true);
         setErrors({});
 
+        const referral = localStorage.getItem('referralReceived');
         const formDataToSend = new FormData(e.target);
+        formDataToSend.append('referral', referral);
     
         try {
             const response = await axios.post("/api/v1/users/signup", formDataToSend);

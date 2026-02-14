@@ -46,8 +46,10 @@ import VendorSettings from './pages/vendor/VendorSettings';
 //Customer Pages;
 import OrderPage from './pages/customer/OrderPage';
 import OrderDetails from './pages/customer/OrderDetails';
+import OrderTracker from './pages/customer/OrderTracker';
 import Profile from './pages/customer/Profile'
 import WishListPage from './pages/customer/WishListPage';
+import Referral from './pages/customer/Referral';
 
 //Product Pages;
 import ProductDetails from './pages/product/ProductDetails';
@@ -64,6 +66,8 @@ import ReturnsRefundsPolicy from './pages/ReturnsRefundsPolicy';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Contact from './pages/Contact';
 import Products from './pages/Products';
+import Delivery from './pages/Delivery';
+import RiderDetails from './pages/RiderDetails';
 
 
 
@@ -93,17 +97,23 @@ const App = () => {
 
                 {/* Customer Routes */}
                 <Route path='orders' element={<OrderPage />}></Route>
+                <Route path='tracker/:id' element={<OrderTracker />}></Route>
                 <Route path='wishlist' element={<WishListPage />}></Route>
                 <Route path='orders/:id' element={<OrderDetails />}></Route>
                 <Route path='profile' element={<Profile />}></Route>
+                <Route path='delivery' element={<Delivery />}></Route>
+                <Route path='rider-details/:id' element={<RiderDetails />}></Route>
+                <Route path='referral' element={<Referral />}></Route>
 
                 {/* Product Routes */}
                 <Route path='/product/:id' element={<ProductDetails />}></Route>
                 <Route path='/category/:categoryId/:subcategoryId?' element={<CategoryProducts />} />
                 <Route path="/vendor/:vendorId" element={<VendorProductsPage />} />
                 <Route path='cart' element={<Cart />}></Route>
-                <Route path='checkout' element={<Checkout />} loader={async({ request }) => 
-                    await requireAuth(request, ['customer', 'vendor', 'admin'])}></Route>
+                <Route path='checkout' element={<Checkout />}
+                    loader={async({ request }) => 
+                    await requireAuth(request, ['customer', 'vendor', 'admin'])}>
+                </Route>
             </Route>
 
             <Route path='/manage' element={<AuthenticatedLayout />} errorElement={<Error />}>

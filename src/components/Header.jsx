@@ -354,7 +354,7 @@ const Header = () => {
                                     loading={searchLoading}
                                     className="w-full"
                                 />
-                                <div className="mt-2 mr-12">
+                                <div className="mt-2">
                                     <ul
                                         className="flex gap-6 text-[13px] text-gray-500
                                         font-medium justify-center"
@@ -393,6 +393,25 @@ const Header = () => {
                                                 Sell on Hezmart
                                             </Link>
                                         </li>
+
+                                        {/* <li
+                                            className="hover:text-primary-light cursor-pointer
+                                            transition-colors"
+                                        >
+                                            <Link to="delivery">
+                                                Deliveries/Logistics
+                                            </Link>
+                                        </li> */}
+
+                                        <li
+                                            className="hover:text-primary-light cursor-pointer
+                                            transition-colors"
+                                        >
+                                            <Link to="referral">
+                                                Refer and Earn
+                                            </Link>
+                                        </li>
+
                                         <li
                                             className="hover:text-primary-light cursor-pointer
                                             transition-colors"
@@ -879,6 +898,20 @@ const Header = () => {
                                 Contact Us
                             </Link>
                         </li>
+
+                        <li
+                            className="flex items-center text-sm rounded-md
+                            hover:bg-gray-50"
+                        >
+                            <Link
+                                to="/referral"
+                                className="py-2 px-4 text-gray-700
+                                hover:bg-gray-100 rounded w-full"
+                            >
+                                Refer and Earn
+                            </Link>
+                        </li>
+
                         <li
                             className="flex items-center text-sm rounded-md
                             hover:bg-gray-50"

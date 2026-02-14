@@ -46,7 +46,7 @@ import VendorSettings from './pages/vendor/VendorSettings';
 //Customer Pages;
 import OrderPage from './pages/customer/OrderPage';
 import OrderDetails from './pages/customer/OrderDetails';
-import OrderTracker from './pages/customer/OrderTracker';
+// import OrderTracker from './pages/customer/OrderTracker';
 import Profile from './pages/customer/Profile'
 import WishListPage from './pages/customer/WishListPage';
 import Referral from './pages/customer/Referral';
@@ -66,9 +66,8 @@ import ReturnsRefundsPolicy from './pages/ReturnsRefundsPolicy';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Contact from './pages/Contact';
 import Products from './pages/Products';
-import Delivery from './pages/Delivery';
-import RiderDetails from './pages/RiderDetails';
-
+// import Delivery from './pages/Delivery';
+// import RiderDetails from './pages/RiderDetails';
 
 
 const App = () => {
@@ -96,13 +95,13 @@ const App = () => {
                 <Route path='contact' element={<Contact />} />
 
                 {/* Customer Routes */}
-                <Route path='orders' element={<OrderPage />}></Route>
-                <Route path='tracker/:id' element={<OrderTracker />}></Route>
+                {/* <Route path='orders' element={<OrderPage />}></Route>
+                <Route path='tracker/:id' element={<OrderTracker />}></Route> */}
                 <Route path='wishlist' element={<WishListPage />}></Route>
                 <Route path='orders/:id' element={<OrderDetails />}></Route>
                 <Route path='profile' element={<Profile />}></Route>
-                <Route path='delivery' element={<Delivery />}></Route>
-                <Route path='rider-details/:id' element={<RiderDetails />}></Route>
+                {/* <Route path='delivery' element={<Delivery />}></Route>
+                <Route path='rider-details/:id' element={<RiderDetails />}></Route> */}
                 <Route path='referral' element={<Referral />}></Route>
 
                 {/* Product Routes */}

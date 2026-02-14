@@ -71,12 +71,13 @@ const Referral = () => {
 
     return (
         <section className='max-w-7xl mx-auto py-6 md:py-10 min-h-[calc(100vh-100px)] relative'>
-            <div className='flex flex-col gap-8'>
-                <div className='flex flex-col gap-4'>
+            <div className='flex flex-col gap-8 md:gap-12'>
+                <div className='flex flex-col gap-6'>
                     <h1 className='text-xl font-semibold text-gray-900'>Referrals</h1>
                     <p className='text-gray-600 text-sm max-w-2xl'>Share your unique referral link with friends and family. Earn rewards every time they sign up and make a purchase! 😋</p>
-                    <div className='mt-4'>
-                        <span className={`text-green-700 font-medium text-sm bg-green-50 border-green-200 px-5 py-2 rounded-2xl cursor-pointer border inline-flex items-center gap-3 transition-all hover:shadow-xs max-w-full overflow-x-auto whitespace-nowrap [&::-webkit-scrollbar]:hidden`}
+                    <div className='mt-6'>
+                        <h1 className='text-xl font-semibold text-gray-800 mb-6'>Your Referral Link</h1>
+                        <span className={`text-green-700 font-medium text-sm bg-green-50 border-green-200 px-5 py-3 rounded-2xl cursor-pointer border inline-flex items-center gap-3 transition-all hover:shadow-xs max-w-full overflow-x-auto whitespace-nowrap [&::-webkit-scrollbar]:hidden`}
                             onClick={handleCopy}
                         >
                             <div className='flex items-center gap-2'>
@@ -99,7 +100,7 @@ const Referral = () => {
                         <div className="flex items-center gap-3">
                             <button 
                                 onClick={handleWithdraw}
-                                className="px-4 py-2.5 text-sm font-medium cursor-pointer text-white bg-green-600 rounded-2xl hover:bg-green-700 focus:ring-4 focus:ring-green-100 transition-colors shadow-sm"
+                                className="px-4 py-3 text-sm font-medium cursor-pointer text-white bg-green-600 rounded-2xl hover:bg-green-700 focus:ring-4 focus:ring-green-100 transition-colors shadow-sm"
                             >
                                 Withdraw Funds
                             </button>

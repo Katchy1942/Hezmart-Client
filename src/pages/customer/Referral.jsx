@@ -100,7 +100,7 @@ const Referral = () => {
                         <div className="flex items-center gap-3">
                             <button 
                                 onClick={handleWithdraw}
-                                className="px-4 py-3 text-sm font-medium cursor-pointer text-white bg-green-600 rounded-2xl hover:bg-green-700 focus:ring-4 focus:ring-green-100 transition-colors shadow-sm"
+                                className="px-4 py-3 text-sm font-medium cursor-pointer text-white bg-green-600 rounded-full hover:bg-green-700 focus:ring-4 focus:ring-green-100 transition-colors shadow-sm"
                             >
                                 Withdraw Funds
                             </button>

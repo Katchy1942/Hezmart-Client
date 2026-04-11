@@ -103,7 +103,7 @@ const SearchBar = ({
                     ) : results.length === 0 && query ? (
                         <div className="px-4 py-3 text-gray-500 text-center text-sm">No results found for "{query}"</div>
                     ) : (
-                        results.map((result, index) => (
+                        results.filter(r => r !== null).map((result, index) => (
                         <div
                             key={index}
                             className="px-5 py-3 hover:bg-gray-50 cursor-pointer flex items-center border-b 

@@ -70,7 +70,7 @@ const CategoryDropdown = () => {
                     <LeftSkeleton />
                 ) : (
                     <ul className="py-2 space-y-1">
-                        {categories.map((category) => (
+                        {categories.filter(cat => cat !== null).map((category) => (
                             <li 
                                 key={category.id}
                                 onMouseEnter={() => setActiveCategoryId(category.id)}
@@ -135,7 +135,7 @@ const CategoryDropdown = () => {
 
                                 {activeCategory.subcategories && activeCategory.subcategories.length > 0 ? (
                                     <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                                        {activeCategory.subcategories.map((sub) => (
+                                        {activeCategory.subcategories.filter(s => s !== null).map((sub) => (
                                             <Link
                                                 key={sub.id}
                                                 to={`/category/${activeCategory.id}/${sub.id}`}

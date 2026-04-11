@@ -108,7 +108,7 @@ const Header = () => {
             navigate(`/category/${result.id}`);
         } else if (result.type === 'subcategory') {
             navigate(
-                `/category/${result.category.id}/${result.id}`
+                `/category/${result.category?.id}/${result.id}`
             );
         }
         setSearchResults([]);
@@ -131,10 +131,13 @@ const Header = () => {
             const res = await axios.get(
                 'api/v1/categories?fields=name,id,icon'
             );
-            setCategories(res.data.data.categories);
+            const fetchedCategories = res.data.data.categories || [];
+            setCategories(fetchedCategories);
             const initialExpandedState = {};
-            res.data.data.categories.forEach(cat => {
-                initialExpandedState[cat.id] = false;
+            fetchedCategories.forEach(cat => {
+                if (cat && cat.id) {
+                    initialExpandedState[cat.id] = false;
+                }
             });
             setExpandedCategories(initialExpandedState);
         } catch (error) {
@@ -717,7 +720,7 @@ const Header = () => {
                         OUR CATEGORIES
                     </p>
                     <ul>
-                        {categories.map((category) => {
+                        {categories.filter(cat => cat !== null).map((category) => {
                             const hasSubcategories =
                                 category.subcategories?.length > 0;
                             return (
@@ -847,7 +850,7 @@ const Header = () => {
                                             className="ml-12 mt-1 space-y-1
                                             border-l-2 border-gray-100 pl-2"
                                         >
-                                            {category.subcategories.map((sub) => (
+                                            {category.subcategories?.filter(s => s !== null).map((sub) => (
                                                 <li key={sub.id}>
                                                     <Link
                                                         to={`/category/${category.id}/${sub.id}`}

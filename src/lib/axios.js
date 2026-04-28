@@ -1,11 +1,11 @@
-import Axios  from "axios";
+import Axios from "axios";
 const axios = Axios.create({
-    baseURL:import.meta.env.VITE_APP_BASE_URL_PRODUCTION,
-    headers:{
-        'X-Requested-with':'XMLHttpRequest'
+    baseURL: import.meta.env.VITE_APP_BASE_URL_PRODUCTION,
+    headers: {
+        'X-Requested-with': 'XMLHttpRequest'
     },
-    withCredentials:true,
-    withXSRFToken:true
+    withCredentials: true,
+    withXSRFToken: true
 });
 
 

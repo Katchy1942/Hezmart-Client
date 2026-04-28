@@ -31,6 +31,7 @@ import EditCoupon from './pages/admin/EditCoupon';
 import CustomersManager from './pages/admin/CustomersManager';
 import AdminSettings from './pages/admin/AdminSettings';
 import Subscribers from './pages/admin/Subscribers';
+import AdminPushNotifications from './pages/admin/AdminPushNotifications';
 
 //Vendor pages
 import PendingVerification from './pages/vendor/PendingVerification';
@@ -131,6 +132,7 @@ const App = () => {
                <Route path='edit-coupon/:id' element={<EditCoupon />}></Route>
                <Route path='settings' element={<AdminSettings />}></Route>
                <Route path='subscribers' element={<Subscribers />} />
+               <Route path='push-notifications' element={<AdminPushNotifications />} />
             </Route>
 
             {/* Vendor Routes */}

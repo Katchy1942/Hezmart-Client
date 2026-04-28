@@ -13,7 +13,7 @@ export default function AuthenticatedLayout() {
             <ScrollToTop />
             {toggle && (
                 <div 
-                    className="fixed inset-0 bg-black bg-opacity-50 z-[15] md:hidden"
+                    className="fixed inset-0 bg-black/20 z-[15] md:hidden"
                     onClick={() => setToggle(false)}
                 />
             )}

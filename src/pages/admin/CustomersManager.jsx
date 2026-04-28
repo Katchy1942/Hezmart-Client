@@ -8,378 +8,377 @@ import usePagination from '../../hooks/usePagination';
 import DataTableFilters from '../../components/common/DataTableFilters';
 
 const CustomersManager = () => {
-  const [activeDropdown, setActiveDropdown] = useState(null);
-  const dropdownRef = useRef(null);
-  const [loading, setLoading] = useState(true);
-  const [customers, setCustomers] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [statusUpdating, setStatusUpdating] = useState(null);
-  const [statusError, setStatusError] = useState(null);
-  const [activeTab, setActiveTab] = useState('all');
-  const [deleteConfirm, setDeleteConfirm] = useState(null); // Track which customer is being deleted
-  const [deleting, setDeleting] = useState(false); // Loading state for delete operation
+   const [activeDropdown, setActiveDropdown] = useState(null);
+   const dropdownRef = useRef(null);
+   const [loading, setLoading] = useState(true);
+   const [customers, setCustomers] = useState([]);
+   const [searchQuery, setSearchQuery] = useState('');
+   const [statusFilter, setStatusFilter] = useState("all");
+   const [statusUpdating, setStatusUpdating] = useState(null);
+   const [statusError, setStatusError] = useState(null);
+   const [activeTab, setActiveTab] = useState('all');
+   const [deleteConfirm, setDeleteConfirm] = useState(null); // Track which customer is being deleted
+   const [deleting, setDeleting] = useState(false); // Loading state for delete operation
 
-  const { pagination, updatePagination } = usePagination();
+   const { pagination, updatePagination } = usePagination();
 
-  const fetchCustomers = async (page = 1, search = '', status = '') => {
-    setLoading(true);
-    try {
-      let url = `api/v1/users/customers?page=${page}&limit=${pagination.perPage}&search=${search}&fields=firstName,lastName,email,photo,status,id,primaryAddress,primaryPhone,createdAt`;
-      if (status && status !== 'all') url += `&status=${status}`;
+   const fetchCustomers = async (page = 1, search = '', status = '') => {
+      setLoading(true);
+      try {
+         let url = `api/v1/users/customers?page=${page}&limit=${pagination.perPage}&search=${search}&fields=firstName,lastName,email,photo,status,id,primaryAddress,primaryPhone,createdAt`;
+         if (status && status !== 'all') url += `&status=${status}`;
 
-      const res = await axios.get(url);
-      if (res.data.status === 'success') {
-        setCustomers(res.data.data.customers.map(customer => ({
-          id: customer.id,
-          name: `${customer.firstName} ${customer.lastName}`,
-          photo: customer.photo,
-          email: customer.email,
-          mobile: customer.primaryPhone,
-          address: customer.primaryAddress,
-          status: customer.status,
-          dateJoin: customer.createdAt,
-          totalOrders: customer.totalOrders || 0,
-          totalSpent: customer.totalSpent || 0
-        })));
+         const res = await axios.get(url);
+         if (res.data.status === 'success') {
+            setCustomers(res.data.data.customers.map(customer => ({
+               id: customer.id,
+               name: `${customer.firstName} ${customer.lastName}`,
+               photo: customer.photo,
+               email: customer.email,
+               mobile: customer.primaryPhone,
+               address: customer.primaryAddress,
+               status: customer.status,
+               dateJoin: customer.createdAt,
+               totalOrders: customer.totalOrders || 0,
+               totalSpent: customer.totalSpent || 0
+            })));
 
-        updatePagination({
-          currentPage: res.data.pagination.currentPage,
-          totalPages: res.data.pagination.totalPages,
-          totalItems: res.data.pagination.totalItems
-        });
+            updatePagination({
+               currentPage: res.data.pagination.currentPage,
+               totalPages: res.data.pagination.totalPages,
+               totalItems: res.data.pagination.totalItems
+            });
+         }
+      } catch (error) {
+         console.error('Error fetching customers:', error);
+         toast.error('Failed to load customers');
+      } finally {
+         setLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching customers:', error);
-      toast.error('Failed to load customers');
-    } finally {
-      setLoading(false);
-    }
-  };
+   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    fetchCustomers(1, searchQuery, activeTab === 'all' ? '' : activeTab);
-  };
+   const handleSearch = (e) => {
+      e.preventDefault();
+      fetchCustomers(1, searchQuery, activeTab === 'all' ? '' : activeTab);
+   };
 
-  const handlePageChange = (page) => {
-    fetchCustomers(page, searchQuery, activeTab === 'all' ? '' : activeTab);
-  };
+   const handlePageChange = (page) => {
+      fetchCustomers(page, searchQuery, activeTab === 'all' ? '' : activeTab);
+   };
 
-  const updateStatus = async (customerId, newStatusKeyword) => {
-    const statusMap = {
-      approve: 'active',
-      deactivate: 'deactivated',
-      deny: 'denied',
-      pending: 'pending'
-    };
+   const updateStatus = async (customerId, newStatusKeyword) => {
+      const statusMap = {
+         approve: 'active',
+         deactivate: 'deactivated',
+         deny: 'denied',
+         pending: 'pending'
+      };
 
-    const newStatus = statusMap[newStatusKeyword] || newStatusKeyword;
+      const newStatus = statusMap[newStatusKeyword] || newStatusKeyword;
 
-    setStatusUpdating(customerId);
-    setStatusError(null);
+      setStatusUpdating(customerId);
+      setStatusError(null);
 
-    try {
-      const res = await axios.patch(`api/v1/users/${customerId}/status`, {
-        status: newStatus
+      try {
+         const res = await axios.patch(`api/v1/users/${customerId}/status`, {
+            status: newStatus
+         });
+
+         if (res.data.status === 'success') {
+            toast.success(`Status updated to "${newStatus}"`);
+            setCustomers(prev => prev.map(customer =>
+               customer.id === customerId ? { ...customer, status: newStatus } : customer
+            ));
+         } else {
+            toast.warning(res.data.message || 'Status updated with warning');
+         }
+      } catch (error) {
+         const errorData = error.response?.data;
+         const message = errorData?.message || 'Failed to update status';
+         setStatusError(message);
+         toast.error(message);
+      } finally {
+         setStatusUpdating(null);
+         setActiveDropdown(null);
+      }
+   };
+
+   // Delete customer function
+   const deleteCustomer = async (customerId) => {
+      if (!window.confirm('Are you sure you want to delete this customer? This action cannot be undone.')) {
+         return;
+      }
+
+      setDeleting(true);
+      setDeleteConfirm(customerId);
+
+      try {
+         const res = await axios.delete(`api/v1/users/${customerId}`);
+
+         if (res.status === 204) {
+            toast.success('Customer deleted successfully');
+            // Remove customer from local state
+            setCustomers(prev => prev.filter(customer => customer.id !== customerId));
+            // Refresh the list to ensure pagination is correct
+            fetchCustomers(pagination.currentPage, searchQuery, activeTab === 'all' ? '' : activeTab);
+         } else {
+            toast.warning(res.data.message || 'Customer deleted with warning');
+         }
+      } catch (error) {
+         const errorData = error.response?.data;
+         const message = errorData?.message || 'Failed to delete customer';
+         toast.error(message);
+         console.error('Error deleting customer:', error);
+      } finally {
+         setDeleting(false);
+         setDeleteConfirm(null);
+         setActiveDropdown(null);
+      }
+   };
+
+   // Enhanced delete function with more safety checks
+   const handleDeleteCustomer = async (customerId, customerName) => {
+      // Additional safety check for customers with orders
+      const customer = customers.find(c => c.id === customerId);
+      if (customer && customer.totalOrders > 0) {
+         const proceed = window.confirm(
+            `Warning: This customer has ${customer.totalOrders} order(s) and ₦${parseFloat(customer.totalSpent).toLocaleString()} in total spending. \n\nAre you absolutely sure you want to delete this customer? This may affect order history and reporting.`
+         );
+         if (!proceed) return;
+      } else {
+         const proceed = window.confirm(
+            `Are you sure you want to delete "${customerName}"? This action cannot be undone.`
+         );
+         if (!proceed) return;
+      }
+
+      await deleteCustomer(customerId);
+   };
+
+   useEffect(() => {
+      const handleClickOutside = (event) => {
+         if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+            setActiveDropdown(null);
+         }
+      };
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+   }, []);
+
+   useEffect(() => {
+      fetchCustomers();
+   }, []);
+
+   const getStatusColor = (status) => {
+      switch (status) {
+         case 'active': return 'bg-green-100 text-green-800';
+         case 'pending': return 'bg-yellow-100 text-yellow-800';
+         case 'denied': return 'bg-red-100 text-red-800';
+         case 'deactivated': return 'bg-gray-100 text-gray-800';
+         default: return 'bg-blue-100 text-blue-800';
+      }
+   };
+
+   const getStatusActions = (currentStatus) => {
+      const actions = {
+         active: [
+            { label: 'Deactivate Customer', value: 'deactivate' }
+         ],
+         pending: [
+            { label: 'Approve (Active)', value: 'approve' },
+            { label: 'Deny Access', value: 'deny' }
+         ],
+         denied: [
+            { label: 'Approve (Active)', value: 'approve' },
+            { label: 'Mark as Pending', value: 'pending' }
+         ],
+         deactivated: [
+            { label: 'Reactivate Customer', value: 'approve' }
+         ]
+      };
+
+      return actions[currentStatus] || [];
+   };
+
+   const statusFilterOptions = [
+      { value: "all", label: "All Statuses" },
+      { value: "pending", label: "Pending" },
+      { value: "active", label: "Active" },
+      { value: "denied", label: "Denied" },
+      { value: "deactivated", label: "Deactivated" }
+   ];
+
+   const handleStatusChange = (status) => {
+      setStatusFilter(status);
+      fetchCustomers(1, searchQuery, status === 'all' ? '' : status);
+   };
+
+   const toggleDropdown = (customerId) => {
+      setActiveDropdown(activeDropdown === customerId ? null : customerId);
+   };
+
+   const formatDate = (dateString) => {
+      if (!dateString) return 'N/A';
+      return new Date(dateString).toLocaleString('en-US', {
+         year: 'numeric',
+         month: 'short',
+         day: 'numeric',
+         hour: '2-digit',
+         minute: '2-digit'
       });
+   };
 
-      if (res.data.status === 'success') {
-        toast.success(`Status updated to "${newStatus}"`);
-        setCustomers(prev => prev.map(customer =>
-          customer.id === customerId ? { ...customer, status: newStatus } : customer
-        ));
-      } else {
-        toast.warning(res.data.message || 'Status updated with warning');
-      }
-    } catch (error) {
-      const errorData = error.response?.data;
-      const message = errorData?.message || 'Failed to update status';
-      setStatusError(message);
-      toast.error(message);
-    } finally {
-      setStatusUpdating(null);
-      setActiveDropdown(null);
-    }
-  };
+   const formatCurrency = (amount) => {
+      return `₦${parseFloat(amount).toLocaleString()}`;
+   };
 
-  // Delete customer function
-  const deleteCustomer = async (customerId) => {
-    if (!window.confirm('Are you sure you want to delete this customer? This action cannot be undone.')) {
-      return;
-    }
+   return (
+      <div>
+         <h1 className="text-2xl font-bold text-gray-800 mb-6">Customers</h1>
 
-    setDeleting(true);
-    setDeleteConfirm(customerId);
+         <DataTableFilters
+            searchTerm={searchQuery}
+            onSearchChange={(e) => setSearchQuery(e.target.value)}
+            onSearchSubmit={handleSearch}
+            filters={[{
+               type: 'select',
+               value: statusFilter,
+               onChange: (e) => handleStatusChange(e.target.value),
+               options: statusFilterOptions
+            }]}
+            totalItems={pagination.totalItems}
+            searchPlaceholder="Search customers..."
+         />
 
-    try {
-      const res = await axios.delete(`api/v1/users/${customerId}`);
+         {statusError && (
+            <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-md">{statusError}</div>
+         )}
 
-      if (res.status === 204) {
-        toast.success('Customer deleted successfully');
-        // Remove customer from local state
-        setCustomers(prev => prev.filter(customer => customer.id !== customerId));
-        // Refresh the list to ensure pagination is correct
-        fetchCustomers(pagination.currentPage, searchQuery, activeTab === 'all' ? '' : activeTab);
-      } else {
-        toast.warning(res.data.message || 'Customer deleted with warning');
-      }
-    } catch (error) {
-      const errorData = error.response?.data;
-      const message = errorData?.message || 'Failed to delete customer';
-      toast.error(message);
-      console.error('Error deleting customer:', error);
-    } finally {
-      setDeleting(false);
-      setDeleteConfirm(null);
-      setActiveDropdown(null);
-    }
-  };
+         {loading ? (
+            <div className="flex justify-center items-center h-64">
+               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-dark"></div>
+            </div>
+         ) : (
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+               <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                     <thead className="bg-gray-50">
+                        <tr>
+                           {['Name', 'Join On', 'Email', 'Mobile', 'Orders', 'Total Spent', 'Status', 'Address', 'Actions'].map((header, idx) => (
+                              <th key={idx} className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${header === 'Actions' ? 'text-right' : ''}`}>
+                                 {header}
+                              </th>
+                           ))}
+                        </tr>
+                     </thead>
+                     <tbody className="bg-white divide-y divide-gray-200">
+                        {customers.length > 0 ? (
+                           customers.map((customer) => {
+                              const actions = getStatusActions(customer.status);
+                              return (
+                                 <tr key={customer.id} className="hover:bg-gray-50">
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                       <div className="flex items-center">
+                                          <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                             {customer.photo ? (
+                                                <img src={customer.photo} alt={customer.name} className="h-full w-full rounded-full object-cover" />
+                                             ) : (
+                                                <FiUser className="text-blue-600" />
+                                             )}
+                                          </div>
+                                          <div className="ml-4">
+                                             <div className="text-sm font-medium text-gray-900">
+                                                {customer.name}
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-gray-900">{formatDate(customer.dateJoin)}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-900">{customer.email}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-900">{customer.mobile}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-900 font-semibold">{customer.totalOrders}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-900 font-semibold">{formatCurrency(customer.totalSpent)}</td>
+                                    <td className="px-6 py-4">
+                                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(customer.status)}`}>
+                                          {customer.status}
+                                       </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-gray-900">{customer.address}</td>
+                                    <td className="px-6 py-4 text-right relative" ref={dropdownRef}>
+                                       <div className="inline-flex items-center space-x-2">
+                                          {/* Delete button - always visible */}
+                                          <button
+                                             onClick={() => handleDeleteCustomer(customer.id, customer.name)}
+                                             disabled={deleting && deleteConfirm === customer.id}
+                                             className={`p-2 rounded-full transition-colors ${deleting && deleteConfirm === customer.id
+                                                   ? 'text-gray-400 cursor-not-allowed'
+                                                   : 'text-red-600 hover:bg-red-50 hover:text-red-700'
+                                                }`}
+                                             title="Delete Customer"
+                                          >
+                                             {deleting && deleteConfirm === customer.id ? (
+                                                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-red-600"></div>
+                                             ) : (
+                                                <FaTrash className="w-4 h-4" />
+                                             )}
+                                          </button>
 
-  // Enhanced delete function with more safety checks
-  const handleDeleteCustomer = async (customerId, customerName) => {
-    // Additional safety check for customers with orders
-    const customer = customers.find(c => c.id === customerId);
-    if (customer && customer.totalOrders > 0) {
-      const proceed = window.confirm(
-        `Warning: This customer has ${customer.totalOrders} order(s) and ₦${parseFloat(customer.totalSpent).toLocaleString()} in total spending. \n\nAre you absolutely sure you want to delete this customer? This may affect order history and reporting.`
-      );
-      if (!proceed) return;
-    } else {
-      const proceed = window.confirm(
-        `Are you sure you want to delete "${customerName}"? This action cannot be undone.`
-      );
-      if (!proceed) return;
-    }
+                                          {/* Status actions dropdown */}
+                                          {actions.length > 0 && (
+                                             <div className="inline-block text-left">
+                                                <button
+                                                   onClick={() => toggleDropdown(customer.id)}
+                                                   className="text-gray-500 hover:text-gray-700 focus:outline-none p-2 rounded-full hover:bg-gray-100"
+                                                >
+                                                   <FaEllipsisV />
+                                                </button>
 
-    await deleteCustomer(customerId);
-  };
+                                                {activeDropdown === customer.id && (
+                                                   <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                                                      <div className="py-1">
+                                                         {actions.map((action) => (
+                                                            <button
+                                                               key={action.value}
+                                                               onClick={() => updateStatus(customer.id, action.value)}
+                                                               disabled={statusUpdating === customer.id}
+                                                               className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                                                            >
+                                                               {statusUpdating === customer.id ? 'Updating...' : action.label}
+                                                            </button>
+                                                         ))}
+                                                      </div>
+                                                   </div>
+                                                )}
+                                             </div>
+                                          )}
+                                       </div>
+                                    </td>
+                                 </tr>
+                              );
+                           })
+                        ) : (
+                           <tr>
+                              <td colSpan="9" className="text-center py-10 text-gray-500">No customers found.</td>
+                           </tr>
+                        )}
+                     </tbody>
+                  </table>
+               </div>
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setActiveDropdown(null);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    fetchCustomers();
-  }, []);
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'denied': return 'bg-red-100 text-red-800';
-      case 'deactivated': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-blue-100 text-blue-800';
-    }
-  };
-
-  const getStatusActions = (currentStatus) => {
-    const actions = {
-      active: [
-        { label: 'Deactivate Customer', value: 'deactivate' }
-      ],
-      pending: [
-        { label: 'Approve (Active)', value: 'approve' },
-        { label: 'Deny Access', value: 'deny' }
-      ],
-      denied: [
-        { label: 'Approve (Active)', value: 'approve' },
-        { label: 'Mark as Pending', value: 'pending' }
-      ],
-      deactivated: [
-        { label: 'Reactivate Customer', value: 'approve' }
-      ]
-    };
-
-    return actions[currentStatus] || [];
-  };
-
-  const statusFilterOptions = [
-    { value: "all", label: "All Statuses" },
-    { value: "pending", label: "Pending" },
-    { value: "active", label: "Active" },
-    { value: "denied", label: "Denied" },
-    { value: "deactivated", label: "Deactivated" }
-  ];
-
-  const handleStatusChange = (status) => {
-    setStatusFilter(status);
-    fetchCustomers(1, searchQuery, status === 'all' ? '' : status);
-  };
-
-  const toggleDropdown = (customerId) => {
-    setActiveDropdown(activeDropdown === customerId ? null : customerId);
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const formatCurrency = (amount) => {
-    return `₦${parseFloat(amount).toLocaleString()}`;
-  };
-
-  return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Customers Manager</h1>
-
-      <DataTableFilters
-        searchTerm={searchQuery}
-        onSearchChange={(e) => setSearchQuery(e.target.value)}
-        onSearchSubmit={handleSearch}
-        filters={[{
-          type: 'select',
-          value: statusFilter,
-          onChange: (e) => handleStatusChange(e.target.value),
-          options: statusFilterOptions
-        }]}
-        totalItems={pagination.totalItems}
-        searchPlaceholder="Search customers..."
-      />
-
-      {statusError && (
-        <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-md">{statusError}</div>
-      )}
-
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-dark"></div>
-        </div>
-      ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  {['Name', 'Join On', 'Email', 'Mobile', 'Orders', 'Total Spent', 'Status', 'Address', 'Actions'].map((header, idx) => (
-                    <th key={idx} className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${header === 'Actions' ? 'text-right' : ''}`}>
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {customers.length > 0 ? (
-                  customers.map((customer) => {
-                    const actions = getStatusActions(customer.status);
-                    return (
-                      <tr key={customer.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                              {customer.photo ? (
-                                <img src={customer.photo} alt={customer.name} className="h-full w-full rounded-full object-cover" />
-                              ) : (
-                                <FiUser className="text-blue-600" />
-                              )}
-                            </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">
-                                {customer.name}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-900">{formatDate(customer.dateJoin)}</td>
-                        <td className="px-6 py-4 text-sm text-gray-900">{customer.email}</td>
-                        <td className="px-6 py-4 text-sm text-gray-900">{customer.mobile}</td>
-                        <td className="px-6 py-4 text-sm text-gray-900 font-semibold">{customer.totalOrders}</td>
-                        <td className="px-6 py-4 text-sm text-gray-900 font-semibold">{formatCurrency(customer.totalSpent)}</td>
-                        <td className="px-6 py-4">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(customer.status)}`}>
-                            {customer.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-900">{customer.address}</td>
-                        <td className="px-6 py-4 text-right relative" ref={dropdownRef}>
-                          <div className="inline-flex items-center space-x-2">
-                            {/* Delete button - always visible */}
-                            <button
-                              onClick={() => handleDeleteCustomer(customer.id, customer.name)}
-                              disabled={deleting && deleteConfirm === customer.id}
-                              className={`p-2 rounded-full transition-colors ${
-                                deleting && deleteConfirm === customer.id 
-                                  ? 'text-gray-400 cursor-not-allowed' 
-                                  : 'text-red-600 hover:bg-red-50 hover:text-red-700'
-                              }`}
-                              title="Delete Customer"
-                            >
-                              {deleting && deleteConfirm === customer.id ? (
-                                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-red-600"></div>
-                              ) : (
-                                <FaTrash className="w-4 h-4" />
-                              )}
-                            </button>
-
-                            {/* Status actions dropdown */}
-                            {actions.length > 0 && (
-                              <div className="inline-block text-left">
-                                <button
-                                  onClick={() => toggleDropdown(customer.id)}
-                                  className="text-gray-500 hover:text-gray-700 focus:outline-none p-2 rounded-full hover:bg-gray-100"
-                                >
-                                  <FaEllipsisV />
-                                </button>
-
-                                {activeDropdown === customer.id && (
-                                  <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
-                                    <div className="py-1">
-                                      {actions.map((action) => (
-                                        <button
-                                          key={action.value}
-                                          onClick={() => updateStatus(customer.id, action.value)}
-                                          disabled={statusUpdating === customer.id}
-                                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
-                                        >
-                                          {statusUpdating === customer.id ? 'Updating...' : action.label}
-                                        </button>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan="9" className="text-center py-10 text-gray-500">No customers found.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="p-4">
-            <Pagination
-              currentPage={pagination.currentPage}
-              totalPages={pagination.totalPages}
-              totalItems={pagination.totalItems}
-              perPage={pagination.perPage}
-              onPageChange={handlePageChange}
-              loading={loading}
-            />
-          </div>
-        </div>
-      )}
-    </div>
-  );
+               <div className="p-4">
+                  <Pagination
+                     currentPage={pagination.currentPage}
+                     totalPages={pagination.totalPages}
+                     totalItems={pagination.totalItems}
+                     perPage={pagination.perPage}
+                     onPageChange={handlePageChange}
+                     loading={loading}
+                  />
+               </div>
+            </div>
+         )}
+      </div>
+   );
 };
 
 export default CustomersManager;

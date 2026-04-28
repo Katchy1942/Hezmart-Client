@@ -60,9 +60,7 @@ const Referral = () => {
                <h1 className='text-3xl font-extrabold text-gray-900 tracking-tight'>Referrals</h1>
                <p className='text-gray-600 text-sm max-w-2xl text-center mt-2'>Earn each a referred customer makes a purchase!</p>
                <div className='mt-6'>
-                  <span className={`text-green-700 text-xs uppercase tracking-tighter font-mono cursor-pointer`}
-                     onClick={handleCopy}
-                  >
+                  <span className={`text-green-700 text-xs uppercase tracking-tighter font-mono cursor-pointer`}                  >
                      <div className='flex items-center gap-2'>
                         {referralData.referralCode ? (
                            <>

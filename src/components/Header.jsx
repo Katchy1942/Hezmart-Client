@@ -23,7 +23,7 @@ import axios from "../lib/axios";
 import { BiSearch, BiSolidShoppingBag } from "react-icons/bi";
 import HeaderBanner from "./HeaderBanner";
 import CategoryDropdown from "./common/CategoryDropdown";
- 
+
 const formatBonus = (val) => {
    if (!val || val === 0) return "0";
    if (val >= 1000) {
@@ -85,7 +85,7 @@ const Header = () => {
 
    const navigate = useNavigate();
    const storedUser = localStorage.getItem('user');
- 
+
    const user = useMemo(() => {
       return (storedUser && storedUser !== "undefined")
          ? JSON.parse(storedUser)
@@ -102,7 +102,7 @@ const Header = () => {
                if (response.data.status === 'success') {
                   const freshUser = response.data.user;
                   setRealUser(freshUser);
-                  
+
                   // Only update localStorage if data is actually different to avoid noise
                   if (JSON.stringify(freshUser) !== JSON.stringify(user)) {
                      localStorage.setItem('user', JSON.stringify(freshUser));
